@@ -67,6 +67,14 @@
   opacity: 0;
   transform: translateY(8px);
   animation: nitpick-fade-up 150ms ease-out forwards;
+  display: flex;
+  flex-direction: column;
+}
+
+/* When anchored from bottom, grow upward */
+.nitpick-popover-container--flipped {
+  transform: translateY(-8px);
+  animation: nitpick-fade-down 150ms ease-out forwards;
 }
 
 /* Comment bubble */
@@ -127,16 +135,23 @@
 }
 .nitpick-send-btn--active:hover { background: #0B87E0; }
 
-/* Issue card — child of popover container, not independently positioned */
+/* Issue card — child of popover container */
 .nitpick-issue-card {
   width: 100%;
   background: #FFFFFF;
   border-radius: 12px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
   padding: 12px;
-  margin-top: 8px;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   box-sizing: border-box;
+}
+
+.nitpick-popover-container:not(.nitpick-popover-container--flipped) .nitpick-issue-card {
+  margin-top: 8px;
+}
+
+.nitpick-popover-container--flipped .nitpick-issue-card {
+  margin-bottom: 8px;
 }
 
 .nitpick-issue-header {
@@ -283,6 +298,11 @@
 /* Animations */
 @keyframes nitpick-fade-up {
   from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes nitpick-fade-down {
+  from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 

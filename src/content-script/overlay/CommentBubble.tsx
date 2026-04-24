@@ -9,9 +9,9 @@ import {
 import { IssueCard } from './IssueCard';
 
 const POPOVER_WIDTH = 320;
-const POPOVER_HEIGHT = 60;
 const EDGE_MARGIN = 12;
 const GAP = 8;
+const BOTTOM_THRESHOLD = 200;
 
 export function CommentBubble() {
   if (!showCommentBubble.value) return null;
@@ -23,18 +23,20 @@ export function CommentBubble() {
   const vh = window.innerHeight;
 
   let left = anchor.x + GAP;
-  let top = anchor.y + GAP;
-
   if (left + POPOVER_WIDTH > vw - EDGE_MARGIN) {
     left = anchor.x - POPOVER_WIDTH - GAP;
   }
-
-  if (top + POPOVER_HEIGHT > vh - EDGE_MARGIN) {
-    top = anchor.y - POPOVER_HEIGHT - GAP;
-  }
-
   left = Math.max(EDGE_MARGIN, Math.min(left, vw - POPOVER_WIDTH - EDGE_MARGIN));
-  top = Math.max(EDGE_MARGIN, top);
+
+  const nearBottom = anchor.y > vh - BOTTOM_THRESHOLD;
+
+  const posStyle: Record<string, string> = { left: `${left}px`, pointerEvents: 'auto' };
+
+  if (nearBottom) {
+    posStyle.bottom = `${vh - anchor.y + GAP}px`;
+  } else {
+    posStyle.top = `${anchor.y + GAP}px`;
+  }
 
   function handleSend(): void {
     const text = commentText.value.trim();
@@ -61,46 +63,71 @@ export function CommentBubble() {
   const canSend = commentText.value.trim().length > 0;
   const shaking = popoverShaking.value;
 
-  const containerClass = shaking
-    ? 'nitpick-popover-container nitpick-popover-container--shake'
-    : 'nitpick-popover-container';
+  let containerClass = 'nitpick-popover-container';
+  if (shaking) containerClass += ' nitpick-popover-container--shake';
+  if (nearBottom) containerClass += ' nitpick-popover-container--flipped';
 
   return (
     <div
       class={containerClass}
-      style={{ top: `${top}px`, left: `${left}px`, pointerEvents: 'auto' }}
+      style={posStyle}
       onAnimationEnd={() => { popoverShaking.value = false; }}
     >
-      <div class="nitpick-comment-bubble" role="dialog" aria-label="Describe the bug">
-        <div class="nitpick-comment-input-row">
-          <textarea
-            class="nitpick-comment-input"
-            placeholder="What looks wrong?"
-            value={commentText.value}
-            onInput={handleInput}
-            onKeyDown={handleKeyDown}
-            autoFocus
-            rows={1}
-          />
-          <button
-            class={`nitpick-send-btn ${canSend ? 'nitpick-send-btn--active' : ''}`}
-            onClick={handleSend}
-            disabled={!canSend}
-            aria-label="Send comment"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path
-                d="M14 2L7 9M14 2L9.5 14L7 9M14 2L2 6.5L7 9"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+      {nearBottom ? (
+        <>
+          <IssueCard />
+          <div class="nitpick-comment-bubble" role="dialog" aria-label="Describe the bug">
+            <div class="nitpick-comment-input-row">
+              <textarea
+                class="nitpick-comment-input"
+                placeholder="What looks wrong?"
+                value={commentText.value}
+                onInput={handleInput}
+                onKeyDown={handleKeyDown}
+                autoFocus
+                rows={1}
               />
-            </svg>
-          </button>
-        </div>
-      </div>
-      <IssueCard />
+              <button
+                class={`nitpick-send-btn ${canSend ? 'nitpick-send-btn--active' : ''}`}
+                onClick={handleSend}
+                disabled={!canSend}
+                aria-label="Send comment"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M14 2L7 9M14 2L9.5 14L7 9M14 2L2 6.5L7 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          <div class="nitpick-comment-bubble" role="dialog" aria-label="Describe the bug">
+            <div class="nitpick-comment-input-row">
+              <textarea
+                class="nitpick-comment-input"
+                placeholder="What looks wrong?"
+                value={commentText.value}
+                onInput={handleInput}
+                onKeyDown={handleKeyDown}
+                autoFocus
+                rows={1}
+              />
+              <button
+                class={`nitpick-send-btn ${canSend ? 'nitpick-send-btn--active' : ''}`}
+                onClick={handleSend}
+                disabled={!canSend}
+                aria-label="Send comment"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M14 2L7 9M14 2L9.5 14L7 9M14 2L2 6.5L7 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <IssueCard />
+        </>
+      )}
     </div>
   );
 }
