@@ -10,6 +10,14 @@ import {
   devrevParts,
   devrevUsers,
   devrevSelf,
+  createdIssueUrl,
+  showSuccessToast,
+  commentText,
+  showCommentBubble,
+  selectedElement,
+  selectedRect,
+  areaSelection,
+  screenshotsReady,
 } from '../signals';
 import { ChipDropdown } from './ChipDropdown';
 import { PRIORITY_OPTIONS } from '../../shared/constants';
@@ -47,8 +55,72 @@ export function IssueCard() {
   }
 
   function handleCreateIssue(): void {
-    // Plan 05 will wire this to the DevRev API
+    // Validate required fields
+    if (!form.title.trim()) {
+      issueError.value = 'Title is required';
+      return;
+    }
+
     isCreatingIssue.value = true;
+    issueError.value = null;
+
+    // Get reported_by from self
+    const self = devrevSelf.value;
+    const reportedById = self?.id || form.ownerId;
+
+    chrome.runtime.sendMessage(
+      {
+        action: 'CREATE_ISSUE',
+        issueData: {
+          title: form.title.trim(),
+          description: form.description.trim(),
+          partId: form.partId,
+          ownerId: form.ownerId || reportedById,
+          priority: form.priorityId as 'p0' | 'p1' | 'p2' | 'p3',
+          reportedById,
+          artifactIds: [], // Service worker adds artifact IDs from screenshot store
+        },
+      },
+      (response) => {
+        isCreatingIssue.value = false;
+
+        if (!response) {
+          issueError.value = 'No response from service worker. Please retry.';
+          return;
+        }
+
+        if (response.action === 'ISSUE_CREATED') {
+          // Success (D-12): show toast with issue link
+          createdIssueUrl.value = response.webUrl;
+          showSuccessToast.value = true;
+
+          // Close the issue card and comment bubble
+          showIssueCard.value = false;
+          showCommentBubble.value = false;
+
+          // Reset form
+          issueFormData.value = {
+            title: '', description: '',
+            part: '', partId: '',
+            owner: '', ownerId: '',
+            priority: 'P2 - Medium', priorityId: 'p2',
+          };
+          commentText.value = '';
+          aiStreamingDone.value = false;
+          aiSuggestedPart.value = undefined;
+          aiSuggestedOwner.value = undefined;
+
+          // Clear selection state
+          selectedElement.value = null;
+          selectedRect.value = null;
+          areaSelection.value = null;
+          screenshotsReady.value = false;
+        } else if (response.action === 'ISSUE_ERROR') {
+          // Error (D-13): inline error with retry, form preserved
+          issueError.value = response.message;
+        }
+      },
+    );
   }
 
   function handleRetry(): void {
