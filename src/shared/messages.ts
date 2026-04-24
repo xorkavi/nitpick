@@ -1,4 +1,12 @@
-import type { ElementMetadata, AreaMetadata, NitpickSettings } from './types';
+import type {
+  ElementMetadata,
+  AreaMetadata,
+  NitpickSettings,
+  BrowserMetadata,
+  DevRevPart,
+  DevRevUser,
+  CreateIssuePayload,
+} from './types';
 
 export type Message =
   | { action: 'PING' }
@@ -12,7 +20,63 @@ export type Message =
   | { action: 'SETTINGS_RESULT'; settings: NitpickSettings }
   | { action: 'SAVE_SETTINGS'; settings: Partial<NitpickSettings> }
   | { action: 'SETTINGS_SAVED' }
-  | { action: 'ERROR'; source: string; message: string };
+  | { action: 'ERROR'; source: string; message: string }
+  // Phase 2: Screenshot capture
+  | {
+      action: 'CAPTURE_SCREENSHOTS';
+      boundingRect: { x: number; y: number; width: number; height: number };
+      highlightRect?: {
+        left: number;
+        top: number;
+        width: number;
+        height: number;
+      };
+      dpr: number;
+      browserMetadata: BrowserMetadata;
+    }
+  | { action: 'SCREENSHOTS_READY'; hasScreenshots: boolean }
+  // Phase 2: DevRev data prefetch
+  | { action: 'PREFETCH_DEVREV_DATA' }
+  | {
+      action: 'DEVREV_DATA_READY';
+      parts: DevRevPart[];
+      users: DevRevUser[];
+      self: DevRevUser;
+    }
+  | { action: 'GET_DEVREV_CACHE' }
+  | {
+      action: 'DEVREV_CACHE_RESULT';
+      parts: DevRevPart[];
+      users: DevRevUser[];
+      self: DevRevUser | null;
+    }
+  // Phase 2: Issue creation
+  | { action: 'CREATE_ISSUE'; issueData: CreateIssuePayload }
+  | {
+      action: 'ISSUE_CREATED';
+      issueId: string;
+      displayId: string;
+      webUrl: string;
+    }
+  | { action: 'ISSUE_ERROR'; message: string };
+
+// Phase 2: Port-based AI streaming messages (not in Message union)
+export type AIPortMessage =
+  | {
+      action: 'AI_ANALYZE';
+      comment: string;
+      metadata: ElementMetadata | AreaMetadata;
+      browserMetadata: BrowserMetadata;
+    }
+  | { action: 'AI_CHUNK'; delta: string; snapshot: string }
+  | {
+      action: 'AI_DONE';
+      title: string;
+      description: string;
+      suggestedPart?: string;
+      suggestedOwner?: string;
+    }
+  | { action: 'AI_ERROR'; message: string };
 
 export async function sendMessage(msg: Message): Promise<unknown> {
   return chrome.runtime.sendMessage(msg);

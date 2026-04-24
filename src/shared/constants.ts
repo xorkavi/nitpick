@@ -28,3 +28,19 @@ export const SPACING = {
   xl: '24px',
   '2xl': '32px',
 } as const;
+
+// Phase 2: Priority options and API endpoints
+
+import type { PriorityOption, PriorityLevel } from './types';
+
+export const PRIORITY_OPTIONS: PriorityOption[] = [
+  { id: 'p0', label: 'P0 - Urgent' },
+  { id: 'p1', label: 'P1 - High' },
+  { id: 'p2', label: 'P2 - Medium' },
+  { id: 'p3', label: 'P3 - Low' },
+];
+
+export const DEFAULT_PRIORITY: PriorityLevel = 'p2';
+
+export const DEVREV_API_BASE = 'https://api.devrev.ai';
+export const DEVREV_DEV_API_BASE = 'https://api.dev.devrev-eng.ai';
