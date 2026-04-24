@@ -4,13 +4,29 @@ import { STORAGE_KEYS, DEFAULT_DOMAINS } from '../shared/constants';
 
 type FieldStatus = 'idle' | 'saving' | 'saved' | 'error';
 
+const DEVREV_API_BASES = [
+  'https://api.devrev.ai',
+  'https://api.dev.devrev-eng.ai',
+];
+
 async function validatePAT(pat: string): Promise<string | null> {
+  for (const base of DEVREV_API_BASES) {
+    try {
+      const resp = await fetch(`${base}/dev-users.self`, {
+        method: 'GET',
+        headers: { Authorization: pat },
+      });
+      if (resp.ok) return null;
+      if (resp.status === 401) continue;
+    } catch {
+      continue;
+    }
+  }
   try {
-    const resp = await fetch('https://api.devrev.ai/dev-users.self', {
+    const resp = await fetch(`${DEVREV_API_BASES[0]}/dev-users.self`, {
       method: 'GET',
       headers: { Authorization: pat },
     });
-    if (resp.ok) return null;
     if (resp.status === 401) return 'Invalid token — authentication failed';
     return `Validation failed (HTTP ${resp.status})`;
   } catch {
