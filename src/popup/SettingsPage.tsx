@@ -74,11 +74,22 @@ export function SettingsPage() {
     chrome.storage.local
       .get([STORAGE_KEYS.pat, STORAGE_KEYS.openaiKey, STORAGE_KEYS.domains])
       .then((result) => {
-        if (result[STORAGE_KEYS.pat]) pat.value = result[STORAGE_KEYS.pat] as string;
-        if (result[STORAGE_KEYS.openaiKey]) openaiKey.value = result[STORAGE_KEYS.openaiKey] as string;
+        if (result[STORAGE_KEYS.pat]) {
+          pat.value = result[STORAGE_KEYS.pat] as string;
+          patSavedValue.value = pat.value;
+          patStatus.value = 'saved';
+        }
+        if (result[STORAGE_KEYS.openaiKey]) {
+          openaiKey.value = result[STORAGE_KEYS.openaiKey] as string;
+          openaiKeySavedValue.value = openaiKey.value;
+          openaiKeyStatus.value = 'saved';
+        }
         if (result[STORAGE_KEYS.domains]) domains.value = result[STORAGE_KEYS.domains] as string[];
       });
   }, []);
+
+  const patSavedValue = useSignal('');
+  const openaiKeySavedValue = useSignal('');
 
   const handleSavePAT = async () => {
     if (!pat.value.trim()) return;
@@ -86,6 +97,7 @@ export function SettingsPage() {
     patMessage.value = '';
     const error = await validatePAT(pat.value.trim());
     await chrome.storage.local.set({ [STORAGE_KEYS.pat]: pat.value.trim() });
+    patSavedValue.value = pat.value.trim();
     if (error) {
       patStatus.value = 'error';
       patMessage.value = error;
@@ -93,7 +105,6 @@ export function SettingsPage() {
       patStatus.value = 'saved';
       patMessage.value = 'Token verified and saved';
     }
-    setTimeout(() => { patStatus.value = 'idle'; }, 3000);
   };
 
   const handleSaveOpenAIKey = async () => {
@@ -102,6 +113,7 @@ export function SettingsPage() {
     openaiKeyMessage.value = '';
     const error = await validateOpenAIKey(openaiKey.value.trim());
     await chrome.storage.local.set({ [STORAGE_KEYS.openaiKey]: openaiKey.value.trim() });
+    openaiKeySavedValue.value = openaiKey.value.trim();
     if (error) {
       openaiKeyStatus.value = 'error';
       openaiKeyMessage.value = error;
@@ -109,7 +121,6 @@ export function SettingsPage() {
       openaiKeyStatus.value = 'saved';
       openaiKeyMessage.value = 'API key verified and saved';
     }
-    setTimeout(() => { openaiKeyStatus.value = 'idle'; }, 3000);
   };
 
   const handleSaveDomains = async () => {
@@ -201,7 +212,7 @@ export function SettingsPage() {
               type={showPat.value ? 'text' : 'password'}
               value={pat.value}
               placeholder="Paste your token here"
-              onInput={(e) => { pat.value = (e.target as HTMLInputElement).value; }}
+              onInput={(e) => { pat.value = (e.target as HTMLInputElement).value; if (pat.value !== patSavedValue.value) { patStatus.value = 'idle'; patMessage.value = ''; } }}
               onBlur={() => { patTouched.value = true; }}
               style={{
                 width: '100%',
@@ -250,7 +261,7 @@ export function SettingsPage() {
               type={showOpenaiKey.value ? 'text' : 'password'}
               value={openaiKey.value}
               placeholder="sk-..."
-              onInput={(e) => { openaiKey.value = (e.target as HTMLInputElement).value; }}
+              onInput={(e) => { openaiKey.value = (e.target as HTMLInputElement).value; if (openaiKey.value !== openaiKeySavedValue.value) { openaiKeyStatus.value = 'idle'; openaiKeyMessage.value = ''; } }}
               onBlur={() => { openaiKeyTouched.value = true; }}
               style={{
                 width: '100%',
