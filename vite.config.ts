@@ -17,10 +17,16 @@ const manifest = defineManifest({
   background: {
     service_worker: 'src/service-worker/index.ts',
   },
+  content_scripts: [
+    {
+      matches: ['<all_urls>'],
+      js: ['src/content-script/index.ts'],
+      run_at: 'document_idle',
+    },
+  ],
   permissions: ['activeTab', 'storage', 'scripting', 'alarms'] as const,
   host_permissions: [
-    'https://api.devrev.ai/*',
-    'https://api.openai.com/*',
+    '<all_urls>',
   ],
 });
 

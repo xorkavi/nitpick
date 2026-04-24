@@ -2,49 +2,27 @@ import { hasCredentials } from './storage';
 import { getMode, setMode, getActiveTabId, setActiveTabId } from './state';
 import { setupMessageHandler } from './messages';
 
-// Popup path -- CRXJS resolves this at build time
 const POPUP_PATH = 'src/popup/index.html';
 
-// Set popup mode based on credential state
 async function updatePopupMode(): Promise<void> {
   const hasCreds = await hasCredentials();
   if (hasCreds) {
-    // No popup -- onClicked fires for comment mode toggle
     await chrome.action.setPopup({ popup: '' });
   } else {
-    // Show popup for setup
     await chrome.action.setPopup({ popup: POPUP_PATH });
   }
 }
 
-// Inject content script if not already present
-async function injectContentScript(tabId: number): Promise<void> {
-  try {
-    const response = await chrome.tabs.sendMessage(tabId, { action: 'PING' });
-    if (response && (response as { pong?: boolean }).pong) return;
-  } catch {
-    // Not injected yet -- expected error
-  }
-  await chrome.scripting.executeScript({
-    target: { tabId },
-    files: ['src/content-script/index.ts'],
-  });
-}
-
-// Toggle comment mode for a tab
 async function toggleCommentMode(tabId: number): Promise<void> {
   const mode = await getMode();
   const activeTab = await getActiveTabId();
 
   if (mode === 'inspecting' && activeTab === tabId) {
-    // Deactivate
     await chrome.tabs.sendMessage(tabId, { action: 'TOGGLE_COMMENT_MODE' });
     await setMode('idle');
     await setActiveTabId(null);
     chrome.alarms.clear('keepalive');
   } else {
-    // Activate
-    await injectContentScript(tabId);
     await chrome.tabs.sendMessage(tabId, { action: 'TOGGLE_COMMENT_MODE' });
     await setMode('inspecting');
     await setActiveTabId(tabId);
