@@ -28,12 +28,8 @@ export function CommentBubble() {
     left = anchor.x - POPOVER_WIDTH - GAP;
   }
 
-  if (top + 400 > vh - EDGE_MARGIN) {
-    top = anchor.y - 400 - GAP;
-  }
-
   left = Math.max(EDGE_MARGIN, Math.min(left, vw - POPOVER_WIDTH - EDGE_MARGIN));
-  top = Math.max(EDGE_MARGIN, top);
+  top = Math.max(EDGE_MARGIN, Math.min(top, vh - EDGE_MARGIN));
 
   function handleSend(): void {
     const text = commentText.value.trim();
