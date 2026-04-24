@@ -1,8 +1,7 @@
 import { mousePosition, isActive, showCommentBubble } from '../signals';
 
 export function CommentCursor() {
-  if (!isActive.value) return null;
-  if (showCommentBubble.value) return null;
+  if (!isActive.value || showCommentBubble.value) return null;
 
   const { x, y } = mousePosition.value;
 

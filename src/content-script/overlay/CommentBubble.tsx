@@ -5,6 +5,7 @@ import {
   issueCardLoading,
   selectedRect,
   areaSelection,
+  popoverShaking,
 } from '../signals';
 import { calculatePopoverPosition } from './PopoverAnchor';
 import { IssueCard } from './IssueCard';
@@ -44,11 +45,17 @@ export function CommentBubble() {
   }
 
   const canSend = commentText.value.trim().length > 0;
+  const shaking = popoverShaking.value;
+
+  const containerClass = shaking
+    ? 'nitpick-popover-container nitpick-popover-container--shake'
+    : 'nitpick-popover-container';
 
   return (
     <div
-      class="nitpick-popover-container"
+      class={containerClass}
       style={{ top: `${pos.top}px`, left: `${pos.left}px`, pointerEvents: 'auto' }}
+      onAnimationEnd={() => { popoverShaking.value = false; }}
     >
       <div class="nitpick-comment-bubble" role="dialog" aria-label="Describe the bug">
         <div class="nitpick-comment-input-row">

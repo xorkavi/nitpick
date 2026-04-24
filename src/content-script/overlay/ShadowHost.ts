@@ -1,9 +1,12 @@
 import { render, h } from 'preact';
 import { OverlayApp } from './OverlayApp';
 import overlayStyles from './styles.css?inline';
+import { showCommentBubble } from '../signals';
+import { effect } from '@preact/signals';
 
 let shadowRoot: ShadowRoot | null = null;
 let hostElement: HTMLElement | null = null;
+let disposeEffect: (() => void) | null = null;
 
 export function mountOverlay(): ShadowRoot {
   if (shadowRoot) return shadowRoot;
@@ -33,10 +36,25 @@ export function mountOverlay(): ShadowRoot {
   render(h(OverlayApp, null), mountPoint);
 
   document.documentElement.appendChild(hostElement);
+
+  disposeEffect = effect(() => {
+    if (showCommentBubble.value) {
+      document.documentElement.style.cursor = '';
+    } else {
+      document.documentElement.style.cursor = 'none';
+    }
+  });
+
   return shadowRoot;
 }
 
 export function unmountOverlay(): void {
+  if (disposeEffect) {
+    disposeEffect();
+    disposeEffect = null;
+  }
+  document.documentElement.style.cursor = '';
+
   if (hostElement) {
     if (shadowRoot) {
       const mount = shadowRoot.getElementById('nitpick-mount');

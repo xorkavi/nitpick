@@ -15,6 +15,7 @@ import {
   showIssueCard,
   issueFormData,
   issueCardLoading,
+  popoverShaking,
 } from './signals';
 import { inspectElement } from './inspector/element-data';
 import { getElementsInRect } from './inspector/area-elements';
@@ -129,7 +130,13 @@ function handleMouseUp(e: MouseEvent): void {
 
 function handleClick(e: MouseEvent): void {
   if (!isActive.value) return;
-  if (showCommentBubble.value) return;
+
+  if (showCommentBubble.value) {
+    if (commentText.value.trim()) {
+      popoverShaking.value = true;
+    }
+    return;
+  }
 
   e.preventDefault();
   e.stopPropagation();
