@@ -58,3 +58,5 @@ export const issueFormData = signal<{
 }>({ title: '', description: '', part: '', owner: '', priority: '' });
 export const issueCardLoading = signal<boolean>(false);
 export const popoverShaking = signal<boolean>(false);
+
+export const popoverAnchorPoint = signal<{ x: number; y: number } | null>(null);

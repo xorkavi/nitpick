@@ -16,6 +16,7 @@ import {
   issueFormData,
   issueCardLoading,
   popoverShaking,
+  popoverAnchorPoint,
 } from './signals';
 import { inspectElement } from './inspector/element-data';
 import { getElementsInRect } from './inspector/area-elements';
@@ -47,6 +48,10 @@ function handleMouseMove(e: MouseEvent): void {
     const dx = Math.abs(e.clientX - mouseDownPos.x);
     const dy = Math.abs(e.clientY - mouseDownPos.y);
     if (dx >= 4 || dy >= 4) {
+      if (!isDragging.value) {
+        hoveredElement.value = null;
+        hoveredRect.value = null;
+      }
       isDragging.value = true;
       dragEnd.value = { x: e.clientX, y: e.clientY };
     }
@@ -114,6 +119,7 @@ function handleMouseUp(e: MouseEvent): void {
     areaSelection.value = rect;
     selectedElement.value = null;
     selectedRect.value = null;
+    popoverAnchorPoint.value = { x: rect.left + rect.width, y: rect.top + rect.height };
     showCommentBubble.value = true;
 
     const elements = getElementsInRect(rect);
@@ -151,8 +157,9 @@ function handleClick(e: MouseEvent): void {
 
   selectedElement.value = target;
   selectedRect.value = target.getBoundingClientRect();
-  showCommentBubble.value = true;
   areaSelection.value = null;
+  popoverAnchorPoint.value = { x: e.clientX, y: e.clientY };
+  showCommentBubble.value = true;
 
   const metadata = inspectElement(target);
   chrome.runtime.sendMessage({ action: 'ELEMENT_SELECTED', data: metadata });
@@ -192,6 +199,7 @@ function deactivateCommentMode(): void {
   showIssueCard.value = false;
   issueFormData.value = { title: '', description: '', part: '', owner: '', priority: '' };
   issueCardLoading.value = false;
+  popoverAnchorPoint.value = null;
 
   isMouseDown = false;
   mouseDownPos = null;

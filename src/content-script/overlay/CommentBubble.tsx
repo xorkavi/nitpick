@@ -3,24 +3,37 @@ import {
   commentText,
   showIssueCard,
   issueCardLoading,
-  selectedRect,
-  areaSelection,
   popoverShaking,
+  popoverAnchorPoint,
 } from '../signals';
-import { calculatePopoverPosition } from './PopoverAnchor';
 import { IssueCard } from './IssueCard';
+
+const POPOVER_WIDTH = 320;
+const EDGE_MARGIN = 12;
+const GAP = 8;
 
 export function CommentBubble() {
   if (!showCommentBubble.value) return null;
 
-  const sRect = selectedRect.value;
-  const aRect = areaSelection.value;
-  const anchorRect = sRect
-    ? { left: sRect.left, top: sRect.top, width: sRect.width, height: sRect.height }
-    : aRect;
-  if (!anchorRect) return null;
+  const anchor = popoverAnchorPoint.value;
+  if (!anchor) return null;
 
-  const pos = calculatePopoverPosition(anchorRect);
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+
+  let left = anchor.x + GAP;
+  let top = anchor.y + GAP;
+
+  if (left + POPOVER_WIDTH > vw - EDGE_MARGIN) {
+    left = anchor.x - POPOVER_WIDTH - GAP;
+  }
+
+  if (top + 400 > vh - EDGE_MARGIN) {
+    top = anchor.y - 400 - GAP;
+  }
+
+  left = Math.max(EDGE_MARGIN, Math.min(left, vw - POPOVER_WIDTH - EDGE_MARGIN));
+  top = Math.max(EDGE_MARGIN, top);
 
   function handleSend(): void {
     const text = commentText.value.trim();
@@ -54,7 +67,7 @@ export function CommentBubble() {
   return (
     <div
       class={containerClass}
-      style={{ top: `${pos.top}px`, left: `${pos.left}px`, pointerEvents: 'auto' }}
+      style={{ top: `${top}px`, left: `${left}px`, pointerEvents: 'auto' }}
       onAnimationEnd={() => { popoverShaking.value = false; }}
     >
       <div class="nitpick-comment-bubble" role="dialog" aria-label="Describe the bug">
