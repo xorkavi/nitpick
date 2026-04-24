@@ -22,26 +22,36 @@ import { getElementsInRect } from './inspector/area-elements';
 
 let rafId: number | null = null;
 
-// Drag detection state (local, not signals)
 let isMouseDown = false;
 let mouseDownPos: { x: number; y: number } | null = null;
 
+function isOwnOverlay(e: Event): boolean {
+  const target = e.target as Element | null;
+  return !!target?.closest?.('nitpick-overlay');
+}
+
+function blockEvent(e: Event): void {
+  e.preventDefault();
+  e.stopPropagation();
+  e.stopImmediatePropagation();
+}
+
 function handleMouseMove(e: MouseEvent): void {
-  // Update cursor position signal immediately
+  if (!isActive.value) return;
+
   mousePosition.value = { x: e.clientX, y: e.clientY };
 
-  // Handle drag tracking when mouse button is held
+  if (showCommentBubble.value) return;
+
   if (isMouseDown && mouseDownPos) {
     const dx = Math.abs(e.clientX - mouseDownPos.x);
     const dy = Math.abs(e.clientY - mouseDownPos.y);
-    // 4px minimum drag threshold per UI-SPEC D-174
     if (dx >= 4 || dy >= 4) {
       isDragging.value = true;
       dragEnd.value = { x: e.clientX, y: e.clientY };
     }
   }
 
-  // Skip hover detection while dragging
   if (isDragging.value) return;
 
   if (rafId !== null) return;
@@ -50,28 +60,19 @@ function handleMouseMove(e: MouseEvent): void {
     rafId = null;
 
     const target = document.elementFromPoint(e.clientX, e.clientY);
-    if (
-      !target ||
-      target === document.documentElement ||
-      target === document.body
-    ) {
+    if (!target || target === document.documentElement || target === document.body) {
       hoveredElement.value = null;
       hoveredRect.value = null;
       return;
     }
 
-    // Recurse into open shadow roots per Research Pattern 4
     let deepTarget: Element = target;
     while (deepTarget.shadowRoot && deepTarget.shadowRoot.mode === 'open') {
-      const inner = deepTarget.shadowRoot.elementFromPoint(
-        e.clientX,
-        e.clientY,
-      );
+      const inner = deepTarget.shadowRoot.elementFromPoint(e.clientX, e.clientY);
       if (!inner || inner === deepTarget) break;
       deepTarget = inner;
     }
 
-    // Skip if hovering over our own overlay
     if (deepTarget.closest?.('nitpick-overlay')) return;
 
     hoveredElement.value = deepTarget;
@@ -81,6 +82,11 @@ function handleMouseMove(e: MouseEvent): void {
 
 function handleMouseDown(e: MouseEvent): void {
   if (!isActive.value || e.button !== 0) return;
+  if (isOwnOverlay(e)) return;
+  blockEvent(e);
+
+  if (showCommentBubble.value) return;
+
   isMouseDown = true;
   mouseDownPos = { x: e.clientX, y: e.clientY };
   dragStart.value = { x: e.clientX, y: e.clientY };
@@ -88,13 +94,16 @@ function handleMouseDown(e: MouseEvent): void {
 
 function handleMouseUp(e: MouseEvent): void {
   if (!isActive.value) return;
+  if (isOwnOverlay(e)) {
+    isMouseDown = false;
+    mouseDownPos = null;
+    return;
+  }
+  blockEvent(e);
+
+  if (showCommentBubble.value) return;
 
   if (isDragging.value && dragStart.value && dragEnd.value) {
-    // Area selection complete
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-
     const rect = {
       left: Math.min(dragStart.value.x, dragEnd.value.x),
       top: Math.min(dragStart.value.y, dragEnd.value.y),
@@ -103,13 +112,11 @@ function handleMouseUp(e: MouseEvent): void {
     };
 
     areaSelection.value = rect;
-    selectedElement.value = null; // Clear single selection
+    selectedElement.value = null;
     selectedRect.value = null;
     showCommentBubble.value = true;
 
-    // Collect all elements in area per D-21
     const elements = getElementsInRect(rect);
-    // Send to service worker
     chrome.runtime.sendMessage({
       action: 'AREA_SELECTED',
       data: {
@@ -120,7 +127,6 @@ function handleMouseUp(e: MouseEvent): void {
     });
   }
 
-  // Reset drag state
   isDragging.value = false;
   isMouseDown = false;
   mouseDownPos = null;
@@ -130,6 +136,8 @@ function handleMouseUp(e: MouseEvent): void {
 
 function handleClick(e: MouseEvent): void {
   if (!isActive.value) return;
+  if (isOwnOverlay(e)) return;
+  blockEvent(e);
 
   if (showCommentBubble.value) {
     if (commentText.value.trim()) {
@@ -137,10 +145,6 @@ function handleClick(e: MouseEvent): void {
     }
     return;
   }
-
-  e.preventDefault();
-  e.stopPropagation();
-  e.stopImmediatePropagation();
 
   const target = hoveredElement.value;
   if (!target) return;
@@ -192,12 +196,8 @@ function deactivateCommentMode(): void {
   isMouseDown = false;
   mouseDownPos = null;
 
-  document.removeEventListener('mousemove', handleMouseMove, {
-    capture: true,
-  });
-  document.removeEventListener('mousedown', handleMouseDown, {
-    capture: true,
-  });
+  document.removeEventListener('mousemove', handleMouseMove, { capture: true });
+  document.removeEventListener('mousedown', handleMouseDown, { capture: true });
   document.removeEventListener('mouseup', handleMouseUp, { capture: true });
   document.removeEventListener('click', handleClick, { capture: true });
   document.removeEventListener('keydown', handleKeyDown, { capture: true });
@@ -209,11 +209,9 @@ function deactivateCommentMode(): void {
 
   unmountOverlay();
 
-  // Notify service worker
   chrome.runtime.sendMessage({ action: 'COMMENT_MODE_DEACTIVATED', tabId: 0 });
 }
 
-// Message listener for service worker communication
 chrome.runtime.onMessage.addListener(
   (msg: { action: string }, _sender, sendResponse) => {
     if (msg.action === 'PING') {
