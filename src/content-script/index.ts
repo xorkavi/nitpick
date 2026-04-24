@@ -17,6 +17,12 @@ import {
   issueCardLoading,
   popoverShaking,
   popoverAnchorPoint,
+  screenshotsReady,
+  aiStreamingDone,
+  issueError,
+  isCreatingIssue,
+  createdIssueUrl,
+  showSuccessToast,
 } from './signals';
 import { inspectElement } from './inspector/element-data';
 import { getElementsInRect } from './inspector/area-elements';
@@ -131,6 +137,28 @@ function handleMouseUp(e: MouseEvent): void {
         pageContext: { url: window.location.href, title: document.title },
       },
     });
+
+    // Trigger screenshot capture for area selection (D-01)
+    chrome.runtime.sendMessage({
+      action: 'CAPTURE_SCREENSHOTS',
+      boundingRect: {
+        x: rect.left,
+        y: rect.top,
+        width: rect.width,
+        height: rect.height,
+      },
+      highlightRect: rect,
+      dpr: window.devicePixelRatio,
+      browserMetadata: {
+        url: window.location.href,
+        title: document.title,
+        viewportWidth: window.innerWidth,
+        viewportHeight: window.innerHeight,
+        userAgent: navigator.userAgent,
+        devicePixelRatio: window.devicePixelRatio,
+        platform: navigator.platform,
+      },
+    });
   }
 
   isDragging.value = false;
@@ -163,6 +191,28 @@ function handleClick(e: MouseEvent): void {
 
   const metadata = inspectElement(target);
   chrome.runtime.sendMessage({ action: 'ELEMENT_SELECTED', data: metadata });
+
+  // Trigger screenshot capture (D-01: immediately on selection)
+  const rect = target.getBoundingClientRect();
+  chrome.runtime.sendMessage({
+    action: 'CAPTURE_SCREENSHOTS',
+    boundingRect: {
+      x: rect.x,
+      y: rect.y,
+      width: rect.width,
+      height: rect.height,
+    },
+    dpr: window.devicePixelRatio,
+    browserMetadata: {
+      url: window.location.href,
+      title: document.title,
+      viewportWidth: window.innerWidth,
+      viewportHeight: window.innerHeight,
+      userAgent: navigator.userAgent,
+      devicePixelRatio: window.devicePixelRatio,
+      platform: navigator.platform,
+    },
+  });
 }
 
 function handleKeyDown(e: KeyboardEvent): void {
@@ -200,6 +250,14 @@ function deactivateCommentMode(): void {
   issueFormData.value = { title: '', description: '', part: '', owner: '', priority: '' };
   issueCardLoading.value = false;
   popoverAnchorPoint.value = null;
+
+  // Phase 2 signal resets
+  screenshotsReady.value = false;
+  aiStreamingDone.value = false;
+  issueError.value = null;
+  isCreatingIssue.value = false;
+  createdIssueUrl.value = null;
+  showSuccessToast.value = false;
 
   isMouseDown = false;
   mouseDownPos = null;

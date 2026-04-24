@@ -1,6 +1,7 @@
 import { hasCredentials } from './storage';
 import { getMode, setMode, getActiveTabId, setActiveTabId } from './state';
 import { setupMessageHandler } from './messages';
+import { clearScreenshots } from './screenshot-store';
 
 const POPUP_PATH = 'src/popup/index.html';
 
@@ -21,6 +22,7 @@ async function toggleCommentMode(tabId: number): Promise<void> {
     await chrome.tabs.sendMessage(tabId, { action: 'TOGGLE_COMMENT_MODE' });
     await setMode('idle');
     await setActiveTabId(null);
+    clearScreenshots();
     chrome.alarms.clear('keepalive');
   } else {
     await chrome.tabs.sendMessage(tabId, { action: 'TOGGLE_COMMENT_MODE' });

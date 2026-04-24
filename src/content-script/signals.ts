@@ -1,4 +1,5 @@
 import { signal, computed } from '@preact/signals';
+import type { DevRevPart, DevRevUser } from '../shared/types';
 
 // Comment mode active state
 export const isActive = signal<boolean>(false);
@@ -60,3 +61,21 @@ export const issueCardLoading = signal<boolean>(false);
 export const popoverShaking = signal<boolean>(false);
 
 export const popoverAnchorPoint = signal<{ x: number; y: number } | null>(null);
+
+// Phase 2: Screenshot state
+export const screenshotsReady = signal<boolean>(false);
+
+// Phase 2: AI streaming state
+export const aiStreamingDone = signal<boolean>(false);
+export const issueError = signal<string | null>(null);
+
+// Phase 2: DevRev cached data
+export const devrevParts = signal<DevRevPart[]>([]);
+export const devrevUsers = signal<DevRevUser[]>([]);
+export const devrevSelf = signal<DevRevUser | null>(null);
+export const devrevDataLoaded = signal<boolean>(false);
+
+// Phase 2: Issue creation state
+export const isCreatingIssue = signal<boolean>(false);
+export const createdIssueUrl = signal<string | null>(null);
+export const showSuccessToast = signal<boolean>(false);
