@@ -24,7 +24,7 @@ const manifest = defineManifest({
       run_at: 'document_idle',
     },
   ],
-  permissions: ['activeTab', 'storage', 'scripting', 'alarms'] as const,
+  permissions: ['activeTab', 'storage', 'scripting', 'alarms', 'offscreen'] as const,
   host_permissions: [
     '<all_urls>',
   ],
@@ -41,6 +41,7 @@ export default defineConfig({
       // for dynamic setPopup() even though manifest has no default_popup
       input: {
         popup: 'src/popup/index.html',
+        offscreen: 'src/offscreen/offscreen.html',
       },
     },
   },
