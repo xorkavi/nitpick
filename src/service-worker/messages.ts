@@ -4,12 +4,17 @@ import { captureScreenshots } from './capture';
 import {
   storeScreenshots,
   storeBrowserMetadata,
+  getScreenshots,
+  clearScreenshots,
 } from './screenshot-store';
 import {
   prefetchDevRevData,
   getCachedParts,
   getCachedUsers,
   getCachedSelf,
+  getDevRevConfig,
+  uploadArtifact,
+  createIssue,
 } from './devrev-api';
 
 export function setupMessageHandler(): void {
@@ -84,6 +89,63 @@ export function setupMessageHandler(): void {
             self: getCachedSelf(),
           });
           return true;
+        }
+
+        case 'CREATE_ISSUE': {
+          (async () => {
+            try {
+              const config = await getDevRevConfig();
+              const screenshots = getScreenshots();
+              const artifactIds: string[] = [];
+
+              // Upload screenshots as artifacts (D-11)
+              if (screenshots.viewport) {
+                const viewportId = await uploadArtifact(
+                  config,
+                  screenshots.viewport,
+                  'viewport-screenshot.png',
+                );
+                artifactIds.push(viewportId);
+              }
+              if (screenshots.cropped) {
+                const croppedId = await uploadArtifact(
+                  config,
+                  screenshots.cropped,
+                  'detail-screenshot.png',
+                );
+                artifactIds.push(croppedId);
+              }
+
+              // Create the issue with artifact IDs attached
+              const issueData = {
+                ...msg.issueData,
+                artifactIds,
+              };
+              const result = await createIssue(config, issueData);
+
+              // Build web URL for the issue
+              // Replace api. with app. in the base URL for the web link
+              const webUrl = `${config.baseUrl.replace('://api.', '://app.').replace('://api.dev.', '://app.dev.')}/issues/${result.display_id}`;
+
+              // Clear screenshots after successful submission
+              clearScreenshots();
+
+              sendResponse({
+                action: 'ISSUE_CREATED',
+                issueId: result.id,
+                displayId: result.display_id,
+                webUrl,
+              });
+            } catch (err) {
+              console.error('[Nitpick] Issue creation failed:', err);
+              sendResponse({
+                action: 'ISSUE_ERROR',
+                message:
+                  err instanceof Error ? err.message : 'Issue creation failed',
+              });
+            }
+          })();
+          return true; // async
         }
 
         default:
