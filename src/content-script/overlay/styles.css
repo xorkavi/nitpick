@@ -41,17 +41,13 @@
   box-sizing: border-box;
 }
 
-/* Comment cursor (blue pin) */
+/* Comment cursor (Figma-style pointed pin) */
 .nitpick-cursor {
   position: fixed;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #0D99FF;
   pointer-events: none;
-  transform: translate(-50%, -50%);
+  transform: translate(-2px, -2px);
   z-index: 10;
-  box-shadow: 0 2px 8px rgba(13, 153, 255, 0.4);
+  filter: drop-shadow(0 2px 4px rgba(13, 153, 255, 0.4));
 }
 
 /* Hide default cursor when comment mode is active */
@@ -68,25 +64,30 @@
   box-sizing: border-box;
 }
 
-/* Comment bubble */
-.nitpick-comment-bubble {
+/* Popover container — positions both bubble and issue card together */
+.nitpick-popover-container {
   position: fixed;
   width: 320px;
-  background: #FFFFFF;
-  border-radius: 12px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
-  padding: 12px;
   z-index: 5;
   opacity: 0;
   transform: translateY(8px);
   animation: nitpick-fade-up 150ms ease-out forwards;
+}
+
+/* Comment bubble */
+.nitpick-comment-bubble {
+  width: 100%;
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+  padding: 12px;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .nitpick-comment-input-row {
   display: flex;
   gap: 8px;
-  align-items: center;
+  align-items: flex-end;
 }
 
 .nitpick-comment-input {
@@ -99,6 +100,11 @@
   color: #1A1A1A;
   background: #FFFFFF;
   outline: none;
+  resize: none;
+  overflow: hidden;
+  min-height: 36px;
+  max-height: 120px;
+  line-height: 1.5;
 }
 .nitpick-comment-input::placeholder { color: #666666; }
 .nitpick-comment-input:focus { border-color: #0D99FF; }
@@ -124,19 +130,16 @@
 }
 .nitpick-send-btn--active:hover { background: #0B87E0; }
 
-/* Issue card */
+/* Issue card — child of popover container, not independently positioned */
 .nitpick-issue-card {
-  width: 320px;
+  width: 100%;
   background: #FFFFFF;
   border-radius: 12px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
   padding: 12px;
   margin-top: 8px;
-  z-index: 5;
-  opacity: 0;
-  transform: translateY(12px);
-  animation: nitpick-fade-up 200ms ease-out forwards;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  box-sizing: border-box;
 }
 
 .nitpick-issue-header {

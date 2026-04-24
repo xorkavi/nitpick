@@ -3,7 +3,6 @@ import { HoverHighlight } from './HoverHighlight';
 import { SelectionBox } from './SelectionBox';
 import { AreaDragSelection } from './AreaDragSelection';
 import { CommentBubble } from './CommentBubble';
-import { IssueCard } from './IssueCard';
 
 export function OverlayApp() {
   return (
@@ -12,7 +11,6 @@ export function OverlayApp() {
       <SelectionBox />
       <AreaDragSelection />
       <CommentBubble />
-      <IssueCard />
       <CommentCursor />
     </>
   );
