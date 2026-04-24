@@ -3,8 +3,15 @@ import {
   commentText,
   showIssueCard,
   issueCardLoading,
+  issueFormData,
   popoverShaking,
   popoverAnchorPoint,
+  aiStreamingDone,
+  issueError,
+  aiSuggestedPart,
+  aiSuggestedOwner,
+  lastSelectedMetadata,
+  devrevSelf,
 } from '../signals';
 import { IssueCard } from './IssueCard';
 
@@ -41,9 +48,108 @@ export function CommentBubble() {
   function handleSend(): void {
     const text = commentText.value.trim();
     if (!text) return;
+
+    // Show issue card with loading skeleton
     showIssueCard.value = true;
     issueCardLoading.value = true;
-    setTimeout(() => { issueCardLoading.value = false; }, 1500);
+    aiStreamingDone.value = false;
+    issueError.value = null;
+    aiSuggestedPart.value = undefined;
+    aiSuggestedOwner.value = undefined;
+
+    // Set default owner to self (D-16)
+    const self = devrevSelf.value;
+    if (self) {
+      issueFormData.value = {
+        ...issueFormData.value,
+        owner: self.display_name,
+        ownerId: self.id,
+      };
+    }
+
+    const metadata = lastSelectedMetadata.value;
+    if (!metadata) {
+      issueError.value = 'No element selected. Please select an element first.';
+      issueCardLoading.value = false;
+      return;
+    }
+
+    // Open port-based streaming connection (D-10)
+    const port = chrome.runtime.connect({ name: 'ai-stream' });
+
+    port.postMessage({
+      action: 'AI_ANALYZE',
+      comment: text,
+      metadata,
+    });
+
+    port.onMessage.addListener((msg: {
+      action: string;
+      delta?: string;
+      snapshot?: string;
+      title?: string;
+      description?: string;
+      suggestedPart?: string;
+      suggestedOwner?: string;
+      message?: string;
+    }) => {
+      switch (msg.action) {
+        case 'AI_CHUNK': {
+          // Parse streaming content using TITLE/DESCRIPTION markers
+          const content = msg.snapshot || '';
+          const titleMarker = content.indexOf('TITLE:');
+          const descMarker = content.indexOf('DESCRIPTION:');
+
+          if (titleMarker !== -1 && descMarker !== -1) {
+            const titleText = content.slice(titleMarker + 6, descMarker).trim();
+            const descText = content.slice(descMarker + 12).trim();
+            issueFormData.value = {
+              ...issueFormData.value,
+              title: titleText,
+              description: descText,
+            };
+          } else if (titleMarker !== -1) {
+            const titleText = content.slice(titleMarker + 6).trim();
+            issueFormData.value = { ...issueFormData.value, title: titleText };
+          }
+
+          // Turn off skeleton once first token arrives (D-17)
+          issueCardLoading.value = false;
+          break;
+        }
+        case 'AI_DONE': {
+          // Set final parsed values
+          issueFormData.value = {
+            ...issueFormData.value,
+            title: msg.title || issueFormData.value.title,
+            description: msg.description || issueFormData.value.description,
+          };
+
+          // Store AI suggestions (D-08, D-16: shown as recommendations, not auto-filled)
+          aiSuggestedPart.value = msg.suggestedPart;
+          aiSuggestedOwner.value = msg.suggestedOwner;
+
+          aiStreamingDone.value = true;
+          issueCardLoading.value = false;
+          port.disconnect();
+          break;
+        }
+        case 'AI_ERROR': {
+          issueError.value = msg.message || 'AI analysis failed';
+          issueCardLoading.value = false;
+          port.disconnect();
+          break;
+        }
+      }
+    });
+
+    // Handle port disconnect (Research Pitfall 5)
+    port.onDisconnect.addListener(() => {
+      if (!aiStreamingDone.value && !issueError.value) {
+        issueError.value = 'Connection to AI lost. Please retry.';
+        issueCardLoading.value = false;
+      }
+    });
   }
 
   function handleKeyDown(e: KeyboardEvent): void {

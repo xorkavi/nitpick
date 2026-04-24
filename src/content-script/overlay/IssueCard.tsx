@@ -2,13 +2,30 @@ import {
   showIssueCard,
   issueCardLoading,
   issueFormData,
+  issueError,
+  isCreatingIssue,
+  aiStreamingDone,
+  aiSuggestedPart,
+  aiSuggestedOwner,
+  devrevParts,
+  devrevUsers,
+  devrevSelf,
 } from '../signals';
+import { ChipDropdown } from './ChipDropdown';
+import { PRIORITY_OPTIONS } from '../../shared/constants';
 
 export function IssueCard() {
   if (!showIssueCard.value) return null;
 
   const isLoading = issueCardLoading.value;
   const form = issueFormData.value;
+  const error = issueError.value;
+  const creating = isCreatingIssue.value;
+  const streamingDone = aiStreamingDone.value;
+
+  // Disable button when: loading, creating, still streaming with no error, or title empty
+  const isButtonDisabled =
+    isLoading || creating || (!streamingDone && !error) || !form.title.trim();
 
   function handleClose(): void {
     showIssueCard.value = false;
@@ -16,13 +33,55 @@ export function IssueCard() {
   }
 
   function handleRefresh(): void {
-    issueFormData.value = { title: '', description: '', part: '', owner: '', priority: '' };
-    issueCardLoading.value = false;
+    const self = devrevSelf.value;
+    issueFormData.value = {
+      title: '', description: '',
+      part: '', partId: '',
+      owner: self?.display_name || '', ownerId: self?.id || '',
+      priority: 'P2 - Medium', priorityId: 'p2',
+    };
+    issueError.value = null;
+    aiSuggestedPart.value = undefined;
+    aiSuggestedOwner.value = undefined;
+    aiStreamingDone.value = false;
   }
 
   function handleCreateIssue(): void {
-    // Phase 2 wires this to DevRev API
+    // Plan 05 will wire this to the DevRev API
+    isCreatingIssue.value = true;
   }
+
+  function handleRetry(): void {
+    // Clear error state; the user can re-send from the comment bubble
+    issueError.value = null;
+    issueCardLoading.value = true;
+    aiStreamingDone.value = false;
+
+    // Re-trigger the send by resetting loading -- the actual retry
+    // is triggered from CommentBubble's handleSend via signal coordination
+    issueCardLoading.value = false;
+    issueError.value = 'Press Send again to retry.';
+  }
+
+  // Build dropdown option arrays
+  const partOptions = devrevParts.value.map((p) => ({
+    id: p.id,
+    label: p.name,
+    description: p.description,
+  }));
+
+  const ownerOptions = devrevUsers.value.map((u) => ({
+    id: u.id,
+    label: u.display_name,
+  }));
+
+  const priorityOptions = PRIORITY_OPTIONS.map((p) => ({
+    id: p.id,
+    label: p.label,
+  }));
+
+  // Chips disabled during streaming (before AI_DONE)
+  const chipsDisabled = isLoading;
 
   return (
     <div class="nitpick-issue-card" role="dialog" aria-label="New issue form">
@@ -64,29 +123,61 @@ export function IssueCard() {
           placeholder="Describe the problem..."
           value={form.description}
           onInput={(e) => {
-            issueFormData.value = { ...form, description: (e.target as HTMLTextAreaElement).value };
+            const el = e.target as HTMLTextAreaElement;
+            issueFormData.value = { ...form, description: el.value };
+            // Auto-grow textarea during streaming
+            el.style.height = 'auto';
+            el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
           }}
           rows={3}
         />
       )}
 
+      {error && (
+        <div class="nitpick-issue-error">
+          <span>{error}</span>
+          <button class="nitpick-retry-btn" onClick={handleRetry}>Retry</button>
+        </div>
+      )}
+
       <div class="nitpick-chips-row">
-        <button class="nitpick-chip" aria-label="Select part">
-          {form.part || 'Part'}
-          <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 4L5 7L8 4" stroke="currentColor" stroke-width="1.2" fill="none" /></svg>
-        </button>
-        <button class="nitpick-chip" aria-label="Select owner">
-          {form.owner || 'Owner'}
-          <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 4L5 7L8 4" stroke="currentColor" stroke-width="1.2" fill="none" /></svg>
-        </button>
-        <button class="nitpick-chip" aria-label="Select priority">
-          {form.priority || 'Priority'}
-          <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 4L5 7L8 4" stroke="currentColor" stroke-width="1.2" fill="none" /></svg>
-        </button>
+        <ChipDropdown
+          label="Part"
+          value={form.part}
+          options={partOptions}
+          onSelect={(id, label) => {
+            issueFormData.value = { ...issueFormData.value, part: label, partId: id };
+          }}
+          suggested={aiSuggestedPart.value}
+          disabled={chipsDisabled}
+        />
+        <ChipDropdown
+          label="Owner"
+          value={form.owner}
+          options={ownerOptions}
+          onSelect={(id, label) => {
+            issueFormData.value = { ...issueFormData.value, owner: label, ownerId: id };
+          }}
+          suggested={aiSuggestedOwner.value}
+          disabled={chipsDisabled}
+        />
+        <ChipDropdown
+          label="Priority"
+          value={form.priority}
+          options={priorityOptions}
+          onSelect={(id, label) => {
+            issueFormData.value = { ...issueFormData.value, priority: label, priorityId: id };
+          }}
+          disabled={chipsDisabled}
+        />
       </div>
 
-      <button class="nitpick-create-btn" onClick={handleCreateIssue} disabled={isLoading}>
-        {isLoading ? 'Creating...' : 'Create Issue'}
+      <button
+        class="nitpick-create-btn"
+        onClick={handleCreateIssue}
+        disabled={isButtonDisabled}
+      >
+        {creating ? 'Creating...' : 'Create Issue'}
       </button>
     </div>
   );

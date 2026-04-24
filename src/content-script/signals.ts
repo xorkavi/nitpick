@@ -1,5 +1,5 @@
 import { signal, computed } from '@preact/signals';
-import type { DevRevPart, DevRevUser } from '../shared/types';
+import type { DevRevPart, DevRevUser, ElementMetadata, AreaMetadata } from '../shared/types';
 
 // Comment mode active state
 export const isActive = signal<boolean>(false);
@@ -53,14 +53,29 @@ export const showIssueCard = signal<boolean>(false);
 export const issueFormData = signal<{
   title: string;
   description: string;
-  part: string;
-  owner: string;
-  priority: string;
-}>({ title: '', description: '', part: '', owner: '', priority: '' });
+  part: string;       // display label
+  partId: string;     // DevRev ID
+  owner: string;      // display label
+  ownerId: string;    // DevRev ID
+  priority: string;   // display label
+  priorityId: string; // 'p0' | 'p1' | 'p2' | 'p3'
+}>({
+  title: '', description: '',
+  part: '', partId: '',
+  owner: '', ownerId: '',
+  priority: 'P2 - Medium', priorityId: 'p2',
+});
 export const issueCardLoading = signal<boolean>(false);
 export const popoverShaking = signal<boolean>(false);
 
 export const popoverAnchorPoint = signal<{ x: number; y: number } | null>(null);
+
+// Phase 2: Last selected metadata for AI retry
+export const lastSelectedMetadata = signal<ElementMetadata | AreaMetadata | null>(null);
+
+// Phase 2: AI-suggested Part/Owner IDs
+export const aiSuggestedPart = signal<string | undefined>(undefined);
+export const aiSuggestedOwner = signal<string | undefined>(undefined);
 
 // Phase 2: Screenshot state
 export const screenshotsReady = signal<boolean>(false);

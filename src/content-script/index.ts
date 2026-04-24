@@ -23,6 +23,13 @@ import {
   isCreatingIssue,
   createdIssueUrl,
   showSuccessToast,
+  lastSelectedMetadata,
+  aiSuggestedPart,
+  aiSuggestedOwner,
+  devrevParts,
+  devrevUsers,
+  devrevSelf,
+  devrevDataLoaded,
 } from './signals';
 import { inspectElement } from './inspector/element-data';
 import { getElementsInRect } from './inspector/area-elements';
@@ -129,13 +136,15 @@ function handleMouseUp(e: MouseEvent): void {
     showCommentBubble.value = true;
 
     const elements = getElementsInRect(rect);
+    const areaMetadata = {
+      selectionRect: rect,
+      elements,
+      pageContext: { url: window.location.href, title: document.title },
+    };
+    lastSelectedMetadata.value = areaMetadata;
     chrome.runtime.sendMessage({
       action: 'AREA_SELECTED',
-      data: {
-        selectionRect: rect,
-        elements,
-        pageContext: { url: window.location.href, title: document.title },
-      },
+      data: areaMetadata,
     });
 
     // Trigger screenshot capture for area selection (D-01)
@@ -190,6 +199,7 @@ function handleClick(e: MouseEvent): void {
   showCommentBubble.value = true;
 
   const metadata = inspectElement(target);
+  lastSelectedMetadata.value = metadata;
   chrome.runtime.sendMessage({ action: 'ELEMENT_SELECTED', data: metadata });
 
   // Trigger screenshot capture (D-01: immediately on selection)
@@ -230,6 +240,19 @@ function activateCommentMode(): void {
   document.addEventListener('mouseup', handleMouseUp, { capture: true });
   document.addEventListener('click', handleClick, { capture: true });
   document.addEventListener('keydown', handleKeyDown, { capture: true });
+
+  // Fetch cached DevRev data for dropdowns (D-14)
+  chrome.runtime.sendMessage(
+    { action: 'GET_DEVREV_CACHE' },
+    (response: { action?: string; parts?: unknown[]; users?: unknown[]; self?: unknown } | undefined) => {
+      if (response && response.action === 'DEVREV_CACHE_RESULT') {
+        devrevParts.value = (response.parts || []) as import('../shared/types').DevRevPart[];
+        devrevUsers.value = (response.users || []) as import('../shared/types').DevRevUser[];
+        devrevSelf.value = (response.self || null) as import('../shared/types').DevRevUser | null;
+        devrevDataLoaded.value = true;
+      }
+    },
+  );
 }
 
 function deactivateCommentMode(): void {
@@ -247,7 +270,12 @@ function deactivateCommentMode(): void {
   showCommentBubble.value = false;
   commentText.value = '';
   showIssueCard.value = false;
-  issueFormData.value = { title: '', description: '', part: '', owner: '', priority: '' };
+  issueFormData.value = {
+    title: '', description: '',
+    part: '', partId: '',
+    owner: '', ownerId: '',
+    priority: 'P2 - Medium', priorityId: 'p2',
+  };
   issueCardLoading.value = false;
   popoverAnchorPoint.value = null;
 
@@ -258,6 +286,9 @@ function deactivateCommentMode(): void {
   isCreatingIssue.value = false;
   createdIssueUrl.value = null;
   showSuccessToast.value = false;
+  lastSelectedMetadata.value = null;
+  aiSuggestedPart.value = undefined;
+  aiSuggestedOwner.value = undefined;
 
   isMouseDown = false;
   mouseDownPos = null;

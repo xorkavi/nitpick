@@ -3,6 +3,7 @@ import { HoverHighlight } from './HoverHighlight';
 import { SelectionBox } from './SelectionBox';
 import { AreaDragSelection } from './AreaDragSelection';
 import { CommentBubble } from './CommentBubble';
+import { Toast } from './Toast';
 
 export function OverlayApp() {
   return (
@@ -12,6 +13,7 @@ export function OverlayApp() {
       <AreaDragSelection />
       <CommentBubble />
       <CommentCursor />
+      <Toast />
     </>
   );
 }
