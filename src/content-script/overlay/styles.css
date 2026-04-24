@@ -68,10 +68,229 @@
   box-sizing: border-box;
 }
 
+/* Comment bubble */
+.nitpick-comment-bubble {
+  position: fixed;
+  width: 320px;
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+  padding: 12px;
+  z-index: 5;
+  opacity: 0;
+  transform: translateY(8px);
+  animation: nitpick-fade-up 150ms ease-out forwards;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.nitpick-comment-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.nitpick-comment-input {
+  flex: 1;
+  border: 1px solid #E5E5E5;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #1A1A1A;
+  background: #FFFFFF;
+  outline: none;
+}
+.nitpick-comment-input::placeholder { color: #666666; }
+.nitpick-comment-input:focus { border-color: #0D99FF; }
+
+.nitpick-send-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: #E5E5E5;
+  color: #999999;
+  cursor: not-allowed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 100ms ease;
+  flex-shrink: 0;
+}
+.nitpick-send-btn--active {
+  background: #0D99FF;
+  color: #FFFFFF;
+  cursor: pointer;
+}
+.nitpick-send-btn--active:hover { background: #0B87E0; }
+
+/* Issue card */
+.nitpick-issue-card {
+  width: 320px;
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+  padding: 12px;
+  margin-top: 8px;
+  z-index: 5;
+  opacity: 0;
+  transform: translateY(12px);
+  animation: nitpick-fade-up 200ms ease-out forwards;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.nitpick-issue-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.nitpick-issue-badge {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1A1A1A;
+}
+
+.nitpick-issue-header-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.nitpick-icon-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  color: #999999;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 100ms ease, background-color 100ms ease;
+}
+.nitpick-icon-btn:hover {
+  color: #333333;
+  background: #F5F5F5;
+}
+
+.nitpick-issue-title {
+  width: 100%;
+  border: 1px solid #E5E5E5;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  color: #1A1A1A;
+  margin-bottom: 8px;
+  box-sizing: border-box;
+  outline: none;
+}
+.nitpick-issue-title::placeholder { color: #666666; font-weight: 400; }
+.nitpick-issue-title:focus { border-color: #0D99FF; }
+
+.nitpick-issue-desc {
+  width: 100%;
+  border: 1px solid #E5E5E5;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #1A1A1A;
+  margin-bottom: 12px;
+  resize: vertical;
+  min-height: 60px;
+  box-sizing: border-box;
+  outline: none;
+  line-height: 1.5;
+}
+.nitpick-issue-desc::placeholder { color: #666666; }
+.nitpick-issue-desc:focus { border-color: #0D99FF; }
+
+.nitpick-chips-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.nitpick-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border: 1px solid #E5E5E5;
+  border-radius: 16px;
+  background: #FFFFFF;
+  color: #666666;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 100ms ease;
+}
+.nitpick-chip:hover { border-color: #0D99FF; }
+
+.nitpick-create-btn {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #7C3AED;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 100ms ease;
+}
+.nitpick-create-btn:hover { background: #6D28D9; }
+.nitpick-create-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Loading skeleton */
+.nitpick-skeleton {
+  border-radius: 8px;
+  background: linear-gradient(90deg, #E5E5E5 25%, #F5F5F5 50%, #E5E5E5 75%);
+  background-size: 200% 100%;
+  animation: nitpick-shimmer 1.5s linear infinite;
+}
+.nitpick-skeleton--title {
+  height: 38px;
+  margin-bottom: 8px;
+}
+.nitpick-skeleton--desc {
+  height: 80px;
+  margin-bottom: 12px;
+}
+
+/* Animations */
+@keyframes nitpick-fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes nitpick-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .nitpick-hover-highlight,
   .nitpick-cursor {
     transition: none;
+  }
+  .nitpick-comment-bubble,
+  .nitpick-issue-card {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .nitpick-skeleton {
+    animation: none;
   }
 }
