@@ -9,6 +9,7 @@ import {
 import { IssueCard } from './IssueCard';
 
 const POPOVER_WIDTH = 320;
+const POPOVER_HEIGHT = 60;
 const EDGE_MARGIN = 12;
 const GAP = 8;
 
@@ -28,8 +29,12 @@ export function CommentBubble() {
     left = anchor.x - POPOVER_WIDTH - GAP;
   }
 
+  if (top + POPOVER_HEIGHT > vh - EDGE_MARGIN) {
+    top = anchor.y - POPOVER_HEIGHT - GAP;
+  }
+
   left = Math.max(EDGE_MARGIN, Math.min(left, vw - POPOVER_WIDTH - EDGE_MARGIN));
-  top = Math.max(EDGE_MARGIN, Math.min(top, vh - EDGE_MARGIN));
+  top = Math.max(EDGE_MARGIN, top);
 
   function handleSend(): void {
     const text = commentText.value.trim();
