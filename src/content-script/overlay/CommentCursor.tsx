@@ -11,17 +11,14 @@ export function CommentCursor() {
       class="nitpick-cursor"
       style={{ left: `${x}px`, top: `${y}px` }}
       aria-hidden="true"
-      width="24"
-      height="32"
-      viewBox="0 0 24 32"
+      width="28"
+      height="28"
+      viewBox="0 0 42 42"
       fill="none"
     >
       <path
-        d="M1 1L1 22L7.5 16.5L12 25L16 23L11.5 14.5L20 14.5L1 1Z"
-        fill="#0D99FF"
-        stroke="white"
-        stroke-width="1.5"
-        stroke-linejoin="round"
+        d="M0 21C0 9.40202 9.40202 0 21 0V0C32.598 0 42 9.40202 42 21V21C42 32.598 32.598 42 21 42H1C0.447716 42 0 41.5523 0 41V21Z"
+        fill="#009CFF"
       />
     </svg>
   );

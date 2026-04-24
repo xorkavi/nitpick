@@ -129,6 +129,7 @@ function handleMouseUp(e: MouseEvent): void {
 
 function handleClick(e: MouseEvent): void {
   if (!isActive.value) return;
+  if (showCommentBubble.value) return;
 
   e.preventDefault();
   e.stopPropagation();
@@ -140,9 +141,8 @@ function handleClick(e: MouseEvent): void {
   selectedElement.value = target;
   selectedRect.value = target.getBoundingClientRect();
   showCommentBubble.value = true;
-  areaSelection.value = null; // Clear area selection
+  areaSelection.value = null;
 
-  // Send element data to service worker
   const metadata = inspectElement(target);
   chrome.runtime.sendMessage({ action: 'ELEMENT_SELECTED', data: metadata });
 }

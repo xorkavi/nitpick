@@ -41,13 +41,13 @@
   box-sizing: border-box;
 }
 
-/* Comment cursor (Figma-style pointed pin) */
+/* Comment cursor — bottom-left corner is the hot spot */
 .nitpick-cursor {
   position: fixed;
   pointer-events: none;
-  transform: translate(-2px, -2px);
+  transform: translate(0, -100%);
   z-index: 10;
-  filter: drop-shadow(0 2px 4px rgba(13, 153, 255, 0.4));
+  filter: drop-shadow(0 2px 4px rgba(0, 156, 255, 0.4));
 }
 
 /* Hide default cursor when comment mode is active */
