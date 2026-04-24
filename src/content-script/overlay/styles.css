@@ -59,6 +59,15 @@
   cursor: none !important;
 }
 
+/* Area drag selection rectangle */
+.nitpick-drag-selection {
+  position: fixed;
+  border: 2px dashed #0D99FF;
+  background: rgba(13, 153, 255, 0.08);
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .nitpick-hover-highlight,
