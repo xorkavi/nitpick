@@ -2,6 +2,7 @@ import { hasCredentials } from './storage';
 import { getMode, setMode, getActiveTabId, setActiveTabId } from './state';
 import { setupMessageHandler } from './messages';
 import { clearScreenshots } from './screenshot-store';
+import { prefetchDevRevData, clearCache } from './devrev-api';
 
 const POPUP_PATH = 'src/popup/index.html';
 
@@ -23,12 +24,18 @@ async function toggleCommentMode(tabId: number): Promise<void> {
     await setMode('idle');
     await setActiveTabId(null);
     clearScreenshots();
+    clearCache();
     chrome.alarms.clear('keepalive');
   } else {
     await chrome.tabs.sendMessage(tabId, { action: 'TOGGLE_COMMENT_MODE' });
     await setMode('inspecting');
     await setActiveTabId(tabId);
     chrome.alarms.create('keepalive', { periodInMinutes: 0.4 });
+
+    // D-14: Prefetch parts and users on comment mode activate
+    prefetchDevRevData().catch((err) => {
+      console.error('[Nitpick] DevRev prefetch failed:', err);
+    });
   }
 }
 
