@@ -1,4 +1,13 @@
-// Stub -- full implementation in Task 2
+import { CommentCursor } from './CommentCursor';
+import { HoverHighlight } from './HoverHighlight';
+import { SelectionBox } from './SelectionBox';
+
 export function OverlayApp() {
-  return null;
+  return (
+    <>
+      <HoverHighlight />
+      <SelectionBox />
+      <CommentCursor />
+    </>
+  );
 }

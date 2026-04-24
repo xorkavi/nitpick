@@ -1,4 +1,4 @@
-/* Stub -- full styles in Task 2 */
+/* Root container */
 #nitpick-mount {
   position: fixed;
   top: 0;
@@ -6,4 +6,63 @@
   width: 100vw;
   height: 100vh;
   pointer-events: none;
+}
+
+/* Hover highlight bounding box */
+.nitpick-hover-highlight {
+  position: fixed;
+  border: 2px dashed #0D99FF;
+  background: rgba(13, 153, 255, 0.08);
+  pointer-events: none;
+  box-sizing: border-box;
+  transition: opacity 100ms ease-in;
+}
+
+/* Corner anchor circles for hover/selection */
+.nitpick-anchor {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #0D99FF;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.nitpick-anchor--tl { top: -5px; left: -5px; }
+.nitpick-anchor--tr { top: -5px; right: -5px; }
+.nitpick-anchor--bl { bottom: -5px; left: -5px; }
+.nitpick-anchor--br { bottom: -5px; right: -5px; }
+
+/* Selection box (persistent after click) */
+.nitpick-selection-box {
+  position: fixed;
+  border: 2px dashed #0D99FF;
+  background: rgba(13, 153, 255, 0.08);
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+/* Comment cursor (blue pin) */
+.nitpick-cursor {
+  position: fixed;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #0D99FF;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(13, 153, 255, 0.4);
+}
+
+/* Hide default cursor when comment mode is active */
+:host {
+  cursor: none !important;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .nitpick-hover-highlight,
+  .nitpick-cursor {
+    transition: none;
+  }
 }
