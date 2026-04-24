@@ -1,8 +1,9 @@
 import { hasCredentials } from './storage';
 import { getMode, setMode, getActiveTabId, setActiveTabId } from './state';
 import { setupMessageHandler } from './messages';
-import { clearScreenshots } from './screenshot-store';
+import { clearScreenshots, getBrowserMetadata } from './screenshot-store';
 import { prefetchDevRevData, clearCache } from './devrev-api';
+import { streamAnalysis } from './ai-analysis';
 
 const POPUP_PATH = 'src/popup/index.html';
 
@@ -74,3 +75,36 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 // Initialize message handler
 setupMessageHandler();
+
+// Port-based streaming for AI analysis (D-10: streaming via ports, not sendMessage)
+chrome.runtime.onConnect.addListener((port) => {
+  if (port.name === 'ai-stream') {
+    port.onMessage.addListener(async (msg: { action: string; comment: string; metadata: unknown; browserMetadata?: unknown }) => {
+      if (msg.action === 'AI_ANALYZE') {
+        const storedBrowserMeta = getBrowserMetadata();
+        const browserMetadata = (msg.browserMetadata || storedBrowserMeta || {
+          url: '',
+          title: '',
+          viewportWidth: 0,
+          viewportHeight: 0,
+          userAgent: '',
+          devicePixelRatio: 1,
+          platform: '',
+        }) as import('../shared/types').BrowserMetadata;
+
+        await streamAnalysis(
+          port,
+          msg.comment,
+          msg.metadata as import('../shared/types').ElementMetadata | import('../shared/types').AreaMetadata,
+          browserMetadata,
+        );
+      }
+    });
+
+    // Handle port disconnect gracefully (Research Pitfall 5)
+    port.onDisconnect.addListener(() => {
+      // Port closed -- stream will naturally stop
+      // No cleanup needed; OpenAI stream will error on next write attempt
+    });
+  }
+});
