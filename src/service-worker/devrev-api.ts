@@ -146,9 +146,11 @@ export async function getDevRevConfig(): Promise<DevRevConfig> {
 async function fetchAllParts(config: DevRevConfig): Promise<DevRevPart[]> {
   const parts: DevRevPart[] = [];
   let cursor: string | undefined;
+  let pages = 0;
+  const maxPages = 3;
 
   do {
-    const body: { limit: number; cursor?: string } = { limit: 50 };
+    const body: { limit: number; cursor?: string } = { limit: 100 };
     if (cursor) body.cursor = cursor;
 
     const response = await devrevFetch<{
@@ -158,7 +160,8 @@ async function fetchAllParts(config: DevRevConfig): Promise<DevRevPart[]> {
 
     parts.push(...response.parts);
     cursor = response.next_cursor;
-  } while (cursor);
+    pages++;
+  } while (cursor && pages < maxPages);
 
   return parts;
 }
@@ -170,9 +173,11 @@ async function fetchAllParts(config: DevRevConfig): Promise<DevRevPart[]> {
 async function fetchAllUsers(config: DevRevConfig): Promise<DevRevUser[]> {
   const users: DevRevUser[] = [];
   let cursor: string | undefined;
+  let pages = 0;
+  const maxPages = 3;
 
   do {
-    const body: { limit: number; cursor?: string } = { limit: 50 };
+    const body: { limit: number; cursor?: string } = { limit: 100 };
     if (cursor) body.cursor = cursor;
 
     const response = await devrevFetch<{
@@ -182,7 +187,8 @@ async function fetchAllUsers(config: DevRevConfig): Promise<DevRevUser[]> {
 
     users.push(...response.dev_users);
     cursor = response.next_cursor;
-  } while (cursor);
+    pages++;
+  } while (cursor && pages < maxPages);
 
   return users;
 }
