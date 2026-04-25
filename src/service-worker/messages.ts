@@ -120,9 +120,21 @@ export function setupMessageHandler(): void {
                 artifactIds.push(croppedId);
               }
 
-              // Create the issue with artifact IDs attached
+              // Append screenshot references as markdown in description
+              let description = msg.issueData.description || '';
+              if (artifactIds.length > 0) {
+                description += '\n\n---\n**Screenshots:**\n';
+                if (screenshots.viewport) {
+                  description += `\n![Viewport Screenshot](${artifactIds[0]})\n`;
+                }
+                if (screenshots.cropped && artifactIds.length > 1) {
+                  description += `\n![Detail Screenshot](${artifactIds[1]})\n`;
+                }
+              }
+
               const issueData = {
                 ...msg.issueData,
+                description,
                 artifactIds,
               };
               const result = await createIssue(config, issueData);

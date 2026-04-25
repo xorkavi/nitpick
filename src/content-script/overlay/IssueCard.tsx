@@ -143,7 +143,7 @@ export function IssueCard() {
 
   const ownerOptions = devrevUsers.value.map((u) => ({
     id: u.id,
-    label: u.display_name,
+    label: u.full_name ? `${u.display_name} (${u.full_name})` : u.display_name,
   }));
 
   const priorityOptions = PRIORITY_OPTIONS.map((p) => ({

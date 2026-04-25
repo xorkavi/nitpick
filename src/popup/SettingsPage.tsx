@@ -104,6 +104,7 @@ export function SettingsPage() {
     } else {
       patStatus.value = 'saved';
       patMessage.value = 'Token verified and saved';
+      chrome.runtime.sendMessage({ action: 'PREFETCH_DEVREV_DATA' });
     }
   };
 
@@ -158,6 +159,16 @@ export function SettingsPage() {
   };
 
   const isSetup = useComputed(() => !pat.value && !openaiKey.value);
+  const bothSaved = useComputed(() => patStatus.value === 'saved' && openaiKeyStatus.value === 'saved');
+
+  const handleStartCommenting = async () => {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (tab?.id) {
+      chrome.runtime.sendMessage({ action: 'PREFETCH_DEVREV_DATA' });
+      await chrome.tabs.sendMessage(tab.id, { action: 'TOGGLE_COMMENT_MODE' });
+      window.close();
+    }
+  };
 
   const fieldBtnStyle = (status: FieldStatus, hasValue: boolean) => ({
     padding: '8px 16px',
@@ -353,6 +364,26 @@ export function SettingsPage() {
           </p>
         )}
       </div>
+
+      {bothSaved.value && (
+        <button
+          type="button"
+          onClick={handleStartCommenting}
+          style={{
+            width: '100%',
+            padding: '12px',
+            backgroundColor: '#0D99FF',
+            color: '#FFFFFF',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: 600,
+            cursor: 'pointer',
+          }}
+        >
+          Start Commenting
+        </button>
+      )}
     </div>
   );
 }

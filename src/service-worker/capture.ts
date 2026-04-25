@@ -22,7 +22,7 @@ export async function captureScreenshots(
   // Step 2: Ensure offscreen document exists for canvas operations
   await ensureOffscreenDocument();
 
-  // Step 3: Send crop request to offscreen document
+  // Step 3: Send crop request to offscreen document (no highlight on crop per user feedback)
   const croppedDataUrl = await new Promise<string>((resolve, reject) => {
     chrome.runtime.sendMessage(
       {
@@ -30,7 +30,7 @@ export async function captureScreenshots(
         action: 'CROP_SCREENSHOT',
         viewportDataUrl,
         cropRect: boundingRect,
-        highlightRect: highlightRect ?? null,
+        highlightRect: null,
         highlightColor: COLORS.selectionBlue,
         dpr,
       },

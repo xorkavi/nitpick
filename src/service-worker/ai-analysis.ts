@@ -100,11 +100,16 @@ RULES:
 OUTPUT FORMAT (use exactly these section markers on their own line):
 TITLE: [title here]
 DESCRIPTION:
+[Write in Markdown format. Use **bold** for property names, \`code\` for values.]
+
 [summary paragraph]
 
-- [bullet point 1]
-- [bullet point 2]
-- [bullet point 3]
+**Affected properties:**
+- **property-name:** \`actual-value\` (expected: \`expected-value\`)
+- **property-name:** \`actual-value\`
+
+**Environment:** [browser, viewport, page URL context]
+
 PART: [part_id or "none"]
 OWNER: [user_id or "none"]
 
