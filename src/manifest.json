@@ -22,5 +22,14 @@
   "host_permissions": [
     "https://api.devrev.ai/*",
     "https://api.openai.com/*"
-  ]
+  ],
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Period",
+        "mac": "Command+Shift+Period"
+      },
+      "description": "Activate comment mode"
+    }
+  }
 }
