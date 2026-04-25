@@ -228,11 +228,29 @@ export async function prefetchDevRevData(): Promise<{
   if (usersResult.status === 'fulfilled') usersCache = usersResult.value;
   if (selfResult.status === 'fulfilled') selfCache = selfResult.value;
 
+  // Resolve profile picture URLs for users who have them (non-blocking)
+  if (usersCache) {
+    resolveProfilePictures(config, usersCache).catch(() => {});
+  }
+
   return {
     parts: partsCache ?? [],
     users: usersCache ?? [],
     self: selfCache,
   };
+}
+
+async function resolveProfilePictures(config: DevRevConfig, users: DevRevUser[]): Promise<void> {
+  const withPics = users.filter(u => u.display_picture?.id);
+  const batch = withPics.slice(0, 20);
+  await Promise.allSettled(batch.map(async (user) => {
+    try {
+      const result = await devrevFetch<{ url: string }>(
+        config, '/artifacts.locate', { body: { id: user.display_picture!.id } },
+      );
+      (user as DevRevUser & { profile_picture_url?: string }).profile_picture_url = result.url;
+    } catch { /* skip */ }
+  }));
 }
 
 // ---------------------------------------------------------------------------

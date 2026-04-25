@@ -7,6 +7,7 @@ interface ChipDropdownOption {
   description?: string;
   initials?: string;
   avatarUrl?: string;
+  searchText?: string;
 }
 
 interface ChipDropdownProps {
@@ -23,8 +24,9 @@ export function ChipDropdown({ label, value, options, onSelect, suggested, disab
   const search = useSignal('');
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const q = search.value.toLowerCase();
   const filtered = options.filter((opt) =>
-    opt.label.toLowerCase().includes(search.value.toLowerCase()),
+    (opt.searchText || opt.label.toLowerCase()).includes(q),
   );
 
   function handleToggle(e: MouseEvent): void {

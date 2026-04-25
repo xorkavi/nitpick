@@ -61,6 +61,7 @@ export interface DevRevUser {
     display_id: string;
     id: string;
   };
+  profile_picture_url?: string;
 }
 
 export interface CreateIssuePayload {

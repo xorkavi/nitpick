@@ -129,7 +129,7 @@ export function setupMessageHandler(): void {
               // Build web URL for the issue
               // Replace api. with app. in the base URL for the web link
               const appBase = config.baseUrl.replace('://api.', '://app.');
-              const webUrl = `${appBase}/${result.display_id}`;
+              const webUrl = `${appBase}/devrev/works/${result.display_id}`;
 
               // Clear screenshots after successful submission
               clearScreenshots();

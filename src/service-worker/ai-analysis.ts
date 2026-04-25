@@ -108,7 +108,8 @@ DESCRIPTION:
 - **property-name:** \`actual-value\` (expected: \`expected-value\`)
 - **property-name:** \`actual-value\`
 
-**Environment:** [browser, viewport, page URL context]
+**Environment:** [browser, viewport]
+**Page:** [page URL as a clickable markdown link: [title](url)]
 
 PART: [part_id or "none"]
 OWNER: [user_id or "none"]
