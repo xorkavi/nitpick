@@ -19,7 +19,7 @@ export async function captureScreenshots(
 
   // Hide overlay and wait for confirmation + paint
   await sendAndWait(tabId, 'HIDE_OVERLAY');
-  await new Promise(r => setTimeout(r, 150));
+  await new Promise(r => setTimeout(r, 30));
 
   // Capture clean page (no overlay at all)
   const cleanDataUrl = await chrome.tabs.captureVisibleTab({ format: 'png' });
