@@ -54,7 +54,7 @@ async function devrevFetch<T>(
   const method = options.method ?? (options.body ? 'POST' : 'GET');
 
   const headers: Record<string, string> = {
-    Authorization: `Bearer ${config.pat}`,
+    Authorization: config.pat,
     'Content-Type': 'application/json',
   };
 
@@ -67,10 +67,11 @@ async function devrevFetch<T>(
   if (!response.ok) {
     const error = await response.json().catch(() => ({
       message: response.statusText,
-    }));
+    })) as { message?: string; type?: string; field_name?: string };
+    const detail = error.field_name ? ` (${error.type}: ${error.field_name})` : '';
     throw new DevRevError(
       response.status,
-      (error as { message?: string }).message ?? 'API request failed',
+      `${error.message ?? 'API request failed'}${detail}`,
     );
   }
 
@@ -91,7 +92,7 @@ async function resolveBaseUrl(pat: string): Promise<string> {
     const res = await fetch(`${DEVREV_API_BASE}/dev-users.self`, {
       method: 'GET',
       headers: {
-        Authorization: `Bearer ${pat}`,
+        Authorization: pat,
         'Content-Type': 'application/json',
       },
     });
@@ -108,7 +109,7 @@ async function resolveBaseUrl(pat: string): Promise<string> {
     const res = await fetch(`${DEVREV_DEV_API_BASE}/dev-users.self`, {
       method: 'GET',
       headers: {
-        Authorization: `Bearer ${pat}`,
+        Authorization: pat,
         'Content-Type': 'application/json',
       },
     });

@@ -34,10 +34,10 @@ export const SPACING = {
 import type { PriorityOption, PriorityLevel } from './types';
 
 export const PRIORITY_OPTIONS: PriorityOption[] = [
-  { id: 'p0', label: 'p0' },
-  { id: 'p1', label: 'p1' },
-  { id: 'p2', label: 'p2' },
-  { id: 'p3', label: 'p3' },
+  { id: 'p0', label: 'P0' },
+  { id: 'p1', label: 'P1' },
+  { id: 'p2', label: 'P2' },
+  { id: 'p3', label: 'P3' },
 ];
 
 export const DEFAULT_PRIORITY: PriorityLevel = 'p2';

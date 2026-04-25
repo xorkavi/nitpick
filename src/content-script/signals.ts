@@ -63,7 +63,7 @@ export const issueFormData = signal<{
   title: '', description: '',
   part: '', partId: '',
   owner: '', ownerId: '',
-  priority: 'p2', priorityId: 'p2',
+  priority: 'P2', priorityId: 'p2',
 });
 export const issueCardLoading = signal<boolean>(false);
 export const popoverShaking = signal<boolean>(false);

@@ -31,9 +31,8 @@ export function IssueCard() {
   const creating = isCreatingIssue.value;
   const streamingDone = aiStreamingDone.value;
 
-  // Disable button when: loading, creating, still streaming with no error, or title empty
   const isButtonDisabled =
-    isLoading || creating || (!streamingDone && !error) || !form.title.trim();
+    isLoading || creating || (!streamingDone && !error) || !form.title.trim() || !form.partId;
 
   function handleClose(): void {
     showIssueCard.value = false;
@@ -46,7 +45,7 @@ export function IssueCard() {
       title: '', description: '',
       part: '', partId: '',
       owner: self?.display_name || '', ownerId: self?.id || '',
-      priority: 'p2', priorityId: 'p2',
+      priority: 'P2', priorityId: 'p2',
     };
     issueError.value = null;
     aiSuggestedPart.value = undefined;
@@ -103,7 +102,7 @@ export function IssueCard() {
             title: '', description: '',
             part: '', partId: '',
             owner: '', ownerId: '',
-            priority: 'p2', priorityId: 'p2',
+            priority: 'P2', priorityId: 'p2',
           };
           commentText.value = '';
           aiStreamingDone.value = false;

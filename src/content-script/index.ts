@@ -241,15 +241,21 @@ function activateCommentMode(): void {
   document.addEventListener('click', handleClick, { capture: true });
   document.addEventListener('keydown', handleKeyDown, { capture: true });
 
-  // Fetch cached DevRev data for dropdowns (D-14)
+  // Prefetch DevRev data for dropdowns (D-14)
   chrome.runtime.sendMessage(
-    { action: 'GET_DEVREV_CACHE' },
-    (response: { action?: string; parts?: unknown[]; users?: unknown[]; self?: unknown } | undefined) => {
-      if (response && response.action === 'DEVREV_CACHE_RESULT') {
+    { action: 'PREFETCH_DEVREV_DATA' },
+    (response: { action?: string; parts?: unknown[]; users?: unknown[]; self?: unknown; message?: string } | undefined) => {
+      if (chrome.runtime.lastError) {
+        console.warn('[Nitpick] DevRev prefetch failed:', chrome.runtime.lastError.message);
+        return;
+      }
+      if (response && response.action === 'DEVREV_DATA_READY') {
         devrevParts.value = (response.parts || []) as import('../shared/types').DevRevPart[];
         devrevUsers.value = (response.users || []) as import('../shared/types').DevRevUser[];
         devrevSelf.value = (response.self || null) as import('../shared/types').DevRevUser | null;
         devrevDataLoaded.value = true;
+      } else if (response && response.action === 'ERROR') {
+        console.warn('[Nitpick] DevRev prefetch error:', response.message);
       }
     },
   );
@@ -274,7 +280,7 @@ function deactivateCommentMode(): void {
     title: '', description: '',
     part: '', partId: '',
     owner: '', ownerId: '',
-    priority: 'p2', priorityId: 'p2',
+    priority: 'P2', priorityId: 'p2',
   };
   issueCardLoading.value = false;
   popoverAnchorPoint.value = null;
