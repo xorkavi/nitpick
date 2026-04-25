@@ -120,28 +120,16 @@ export function setupMessageHandler(): void {
                 artifactIds.push(croppedId);
               }
 
-              // Append screenshot references as markdown in description
-              let description = msg.issueData.description || '';
-              if (artifactIds.length > 0) {
-                description += '\n\n---\n**Screenshots:**\n';
-                if (screenshots.viewport) {
-                  description += `\n![Viewport Screenshot](${artifactIds[0]})\n`;
-                }
-                if (screenshots.cropped && artifactIds.length > 1) {
-                  description += `\n![Detail Screenshot](${artifactIds[1]})\n`;
-                }
-              }
-
               const issueData = {
                 ...msg.issueData,
-                description,
                 artifactIds,
               };
               const result = await createIssue(config, issueData);
 
               // Build web URL for the issue
               // Replace api. with app. in the base URL for the web link
-              const webUrl = `${config.baseUrl.replace('://api.', '://app.').replace('://api.dev.', '://app.dev.')}/issues/${result.display_id}`;
+              const appBase = config.baseUrl.replace('://api.', '://app.');
+              const webUrl = `${appBase}/${result.display_id}`;
 
               // Clear screenshots after successful submission
               clearScreenshots();

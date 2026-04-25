@@ -22,6 +22,10 @@ import {
 import { ChipDropdown } from './ChipDropdown';
 import { PRIORITY_OPTIONS } from '../../shared/constants';
 
+function getInitials(name: string): string {
+  return name.split(/[\s-]+/).map(w => w[0]?.toUpperCase() || '').slice(0, 2).join('');
+}
+
 export function IssueCard() {
   if (!showIssueCard.value) return null;
 
@@ -141,10 +145,14 @@ export function IssueCard() {
     description: p.description,
   }));
 
-  const ownerOptions = devrevUsers.value.map((u) => ({
-    id: u.id,
-    label: u.full_name ? `${u.display_name} (${u.full_name})` : u.display_name,
-  }));
+  const ownerOptions = devrevUsers.value.map((u) => {
+    const name = u.full_name || u.display_name;
+    return {
+      id: u.id,
+      label: name,
+      initials: getInitials(name),
+    };
+  });
 
   const priorityOptions = PRIORITY_OPTIONS.map((p) => ({
     id: p.id,

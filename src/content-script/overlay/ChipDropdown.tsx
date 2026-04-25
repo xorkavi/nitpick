@@ -5,6 +5,8 @@ interface ChipDropdownOption {
   id: string;
   label: string;
   description?: string;
+  initials?: string;
+  avatarUrl?: string;
 }
 
 interface ChipDropdownProps {
@@ -97,6 +99,13 @@ export function ChipDropdown({ label, value, options, onSelect, suggested, disab
                   onClick={(e) => handleSelect(e as unknown as MouseEvent, opt)}
                   onMouseDown={handleSearchClick}
                 >
+                  {(opt.initials || opt.avatarUrl) && (
+                    <span class="nitpick-avatar">
+                      {opt.avatarUrl
+                        ? <img src={opt.avatarUrl} alt={opt.label} />
+                        : opt.initials}
+                    </span>
+                  )}
                   <span class="nitpick-dropdown-option-label">
                     {opt.label}
                     {opt.description && (
