@@ -108,8 +108,14 @@ DESCRIPTION:
 - **property-name:** \`actual-value\` (expected: \`expected-value\`)
 - **property-name:** \`actual-value\`
 
-**Environment:** [browser, viewport]
-**Page:** [page URL as a clickable markdown link: [title](url)]
+**Environment:**
+| Property | Value |
+|----------|-------|
+| Browser | [e.g. Chrome 145.0.0.0] |
+| OS | [e.g. macOS 10.15.7, Windows 11, etc — extract from user agent] |
+| Viewport | [e.g. 1723x994] |
+| DPR | [device pixel ratio if available] |
+| Page | [clickable markdown link: [page title](url)]  |
 
 PART: [part_id or "none"]
 OWNER: [user_id or "none"]

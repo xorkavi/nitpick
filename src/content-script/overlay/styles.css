@@ -226,6 +226,7 @@
 
 .nitpick-chips-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 12px;
 }
@@ -243,6 +244,10 @@
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
+  max-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .nitpick-chip:hover { border-color: #0D99FF; }
 

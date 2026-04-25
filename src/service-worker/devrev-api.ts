@@ -206,6 +206,7 @@ async function fetchSelf(config: DevRevConfig): Promise<DevRevUser> {
 let partsCache: DevRevPart[] | null = null;
 let usersCache: DevRevUser[] | null = null;
 let selfCache: DevRevUser | null = null;
+let nitpickedTagId: string | null = null;
 
 // ---------------------------------------------------------------------------
 // Prefetch
@@ -218,19 +219,23 @@ export async function prefetchDevRevData(): Promise<{
 }> {
   const config = await getDevRevConfig();
 
-  const [partsResult, usersResult, selfResult] = await Promise.allSettled([
+  const [partsResult, usersResult, selfResult, tagResult] = await Promise.allSettled([
     fetchAllParts(config),
     fetchAllUsers(config),
     fetchSelf(config),
+    findNitpickedTag(config),
   ]);
 
   if (partsResult.status === 'fulfilled') partsCache = partsResult.value;
   if (usersResult.status === 'fulfilled') usersCache = usersResult.value;
   if (selfResult.status === 'fulfilled') selfCache = selfResult.value;
+  if (tagResult.status === 'fulfilled') nitpickedTagId = tagResult.value;
 
-  // Resolve profile picture URLs for users who have them (non-blocking)
   if (usersCache) {
-    resolveProfilePictures(config, usersCache).catch(() => {});
+    await resolveProfilePictures(config, usersCache).catch(() => {});
+  }
+  if (selfCache?.display_picture?.id) {
+    await resolveProfilePictures(config, [selfCache]).catch(() => {});
   }
 
   return {
@@ -238,6 +243,17 @@ export async function prefetchDevRevData(): Promise<{
     users: usersCache ?? [],
     self: selfCache,
   };
+}
+
+async function findNitpickedTag(config: DevRevConfig): Promise<string | null> {
+  try {
+    const result = await devrevFetch<{
+      tags: Array<{ id: string; name: string }>;
+    }>(config, '/tags.list', { body: { name: ['nitpicked'] } });
+    return result.tags?.[0]?.id ?? null;
+  } catch {
+    return null;
+  }
 }
 
 async function resolveProfilePictures(config: DevRevConfig, users: DevRevUser[]): Promise<void> {
@@ -269,11 +285,16 @@ export function getCachedSelf(): DevRevUser | null {
   return selfCache;
 }
 
+export function getNitpickedTagId(): string | null {
+  return nitpickedTagId;
+}
+
 export function clearCache(): void {
   partsCache = null;
   usersCache = null;
   selfCache = null;
   baseUrlCache = null;
+  nitpickedTagId = null;
 }
 
 // ---------------------------------------------------------------------------
@@ -353,6 +374,9 @@ export async function createIssue(
   if (payload.ownerId) body.owned_by = [payload.ownerId];
   if (payload.reportedById) body.reported_by = [payload.reportedById];
   if (payload.artifactIds?.length) body.artifacts = payload.artifactIds;
+
+  const tagId = getNitpickedTagId();
+  if (tagId) body.tags = [{ id: tagId }];
 
   const response = await devrevFetch<{
     work: { id: string; display_id: string };
