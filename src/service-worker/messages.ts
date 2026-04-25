@@ -21,6 +21,10 @@ export function setupMessageHandler(): void {
   chrome.runtime.onMessage.addListener(
     (msg: Message, _sender, sendResponse): boolean | undefined => {
       switch (msg.action) {
+        case 'PING':
+          sendResponse({ pong: true });
+          return;
+
         case 'GET_SETTINGS':
           getSettings().then((settings) => {
             sendResponse({ action: 'SETTINGS_RESULT', settings });

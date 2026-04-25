@@ -46,7 +46,7 @@ export function IssueCard() {
       title: '', description: '',
       part: '', partId: '',
       owner: self?.display_name || '', ownerId: self?.id || '',
-      priority: 'P2 - Medium', priorityId: 'p2',
+      priority: 'p2', priorityId: 'p2',
     };
     issueError.value = null;
     aiSuggestedPart.value = undefined;
@@ -103,7 +103,7 @@ export function IssueCard() {
             title: '', description: '',
             part: '', partId: '',
             owner: '', ownerId: '',
-            priority: 'P2 - Medium', priorityId: 'p2',
+            priority: 'p2', priorityId: 'p2',
           };
           commentText.value = '';
           aiStreamingDone.value = false;

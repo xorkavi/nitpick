@@ -45,7 +45,7 @@ export function CommentBubble() {
     posStyle.top = `${anchor.y + GAP}px`;
   }
 
-  function handleSend(): void {
+  async function handleSend(): Promise<void> {
     const text = commentText.value.trim();
     if (!text) return;
 
@@ -74,8 +74,21 @@ export function CommentBubble() {
       return;
     }
 
-    // Open port-based streaming connection (D-10)
-    const port = chrome.runtime.connect({ name: 'ai-stream' });
+    // Wake service worker before opening port (prevents "Receiving end does not exist" error)
+    try {
+      await chrome.runtime.sendMessage({ action: 'PING' });
+    } catch {
+      // Service worker will wake on connect anyway
+    }
+
+    let port: chrome.runtime.Port;
+    try {
+      port = chrome.runtime.connect({ name: 'ai-stream' });
+    } catch (err) {
+      issueError.value = `Connection failed: ${err instanceof Error ? err.message : 'Unknown error'}. Try again.`;
+      issueCardLoading.value = false;
+      return;
+    }
 
     port.postMessage({
       action: 'AI_ANALYZE',

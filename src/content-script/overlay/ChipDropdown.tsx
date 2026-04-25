@@ -1,4 +1,4 @@
-import { signal } from '@preact/signals';
+import { useSignal } from '@preact/signals';
 import { useEffect, useRef } from 'preact/hooks';
 
 interface ChipDropdownOption {
@@ -17,8 +17,8 @@ interface ChipDropdownProps {
 }
 
 export function ChipDropdown({ label, value, options, onSelect, suggested, disabled }: ChipDropdownProps) {
-  const isOpen = signal(false);
-  const search = signal('');
+  const isOpen = useSignal(false);
+  const search = useSignal('');
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown on outside click

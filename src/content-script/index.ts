@@ -274,7 +274,7 @@ function deactivateCommentMode(): void {
     title: '', description: '',
     part: '', partId: '',
     owner: '', ownerId: '',
-    priority: 'P2 - Medium', priorityId: 'p2',
+    priority: 'p2', priorityId: 'p2',
   };
   issueCardLoading.value = false;
   popoverAnchorPoint.value = null;
