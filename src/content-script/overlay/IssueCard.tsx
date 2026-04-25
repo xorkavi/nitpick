@@ -11,6 +11,7 @@ import {
   devrevUsers,
   devrevSelf,
   createdIssueUrl,
+  createdIssueDisplayId,
   showSuccessToast,
   commentText,
   showCommentBubble,
@@ -49,7 +50,7 @@ export function IssueCard() {
     issueFormData.value = {
       title: '', description: '',
       part: '', partId: '',
-      owner: self?.display_name || '', ownerId: self?.id || '',
+      owner: '', ownerId: '',
       priority: 'P2', priorityId: 'p2',
     };
   }
@@ -59,7 +60,7 @@ export function IssueCard() {
     issueFormData.value = {
       title: '', description: '',
       part: '', partId: '',
-      owner: self?.display_name || '', ownerId: self?.id || '',
+      owner: '', ownerId: '',
       priority: 'P2', priorityId: 'p2',
     };
     issueError.value = null;
@@ -104,8 +105,8 @@ export function IssueCard() {
         }
 
         if (response.action === 'ISSUE_CREATED') {
-          // Success (D-12): show toast with issue link
           createdIssueUrl.value = response.webUrl;
+          createdIssueDisplayId.value = response.displayId;
           showSuccessToast.value = true;
 
           // Close the issue card and comment bubble

@@ -66,15 +66,7 @@ export function CommentBubble() {
     aiSuggestedPart.value = undefined;
     aiSuggestedOwner.value = undefined;
 
-    // Set default owner to self (D-16)
-    const self = devrevSelf.value;
-    if (self) {
-      issueFormData.value = {
-        ...issueFormData.value,
-        owner: self.display_name,
-        ownerId: self.id,
-      };
-    }
+    // Owner starts empty — user picks from dropdown
 
     const metadata = lastSelectedMetadata.value;
     if (!metadata) {

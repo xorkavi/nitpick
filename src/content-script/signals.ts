@@ -93,4 +93,5 @@ export const devrevDataLoaded = signal<boolean>(false);
 // Phase 2: Issue creation state
 export const isCreatingIssue = signal<boolean>(false);
 export const createdIssueUrl = signal<string | null>(null);
+export const createdIssueDisplayId = signal<string | null>(null);
 export const showSuccessToast = signal<boolean>(false);

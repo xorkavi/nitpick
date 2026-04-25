@@ -22,6 +22,7 @@ import {
   issueError,
   isCreatingIssue,
   createdIssueUrl,
+  createdIssueDisplayId,
   showSuccessToast,
   lastSelectedMetadata,
   aiSuggestedPart,
@@ -291,6 +292,7 @@ function deactivateCommentMode(): void {
   issueError.value = null;
   isCreatingIssue.value = false;
   createdIssueUrl.value = null;
+  createdIssueDisplayId.value = null;
   showSuccessToast.value = false;
   lastSelectedMetadata.value = null;
   aiSuggestedPart.value = undefined;

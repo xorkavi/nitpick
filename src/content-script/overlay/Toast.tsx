@@ -1,22 +1,21 @@
-import { signal } from '@preact/signals';
+import { useSignal } from '@preact/signals';
 import { useEffect } from 'preact/hooks';
-import { showSuccessToast, createdIssueUrl } from '../signals';
+import { showSuccessToast, createdIssueUrl, createdIssueDisplayId } from '../signals';
 
 export function Toast() {
-  const isExiting = signal(false);
+  const isExiting = useSignal(false);
 
   useEffect(() => {
     if (!showSuccessToast.value) return;
 
     const dismissTimer = setTimeout(() => {
       isExiting.value = true;
-      // Wait for exit animation before hiding
       const exitTimer = setTimeout(() => {
         showSuccessToast.value = false;
         isExiting.value = false;
       }, 200);
       return () => clearTimeout(exitTimer);
-    }, 4000);
+    }, 6000);
 
     return () => clearTimeout(dismissTimer);
   });
@@ -24,6 +23,7 @@ export function Toast() {
   if (!showSuccessToast.value) return null;
 
   const url = createdIssueUrl.value;
+  const displayId = createdIssueDisplayId.value;
 
   function handleLinkClick(e: MouseEvent): void {
     e.preventDefault();
@@ -46,7 +46,9 @@ export function Toast() {
         <circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5" />
         <path d="M5.5 9.5L7.5 11.5L12.5 6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
-      <span class="nitpick-toast-text">Issue created</span>
+      <span class="nitpick-toast-text">
+        {displayId ? `${displayId} created` : 'Issue created'}
+      </span>
       {url && (
         <a
           href={url}
