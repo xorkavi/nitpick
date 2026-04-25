@@ -1,3 +1,4 @@
+import { useRef, useEffect } from 'preact/hooks';
 import {
   showCommentBubble,
   commentText,
@@ -21,6 +22,14 @@ const GAP = 8;
 const BOTTOM_THRESHOLD = 200;
 
 export function CommentBubble() {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (showCommentBubble.value && textareaRef.current) {
+      setTimeout(() => textareaRef.current?.focus(), 50);
+    }
+  });
+
   if (!showCommentBubble.value) return null;
 
   const anchor = popoverAnchorPoint.value;
@@ -94,6 +103,15 @@ export function CommentBubble() {
       action: 'AI_ANALYZE',
       comment: text,
       metadata,
+      browserMetadata: {
+        url: window.location.href,
+        title: document.title,
+        viewportWidth: window.innerWidth,
+        viewportHeight: window.innerHeight,
+        userAgent: navigator.userAgent,
+        devicePixelRatio: window.devicePixelRatio,
+        platform: navigator.platform,
+      },
     });
 
     port.onMessage.addListener((msg: {
@@ -198,12 +216,12 @@ export function CommentBubble() {
           <div class="nitpick-comment-bubble" role="dialog" aria-label="Describe the bug">
             <div class="nitpick-comment-input-row">
               <textarea
+                ref={textareaRef}
                 class="nitpick-comment-input"
                 placeholder="What looks wrong?"
                 value={commentText.value}
                 onInput={handleInput}
                 onKeyDown={handleKeyDown}
-                autoFocus
                 rows={1}
               />
               <button
@@ -224,12 +242,12 @@ export function CommentBubble() {
           <div class="nitpick-comment-bubble" role="dialog" aria-label="Describe the bug">
             <div class="nitpick-comment-input-row">
               <textarea
+                ref={textareaRef}
                 class="nitpick-comment-input"
                 placeholder="What looks wrong?"
                 value={commentText.value}
                 onInput={handleInput}
                 onKeyDown={handleKeyDown}
-                autoFocus
                 rows={1}
               />
               <button

@@ -250,8 +250,15 @@ async function findNitpickedTag(config: DevRevConfig): Promise<string | null> {
     const result = await devrevFetch<{
       tags: Array<{ id: string; name: string }>;
     }>(config, '/tags.list', { body: { name: ['nitpicked'] } });
-    return result.tags?.[0]?.id ?? null;
-  } catch {
+    const tagId = result.tags?.[0]?.id ?? null;
+    if (tagId) {
+      console.log('[Nitpick] Found nitpicked tag:', tagId);
+    } else {
+      console.warn('[Nitpick] nitpicked tag not found in org');
+    }
+    return tagId;
+  } catch (err) {
+    console.warn('[Nitpick] Tag lookup failed:', err);
     return null;
   }
 }

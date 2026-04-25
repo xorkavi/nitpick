@@ -41,6 +41,17 @@ export function IssueCard() {
   function handleClose(): void {
     showIssueCard.value = false;
     issueCardLoading.value = false;
+    aiStreamingDone.value = false;
+    issueError.value = null;
+    aiSuggestedPart.value = undefined;
+    aiSuggestedOwner.value = undefined;
+    const self = devrevSelf.value;
+    issueFormData.value = {
+      title: '', description: '',
+      part: '', partId: '',
+      owner: self?.display_name || '', ownerId: self?.id || '',
+      priority: 'P2', priorityId: 'p2',
+    };
   }
 
   function handleRefresh(): void {
