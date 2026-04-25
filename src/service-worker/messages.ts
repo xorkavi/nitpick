@@ -9,12 +9,12 @@ import {
 } from './screenshot-store';
 import {
   prefetchDevRevData,
-  getCachedParts,
   getCachedUsers,
   getCachedSelf,
   getDevRevConfig,
   uploadArtifact,
   createIssue,
+  searchParts,
 } from './devrev-api';
 
 export function setupMessageHandler(): void {
@@ -65,10 +65,9 @@ export function setupMessageHandler(): void {
 
         case 'PREFETCH_DEVREV_DATA': {
           prefetchDevRevData()
-            .then(({ parts, users, self }) => {
+            .then(({ users, self }) => {
               sendResponse({
                 action: 'DEVREV_DATA_READY',
-                parts,
                 users,
                 self,
               });
@@ -88,10 +87,23 @@ export function setupMessageHandler(): void {
         case 'GET_DEVREV_CACHE': {
           sendResponse({
             action: 'DEVREV_CACHE_RESULT',
-            parts: getCachedParts(),
             users: getCachedUsers(),
             self: getCachedSelf(),
           });
+          return true;
+        }
+
+        case 'SEARCH_PARTS': {
+          (async () => {
+            try {
+              const config = await getDevRevConfig();
+              const parts = await searchParts(config, msg.query ?? '', msg.limit ?? 20);
+              sendResponse({ action: 'SEARCH_PARTS_RESULT', parts });
+            } catch (err) {
+              console.error('[Nitpick] Parts search failed:', err);
+              sendResponse({ action: 'SEARCH_PARTS_RESULT', parts: [] });
+            }
+          })();
           return true;
         }
 

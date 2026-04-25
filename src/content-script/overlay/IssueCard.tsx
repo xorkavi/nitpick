@@ -7,7 +7,8 @@ import {
   aiStreamingDone,
   aiSuggestedPart,
   aiSuggestedOwner,
-  devrevParts,
+  partSearchResults,
+  partSearchLoading,
   devrevUsers,
   devrevSelf,
   createdIssueUrl,
@@ -150,8 +151,20 @@ export function IssueCard() {
     issueError.value = 'Press Send again to retry.';
   }
 
-  // Build dropdown option arrays
-  const partOptions = devrevParts.value.map((p) => ({
+  function handlePartSearch(query: string): void {
+    partSearchLoading.value = true;
+    chrome.runtime.sendMessage(
+      { action: 'SEARCH_PARTS', query, limit: 20 },
+      (response: { action?: string; parts?: unknown[] } | undefined) => {
+        partSearchLoading.value = false;
+        if (response?.action === 'SEARCH_PARTS_RESULT') {
+          partSearchResults.value = (response.parts || []) as import('../../shared/types').DevRevPart[];
+        }
+      },
+    );
+  }
+
+  const partOptions = partSearchResults.value.map((p) => ({
     id: p.id,
     label: p.name,
     description: p.description,
@@ -241,6 +254,8 @@ export function IssueCard() {
           onSelect={(id, label) => {
             issueFormData.value = { ...issueFormData.value, part: label, partId: id };
           }}
+          onSearch={handlePartSearch}
+          loading={partSearchLoading.value}
           suggested={aiSuggestedPart.value}
           disabled={chipsDisabled}
         />

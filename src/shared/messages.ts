@@ -39,17 +39,18 @@ export type Message =
   | { action: 'PREFETCH_DEVREV_DATA' }
   | {
       action: 'DEVREV_DATA_READY';
-      parts: DevRevPart[];
       users: DevRevUser[];
       self: DevRevUser;
     }
   | { action: 'GET_DEVREV_CACHE' }
   | {
       action: 'DEVREV_CACHE_RESULT';
-      parts: DevRevPart[];
       users: DevRevUser[];
       self: DevRevUser | null;
     }
+  // Phase 2: Live parts search
+  | { action: 'SEARCH_PARTS'; query: string; limit?: number }
+  | { action: 'SEARCH_PARTS_RESULT'; parts: DevRevPart[] }
   // Phase 2: Issue creation
   | { action: 'CREATE_ISSUE'; issueData: CreateIssuePayload }
   | {
@@ -58,7 +59,10 @@ export type Message =
       displayId: string;
       webUrl: string;
     }
-  | { action: 'ISSUE_ERROR'; message: string };
+  | { action: 'ISSUE_ERROR'; message: string }
+  // Overlay visibility control (for screenshot capture)
+  | { action: 'HIDE_OVERLAY' }
+  | { action: 'SHOW_OVERLAY' };
 
 // Phase 2: Port-based AI streaming messages (not in Message union)
 export type AIPortMessage =

@@ -15,17 +15,20 @@ interface ChipDropdownProps {
   value: string;
   options: ChipDropdownOption[];
   onSelect: (id: string, label: string) => void;
+  onSearch?: (query: string) => void;
   suggested?: string;
   disabled?: boolean;
+  loading?: boolean;
 }
 
-export function ChipDropdown({ label, value, options, onSelect, suggested, disabled }: ChipDropdownProps) {
+export function ChipDropdown({ label, value, options, onSelect, onSearch, suggested, disabled, loading }: ChipDropdownProps) {
   const isOpen = useSignal(false);
   const search = useSignal('');
   const highlightIndex = useSignal(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const optionsRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<number>(0);
 
   useEffect(() => {
     if (isOpen.value && searchRef.current) {
@@ -34,9 +37,9 @@ export function ChipDropdown({ label, value, options, onSelect, suggested, disab
   });
 
   const q = search.value.toLowerCase();
-  const filtered = options.filter((opt) =>
-    (opt.searchText || opt.label.toLowerCase()).includes(q),
-  );
+  const filtered = onSearch
+    ? options
+    : options.filter((opt) => (opt.searchText || opt.label.toLowerCase()).includes(q));
 
   function selectOption(opt: ChipDropdownOption): void {
     onSelect(opt.id, opt.label);
@@ -49,6 +52,9 @@ export function ChipDropdown({ label, value, options, onSelect, suggested, disab
     e.stopPropagation();
     if (disabled) return;
     isOpen.value = !isOpen.value;
+    if (isOpen.value && onSearch) {
+      onSearch('');
+    }
     if (!isOpen.value) {
       search.value = '';
       highlightIndex.value = 0;
@@ -107,8 +113,16 @@ export function ChipDropdown({ label, value, options, onSelect, suggested, disab
   }
 
   function handleSearchInput(e: Event): void {
-    search.value = (e.target as HTMLInputElement).value;
+    const val = (e.target as HTMLInputElement).value;
+    search.value = val;
     highlightIndex.value = 0;
+
+    if (onSearch) {
+      clearTimeout(debounceRef.current);
+      debounceRef.current = window.setTimeout(() => {
+        onSearch(val);
+      }, 200);
+    }
   }
 
   return (
@@ -144,7 +158,7 @@ export function ChipDropdown({ label, value, options, onSelect, suggested, disab
             <div class="nitpick-dropdown-options" ref={optionsRef}>
               {filtered.length === 0 && (
                 <div class="nitpick-dropdown-empty">
-                  {options.length === 0 ? 'Loading...' : 'No matches'}
+                  {loading ? 'Searching...' : options.length === 0 ? 'Type to search...' : 'No matches'}
                 </div>
               )}
               {filtered.map((opt, i) => (

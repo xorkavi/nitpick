@@ -27,7 +27,6 @@ import {
   lastSelectedMetadata,
   aiSuggestedPart,
   aiSuggestedOwner,
-  devrevParts,
   devrevUsers,
   devrevSelf,
   devrevDataLoaded,
@@ -251,7 +250,6 @@ function activateCommentMode(): void {
         return;
       }
       if (response && response.action === 'DEVREV_DATA_READY') {
-        devrevParts.value = (response.parts || []) as import('../shared/types').DevRevPart[];
         devrevUsers.value = (response.users || []) as import('../shared/types').DevRevUser[];
         devrevSelf.value = (response.self || null) as import('../shared/types').DevRevUser | null;
         devrevDataLoaded.value = true;

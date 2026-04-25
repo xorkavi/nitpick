@@ -84,11 +84,14 @@ export const screenshotsReady = signal<boolean>(false);
 export const aiStreamingDone = signal<boolean>(false);
 export const issueError = signal<string | null>(null);
 
-// Phase 2: DevRev cached data
-export const devrevParts = signal<DevRevPart[]>([]);
+// Phase 2: DevRev cached data (users only — parts use live search)
 export const devrevUsers = signal<DevRevUser[]>([]);
 export const devrevSelf = signal<DevRevUser | null>(null);
 export const devrevDataLoaded = signal<boolean>(false);
+
+// Phase 2: Live parts search
+export const partSearchResults = signal<DevRevPart[]>([]);
+export const partSearchLoading = signal<boolean>(false);
 
 // Phase 2: Issue creation state
 export const isCreatingIssue = signal<boolean>(false);

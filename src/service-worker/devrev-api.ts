@@ -143,27 +143,34 @@ export async function getDevRevConfig(): Promise<DevRevConfig> {
 // Parts list (POST, cursor-paginated)
 // ---------------------------------------------------------------------------
 
-async function fetchAllParts(config: DevRevConfig): Promise<DevRevPart[]> {
-  const parts: DevRevPart[] = [];
-  let cursor: string | undefined;
-  let pages = 0;
-  const maxPages = 3;
+export async function searchParts(
+  config: DevRevConfig,
+  query: string,
+  limit: number = 20,
+): Promise<DevRevPart[]> {
+  const response = await devrevFetch<{
+    results: Array<{
+      type: string;
+      part?: DevRevPart & { type?: string };
+    }>;
+  }>(config, '/internal/search.typeahead', {
+    body: {
+      query,
+      fields: ['name'],
+      namespaces: ['enhancement', 'feature', 'capability', 'product'],
+      limit,
+    },
+  });
 
-  do {
-    const body: { limit: number; cursor?: string } = { limit: 100 };
-    if (cursor) body.cursor = cursor;
-
-    const response = await devrevFetch<{
-      parts: DevRevPart[];
-      next_cursor?: string;
-    }>(config, '/parts.list', { body, method: 'POST' });
-
-    parts.push(...response.parts);
-    cursor = response.next_cursor;
-    pages++;
-  } while (cursor && pages < maxPages);
-
-  return parts;
+  return response.results
+    .filter(r => r.part)
+    .map(r => ({
+      id: r.part!.id,
+      display_id: r.part!.display_id,
+      name: r.part!.name,
+      description: r.part!.description,
+      owned_by: r.part!.owned_by,
+    }));
 }
 
 // ---------------------------------------------------------------------------
@@ -209,36 +216,31 @@ async function fetchSelf(config: DevRevConfig): Promise<DevRevUser> {
 // Module-level cache
 // ---------------------------------------------------------------------------
 
-let partsCache: DevRevPart[] | null = null;
 let usersCache: DevRevUser[] | null = null;
 let selfCache: DevRevUser | null = null;
 let nitpickedTagId: string | null = null;
 
 // ---------------------------------------------------------------------------
-// Prefetch
+// Prefetch (users + self + tag only — parts use live search)
 // ---------------------------------------------------------------------------
 
 export async function prefetchDevRevData(): Promise<{
-  parts: DevRevPart[];
   users: DevRevUser[];
   self: DevRevUser | null;
 }> {
   const config = await getDevRevConfig();
 
-  const [partsResult, usersResult, selfResult, tagResult] = await Promise.allSettled([
-    fetchAllParts(config),
+  const [usersResult, selfResult, tagResult] = await Promise.allSettled([
     fetchAllUsers(config),
     fetchSelf(config),
     findNitpickedTag(config),
   ]);
 
-  if (partsResult.status === 'fulfilled') partsCache = partsResult.value;
   if (usersResult.status === 'fulfilled') usersCache = usersResult.value;
   if (selfResult.status === 'fulfilled') selfCache = selfResult.value;
   if (tagResult.status === 'fulfilled') nitpickedTagId = tagResult.value;
 
   return {
-    parts: partsCache ?? [],
     users: usersCache ?? [],
     self: selfCache,
   };
@@ -266,10 +268,6 @@ async function findNitpickedTag(config: DevRevConfig): Promise<string | null> {
 // Cache getters
 // ---------------------------------------------------------------------------
 
-export function getCachedParts(): DevRevPart[] {
-  return partsCache ?? [];
-}
-
 export function getCachedUsers(): DevRevUser[] {
   return usersCache ?? [];
 }
@@ -283,7 +281,6 @@ export function getNitpickedTagId(): string | null {
 }
 
 export function clearCache(): void {
-  partsCache = null;
   usersCache = null;
   selfCache = null;
   baseUrlCache = null;
