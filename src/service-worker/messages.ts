@@ -52,6 +52,16 @@ export function setupMessageHandler(): void {
                 action: 'SCREENSHOTS_READY',
                 hasScreenshots: true,
               });
+
+              // Proactively relay cropped screenshot to content script
+              if (_sender.tab?.id && cropped) {
+                chrome.tabs.sendMessage(_sender.tab.id, {
+                  action: 'RELAY_CROPPED_SCREENSHOT',
+                  croppedScreenshotUrl: cropped,
+                }).catch((err) => {
+                  console.error('[Nitpick] Failed to relay screenshot:', err);
+                });
+              }
             })
             .catch((err) => {
               console.error('[Nitpick] Screenshot capture failed:', err);
