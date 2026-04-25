@@ -242,9 +242,9 @@
   font-size: 12px;
   font-weight: 500;
   font-family: inherit;
-  cursor: default;
-  opacity: 0.5;
+  cursor: pointer;
 }
+.nitpick-chip:hover { border-color: #0D99FF; }
 
 .nitpick-create-btn {
   width: 100%;

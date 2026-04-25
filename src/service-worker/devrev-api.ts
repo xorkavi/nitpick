@@ -323,20 +323,21 @@ export async function createIssue(
   config: DevRevConfig,
   payload: CreateIssuePayload,
 ): Promise<{ id: string; display_id: string }> {
+  const body: Record<string, unknown> = {
+    type: 'issue',
+    title: payload.title,
+    body: payload.description,
+    priority: payload.priority,
+  };
+
+  if (payload.partId) body.applies_to_part = payload.partId;
+  if (payload.ownerId) body.owned_by = [payload.ownerId];
+  if (payload.reportedById) body.reported_by = [payload.reportedById];
+  if (payload.artifactIds?.length) body.artifacts = payload.artifactIds;
+
   const response = await devrevFetch<{
     work: { id: string; display_id: string };
-  }>(config, '/works.create', {
-    body: {
-      type: 'issue',
-      title: payload.title,
-      body: payload.description,
-      applies_to_part: payload.partId,
-      owned_by: [payload.ownerId],
-      reported_by: [payload.reportedById],
-      priority: payload.priority,
-      artifacts: payload.artifactIds,
-    },
-  });
+  }>(config, '/works.create', { body });
 
   return {
     id: response.work.id,

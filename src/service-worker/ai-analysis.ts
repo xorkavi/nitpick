@@ -14,6 +14,7 @@ import OpenAI from 'openai';
 import type { ElementMetadata, AreaMetadata, BrowserMetadata, DevRevPart, DevRevUser } from '../shared/types';
 import { getSettings } from './storage';
 import { getCachedParts, getCachedUsers } from './devrev-api';
+import { getScreenshots } from './screenshot-store';
 
 // ---------------------------------------------------------------------------
 // Response parser
@@ -73,14 +74,18 @@ function buildSystemPrompt(
     .map((u) => `- ${u.display_name} (${u.id})`)
     .join('\n');
 
-  return `You are a UI bug report writer for a web application. You generate concise, actionable issue descriptions.
+  return `You are a senior QA engineer writing bug reports for a web application. You write precise, actionable JIRA-style issue titles and descriptions.
 
-TASK: Given a user's plain-language bug description and an element's CSS/DOM metadata, generate:
-1. A concise issue title (max 80 chars, searchable)
+TASK: Given a user's plain-language bug description, an element's CSS/DOM metadata, and optionally a screenshot of the selected area, generate:
+1. A JIRA-style issue title: "[Component/Area] Specific problem description" (max 80 chars). Examples:
+   - "[Tabs] Selected tab text misaligned with container bounds"
+   - "[Sidebar] Chat list items overlap at narrow viewport widths"
+   - "[Button] Primary CTA color does not match design system token"
+   The title MUST immediately convey what is wrong and where.
 2. A description with:
-   - One summary paragraph (2-3 sentences)
-   - 3-5 bullet points listing ONLY the CSS/DOM properties relevant to the user's complaint, with actual values
-3. A suggested Part (from the list below)
+   - One summary paragraph (2-3 sentences) explaining the visual defect
+   - 3-5 bullet points listing ONLY the CSS/DOM properties relevant to the user's complaint, with actual computed values
+3. A suggested Part (from the list below) — match by page URL or component area
 4. A suggested Owner (from the list below)
 
 RULES:
@@ -90,6 +95,7 @@ RULES:
 - Format property values clearly: "font-size: 12px"
 - If you can infer expected values from context, note them: "font-size: 12px (expected: 14px based on sibling elements)"
 - Keep the description under 200 words
+- If a screenshot is provided, use visual context to be more precise about the problem
 
 OUTPUT FORMAT (use exactly these section markers on their own line):
 TITLE: [title here]
@@ -202,11 +208,23 @@ export async function streamAnalysis(
     const systemPrompt = buildSystemPrompt(parts, users);
     const userMessage = buildUserMessage(comment, metadata, browserMetadata);
 
+    const screenshots = getScreenshots();
+    const userContent: OpenAI.ChatCompletionContentPart[] = [
+      { type: 'text', text: userMessage },
+    ];
+
+    if (screenshots.cropped) {
+      userContent.push({
+        type: 'image_url',
+        image_url: { url: screenshots.cropped, detail: 'low' },
+      });
+    }
+
     const stream = client.chat.completions.stream({
       model: 'gpt-4.1-mini',
       messages: [
         { role: 'system', content: systemPrompt },
-        { role: 'user', content: userMessage },
+        { role: 'user', content: userContent },
       ],
       temperature: 0.3,
       max_tokens: 800,
