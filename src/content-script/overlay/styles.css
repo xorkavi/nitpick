@@ -394,7 +394,8 @@
   cursor: pointer;
   text-align: left;
 }
-.nitpick-dropdown-option:hover { background: #F5F5F5; }
+.nitpick-dropdown-option:hover,
+.nitpick-dropdown-option--highlighted { background: #F0F4FF; }
 .nitpick-dropdown-option--suggested { font-weight: 500; }
 
 .nitpick-dropdown-option-label {

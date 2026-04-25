@@ -22,8 +22,10 @@ interface ChipDropdownProps {
 export function ChipDropdown({ label, value, options, onSelect, suggested, disabled }: ChipDropdownProps) {
   const isOpen = useSignal(false);
   const search = useSignal('');
+  const highlightIndex = useSignal(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+  const optionsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen.value && searchRef.current) {
@@ -36,20 +38,26 @@ export function ChipDropdown({ label, value, options, onSelect, suggested, disab
     (opt.searchText || opt.label.toLowerCase()).includes(q),
   );
 
+  function selectOption(opt: ChipDropdownOption): void {
+    onSelect(opt.id, opt.label);
+    isOpen.value = false;
+    search.value = '';
+    highlightIndex.value = 0;
+  }
+
   function handleToggle(e: MouseEvent): void {
     e.stopPropagation();
     if (disabled) return;
     isOpen.value = !isOpen.value;
     if (!isOpen.value) {
       search.value = '';
+      highlightIndex.value = 0;
     }
   }
 
   function handleSelect(e: MouseEvent, opt: ChipDropdownOption): void {
     e.stopPropagation();
-    onSelect(opt.id, opt.label);
-    isOpen.value = false;
-    search.value = '';
+    selectOption(opt);
   }
 
   function handleSearchClick(e: MouseEvent): void {
@@ -60,6 +68,47 @@ export function ChipDropdown({ label, value, options, onSelect, suggested, disab
     e.stopPropagation();
     isOpen.value = false;
     search.value = '';
+    highlightIndex.value = 0;
+  }
+
+  function handleKeyDown(e: KeyboardEvent): void {
+    if (!isOpen.value) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      highlightIndex.value = Math.min(highlightIndex.value + 1, filtered.length - 1);
+      scrollHighlightedIntoView();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      highlightIndex.value = Math.max(highlightIndex.value - 1, 0);
+      scrollHighlightedIntoView();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (filtered.length > 0 && highlightIndex.value < filtered.length) {
+        selectOption(filtered[highlightIndex.value]);
+      }
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      isOpen.value = false;
+      search.value = '';
+      highlightIndex.value = 0;
+    }
+  }
+
+  function scrollHighlightedIntoView(): void {
+    setTimeout(() => {
+      const container = optionsRef.current;
+      if (!container) return;
+      const highlighted = container.querySelector('.nitpick-dropdown-option--highlighted');
+      if (highlighted) {
+        highlighted.scrollIntoView({ block: 'nearest' });
+      }
+    }, 0);
+  }
+
+  function handleSearchInput(e: Event): void {
+    search.value = (e.target as HTMLInputElement).value;
+    highlightIndex.value = 0;
   }
 
   return (
@@ -87,26 +136,26 @@ export function ChipDropdown({ label, value, options, onSelect, suggested, disab
               class="nitpick-dropdown-search"
               placeholder={`Search ${label.toLowerCase()}...`}
               value={search.value}
-              onInput={(e) => {
-                search.value = (e.target as HTMLInputElement).value;
-              }}
+              onInput={handleSearchInput}
+              onKeyDown={handleKeyDown}
               onClick={handleSearchClick}
               onMouseDown={handleSearchClick}
             />
-            <div class="nitpick-dropdown-options">
+            <div class="nitpick-dropdown-options" ref={optionsRef}>
               {filtered.length === 0 && (
                 <div class="nitpick-dropdown-empty">
                   {options.length === 0 ? 'Loading...' : 'No matches'}
                 </div>
               )}
-              {filtered.map((opt) => (
+              {filtered.map((opt, i) => (
                 <button
                   key={opt.id}
-                  class={`nitpick-dropdown-option ${opt.id === suggested ? 'nitpick-dropdown-option--suggested' : ''}`}
+                  class={`nitpick-dropdown-option ${i === highlightIndex.value ? 'nitpick-dropdown-option--highlighted' : ''} ${opt.id === suggested ? 'nitpick-dropdown-option--suggested' : ''}`}
                   role="option"
                   aria-selected={opt.label === value}
                   onClick={(e) => handleSelect(e as unknown as MouseEvent, opt)}
                   onMouseDown={handleSearchClick}
+                  onMouseEnter={() => { highlightIndex.value = i; }}
                 >
                   {(opt.initials || opt.avatarUrl) && (
                     <span class="nitpick-avatar">
