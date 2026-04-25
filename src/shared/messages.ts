@@ -37,20 +37,13 @@ export type Message =
   | { action: 'SCREENSHOTS_READY'; hasScreenshots: boolean }
   // Phase 2: DevRev data prefetch
   | { action: 'PREFETCH_DEVREV_DATA' }
-  | {
-      action: 'DEVREV_DATA_READY';
-      users: DevRevUser[];
-      self: DevRevUser;
-    }
-  | { action: 'GET_DEVREV_CACHE' }
-  | {
-      action: 'DEVREV_CACHE_RESULT';
-      users: DevRevUser[];
-      self: DevRevUser | null;
-    }
+  | { action: 'DEVREV_DATA_READY'; self: DevRevUser }
   // Phase 2: Live parts search
   | { action: 'SEARCH_PARTS'; query: string; limit?: number }
   | { action: 'SEARCH_PARTS_RESULT'; parts: DevRevPart[] }
+  // Phase 2: Live users search
+  | { action: 'SEARCH_USERS'; query: string; limit?: number }
+  | { action: 'SEARCH_USERS_RESULT'; users: DevRevUser[] }
   // Phase 2: Issue creation
   | { action: 'CREATE_ISSUE'; issueData: CreateIssuePayload }
   | {

@@ -13,7 +13,6 @@
 import OpenAI from 'openai';
 import type { ElementMetadata, AreaMetadata, BrowserMetadata, DevRevPart, DevRevUser } from '../shared/types';
 import { getSettings } from './storage';
-import { getCachedUsers } from './devrev-api';
 import { getScreenshots } from './screenshot-store';
 
 // ---------------------------------------------------------------------------
@@ -256,7 +255,7 @@ export async function streamAnalysis(
     });
 
     const parts: import('../shared/types').DevRevPart[] = [];
-    const users = getCachedUsers();
+    const users: import('../shared/types').DevRevUser[] = [];
 
     const systemPrompt = buildSystemPrompt(parts, users);
     const userMessage = buildUserMessage(comment, metadata, browserMetadata);

@@ -27,7 +27,8 @@ import {
   lastSelectedMetadata,
   aiSuggestedPart,
   aiSuggestedOwner,
-  devrevUsers,
+  userSearchResults,
+  userSearchLoading,
   devrevSelf,
   devrevDataLoaded,
 } from './signals';
@@ -250,7 +251,6 @@ function activateCommentMode(): void {
         return;
       }
       if (response && response.action === 'DEVREV_DATA_READY') {
-        devrevUsers.value = (response.users || []) as import('../shared/types').DevRevUser[];
         devrevSelf.value = (response.self || null) as import('../shared/types').DevRevUser | null;
         devrevDataLoaded.value = true;
       } else if (response && response.action === 'ERROR') {
@@ -292,6 +292,8 @@ function deactivateCommentMode(): void {
   createdIssueUrl.value = null;
   createdIssueDisplayId.value = null;
   showSuccessToast.value = false;
+  userSearchResults.value = [];
+  userSearchLoading.value = false;
   lastSelectedMetadata.value = null;
   aiSuggestedPart.value = undefined;
   aiSuggestedOwner.value = undefined;

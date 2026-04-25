@@ -174,30 +174,38 @@ export async function searchParts(
 }
 
 // ---------------------------------------------------------------------------
-// Users list (POST, cursor-paginated)
+// Live user search (via typeahead)
 // ---------------------------------------------------------------------------
 
-async function fetchAllUsers(config: DevRevConfig): Promise<DevRevUser[]> {
-  const users: DevRevUser[] = [];
-  let cursor: string | undefined;
-  let pages = 0;
-  const maxPages = 3;
+export async function searchUsers(
+  config: DevRevConfig,
+  query: string,
+  limit: number = 20,
+): Promise<DevRevUser[]> {
+  const response = await devrevFetch<{
+    results: Array<{
+      type: string;
+      user?: DevRevUser & { type?: string };
+    }>;
+  }>(config, '/internal/search.typeahead', {
+    body: {
+      query,
+      fields: ['full_name', 'display_name', 'email'],
+      namespaces: ['dev_user'],
+      limit,
+    },
+  });
 
-  do {
-    const body: { limit: number; cursor?: string } = { limit: 100 };
-    if (cursor) body.cursor = cursor;
-
-    const response = await devrevFetch<{
-      dev_users: DevRevUser[];
-      next_cursor?: string;
-    }>(config, '/internal/dev-users.list', { body, method: 'POST' });
-
-    users.push(...response.dev_users);
-    cursor = response.next_cursor;
-    pages++;
-  } while (cursor && pages < maxPages);
-
-  return users;
+  return response.results
+    .filter(r => r.user)
+    .map(r => ({
+      id: r.user!.id,
+      display_id: r.user!.display_id,
+      display_name: r.user!.display_name,
+      email: r.user!.email,
+      full_name: r.user!.full_name,
+      thumbnail: r.user!.thumbnail,
+    }));
 }
 
 // ---------------------------------------------------------------------------
@@ -213,37 +221,30 @@ async function fetchSelf(config: DevRevConfig): Promise<DevRevUser> {
 }
 
 // ---------------------------------------------------------------------------
-// Module-level cache
+// Module-level cache (self + tag only)
 // ---------------------------------------------------------------------------
 
-let usersCache: DevRevUser[] | null = null;
 let selfCache: DevRevUser | null = null;
 let nitpickedTagId: string | null = null;
 
 // ---------------------------------------------------------------------------
-// Prefetch (users + self + tag only — parts use live search)
+// Prefetch (self + tag only — parts and users use live search)
 // ---------------------------------------------------------------------------
 
 export async function prefetchDevRevData(): Promise<{
-  users: DevRevUser[];
   self: DevRevUser | null;
 }> {
   const config = await getDevRevConfig();
 
-  const [usersResult, selfResult, tagResult] = await Promise.allSettled([
-    fetchAllUsers(config),
+  const [selfResult, tagResult] = await Promise.allSettled([
     fetchSelf(config),
     findNitpickedTag(config),
   ]);
 
-  if (usersResult.status === 'fulfilled') usersCache = usersResult.value;
   if (selfResult.status === 'fulfilled') selfCache = selfResult.value;
   if (tagResult.status === 'fulfilled') nitpickedTagId = tagResult.value;
 
-  return {
-    users: usersCache ?? [],
-    self: selfCache,
-  };
+  return { self: selfCache };
 }
 
 async function findNitpickedTag(config: DevRevConfig): Promise<string | null> {
@@ -268,10 +269,6 @@ async function findNitpickedTag(config: DevRevConfig): Promise<string | null> {
 // Cache getters
 // ---------------------------------------------------------------------------
 
-export function getCachedUsers(): DevRevUser[] {
-  return usersCache ?? [];
-}
-
 export function getCachedSelf(): DevRevUser | null {
   return selfCache;
 }
@@ -281,7 +278,6 @@ export function getNitpickedTagId(): string | null {
 }
 
 export function clearCache(): void {
-  usersCache = null;
   selfCache = null;
   baseUrlCache = null;
   nitpickedTagId = null;

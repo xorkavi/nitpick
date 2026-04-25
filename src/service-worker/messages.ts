@@ -9,12 +9,12 @@ import {
 } from './screenshot-store';
 import {
   prefetchDevRevData,
-  getCachedUsers,
   getCachedSelf,
   getDevRevConfig,
   uploadArtifact,
   createIssue,
   searchParts,
+  searchUsers,
 } from './devrev-api';
 
 export function setupMessageHandler(): void {
@@ -65,31 +65,17 @@ export function setupMessageHandler(): void {
 
         case 'PREFETCH_DEVREV_DATA': {
           prefetchDevRevData()
-            .then(({ users, self }) => {
-              sendResponse({
-                action: 'DEVREV_DATA_READY',
-                users,
-                self,
-              });
+            .then(({ self }) => {
+              sendResponse({ action: 'DEVREV_DATA_READY', self });
             })
             .catch((err) => {
               console.error('[Nitpick] DevRev prefetch failed:', err);
               sendResponse({
                 action: 'ERROR',
                 source: 'devrev-prefetch',
-                message:
-                  err instanceof Error ? err.message : 'Prefetch failed',
+                message: err instanceof Error ? err.message : 'Prefetch failed',
               });
             });
-          return true; // async response
-        }
-
-        case 'GET_DEVREV_CACHE': {
-          sendResponse({
-            action: 'DEVREV_CACHE_RESULT',
-            users: getCachedUsers(),
-            self: getCachedSelf(),
-          });
           return true;
         }
 
@@ -102,6 +88,20 @@ export function setupMessageHandler(): void {
             } catch (err) {
               console.error('[Nitpick] Parts search failed:', err);
               sendResponse({ action: 'SEARCH_PARTS_RESULT', parts: [] });
+            }
+          })();
+          return true;
+        }
+
+        case 'SEARCH_USERS': {
+          (async () => {
+            try {
+              const config = await getDevRevConfig();
+              const users = await searchUsers(config, msg.query ?? '', msg.limit ?? 20);
+              sendResponse({ action: 'SEARCH_USERS_RESULT', users });
+            } catch (err) {
+              console.error('[Nitpick] Users search failed:', err);
+              sendResponse({ action: 'SEARCH_USERS_RESULT', users: [] });
             }
           })();
           return true;

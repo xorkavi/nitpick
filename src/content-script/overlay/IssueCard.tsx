@@ -9,7 +9,8 @@ import {
   aiSuggestedOwner,
   partSearchResults,
   partSearchLoading,
-  devrevUsers,
+  userSearchResults,
+  userSearchLoading,
   devrevSelf,
   createdIssueUrl,
   createdIssueDisplayId,
@@ -170,14 +171,26 @@ export function IssueCard() {
     description: p.description,
   }));
 
-  const ownerOptions = devrevUsers.value.map((u) => {
+  function handleUserSearch(query: string): void {
+    userSearchLoading.value = true;
+    chrome.runtime.sendMessage(
+      { action: 'SEARCH_USERS', query, limit: 20 },
+      (response: { action?: string; users?: unknown[] } | undefined) => {
+        userSearchLoading.value = false;
+        if (response?.action === 'SEARCH_USERS_RESULT') {
+          userSearchResults.value = (response.users || []) as import('../../shared/types').DevRevUser[];
+        }
+      },
+    );
+  }
+
+  const ownerOptions = userSearchResults.value.map((u) => {
     const name = u.full_name || u.display_name;
     return {
       id: u.id,
       label: name,
       initials: getInitials(name),
       avatarUrl: u.thumbnail,
-      searchText: `${u.display_name} ${u.full_name || ''}`.toLowerCase(),
     };
   });
 
@@ -266,6 +279,8 @@ export function IssueCard() {
           onSelect={(id, label) => {
             issueFormData.value = { ...issueFormData.value, owner: label, ownerId: id };
           }}
+          onSearch={handleUserSearch}
+          loading={userSearchLoading.value}
           suggested={aiSuggestedOwner.value}
           disabled={chipsDisabled}
         />
