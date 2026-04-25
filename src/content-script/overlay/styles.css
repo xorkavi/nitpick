@@ -214,7 +214,7 @@
   font-size: var(--typography-body-small-font-size);
   font-family: inherit;
   color: var(--fg-neutral-prominent);
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   resize: vertical;
   min-height: 60px;
   box-sizing: border-box;
@@ -223,6 +223,17 @@
 }
 .nitpick-issue-desc::placeholder { color: var(--fg-neutral-medium); }
 .nitpick-issue-desc:focus { border-color: var(--core-blueberry-blue-500); }
+
+.nitpick-screenshot-thumbnail {
+  width: 120px;
+  height: auto;
+  max-height: 80px;
+  border: 1px solid var(--stroke-neutral-subtle);
+  border-radius: var(--corner-square);
+  margin-bottom: 12px;
+  object-fit: contain;
+  cursor: pointer;
+}
 
 .nitpick-chips-row {
   display: flex;

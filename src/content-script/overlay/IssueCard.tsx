@@ -21,6 +21,7 @@ import {
   selectedRect,
   areaSelection,
   screenshotsReady,
+  croppedScreenshotUrl,
 } from '../signals';
 import { ChipDropdown } from './ChipDropdown';
 import { PRIORITY_OPTIONS } from '../../shared/constants';
@@ -249,6 +250,17 @@ export function IssueCard() {
             el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
           }}
           rows={3}
+        />
+      )}
+
+      {croppedScreenshotUrl.value && (
+        <img
+          src={croppedScreenshotUrl.value}
+          alt="Cropped screenshot of selected element"
+          class="nitpick-screenshot-thumbnail"
+          onClick={() => window.open(croppedScreenshotUrl.value!, "_blank")}
+          role="button"
+          aria-label="View full-size screenshot"
         />
       )}
 
