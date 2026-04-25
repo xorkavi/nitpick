@@ -12,7 +12,7 @@
 .nitpick-hover-highlight {
   position: fixed;
   border: 2px dashed #0D99FF;
-  background: rgba(13, 153, 255, 0.08);
+  background: rgba(13, 153, 255, 0.03);
   pointer-events: none;
   box-sizing: border-box;
   transition: opacity 100ms ease-in;
@@ -36,7 +36,7 @@
 .nitpick-selection-box {
   position: fixed;
   border: 2px dashed #0D99FF;
-  background: rgba(13, 153, 255, 0.08);
+  background: rgba(13, 153, 255, 0.03);
   pointer-events: none;
   box-sizing: border-box;
 }
@@ -54,7 +54,7 @@
 .nitpick-drag-selection {
   position: fixed;
   border: 2px dashed #0D99FF;
-  background: rgba(13, 153, 255, 0.08);
+  background: rgba(13, 153, 255, 0.03);
   pointer-events: none;
   box-sizing: border-box;
 }
