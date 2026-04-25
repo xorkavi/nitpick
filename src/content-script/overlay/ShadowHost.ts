@@ -4,6 +4,11 @@ import overlayStyles from './styles.css?inline';
 import { showCommentBubble } from '../signals';
 import { effect } from '@preact/signals';
 
+// Import Arcade token CSS as inline text (Vite ?inline query)
+import arcadeCoreTokens from '../../tokens/arcade/core.css?inline';
+import arcadeLightTokens from '../../tokens/arcade/light.css?inline';
+import arcadeComponentTokens from '../../tokens/arcade/component.css?inline';
+
 let shadowRoot: ShadowRoot | null = null;
 let hostElement: HTMLElement | null = null;
 let disposeEffect: (() => void) | null = null;
@@ -25,8 +30,14 @@ export function mountOverlay(): ShadowRoot {
 
   shadowRoot = hostElement.attachShadow({ mode: 'closed' });
 
+  // Inject tokens + overlay styles into shadow DOM
   const style = document.createElement('style');
-  style.textContent = overlayStyles;
+  style.textContent = [
+    arcadeCoreTokens,        // 90 core color/font variables
+    arcadeLightTokens,       // 292 semantic light mode aliases
+    arcadeComponentTokens,   // 317 component-level tokens
+    overlayStyles,           // Overlay-specific rules referencing tokens
+  ].join('\n');
   shadowRoot.appendChild(style);
 
   const mountPoint = document.createElement('div');
