@@ -100,28 +100,39 @@ export function setupMessageHandler(): void {
             try {
               const config = await getDevRevConfig();
               const screenshots = getScreenshots();
-              const artifactIds: string[] = [];
+              const uploadedArtifacts: Array<{ id: string; accessKey: string; fileName: string }> = [];
 
-              // Upload screenshots as artifacts (D-11)
               if (screenshots.viewport) {
-                const viewportId = await uploadArtifact(
+                const artifact = await uploadArtifact(
                   config,
                   screenshots.viewport,
                   'viewport-screenshot.png',
                 );
-                artifactIds.push(viewportId);
+                uploadedArtifacts.push(artifact);
               }
               if (screenshots.cropped) {
-                const croppedId = await uploadArtifact(
+                const artifact = await uploadArtifact(
                   config,
                   screenshots.cropped,
                   'detail-screenshot.png',
                 );
-                artifactIds.push(croppedId);
+                uploadedArtifacts.push(artifact);
+              }
+
+              const artifactIds = uploadedArtifacts.map(a => a.id);
+
+              // Build inline markdown images using permanent download URLs
+              let description = msg.issueData.description || '';
+              if (uploadedArtifacts.length > 0) {
+                const imageMarkdown = uploadedArtifacts
+                  .map(a => `![${a.fileName}](${config.baseUrl}/internal/artifacts.download?id=${encodeURIComponent(a.id)}&key=${encodeURIComponent(a.accessKey)})`)
+                  .join('\n');
+                description = `${imageMarkdown}\n\n${description}`;
               }
 
               const issueData = {
                 ...msg.issueData,
+                description,
                 artifactIds,
               };
               const result = await createIssue(config, issueData);

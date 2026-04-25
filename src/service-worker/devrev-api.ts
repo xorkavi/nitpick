@@ -323,33 +323,34 @@ function dataUrlToBlob(dataUrl: string): Blob {
 // Artifact upload (prepare + multipart POST)
 // ---------------------------------------------------------------------------
 
+export interface UploadedArtifact {
+  id: string;
+  accessKey: string;
+  fileName: string;
+}
+
 export async function uploadArtifact(
   config: DevRevConfig,
   dataUrl: string,
   fileName: string,
-): Promise<string> {
-  // Step 1: Prepare -- get pre-signed upload URL and form fields
+): Promise<UploadedArtifact> {
   const prepared = await devrevFetch<{
     id: string;
     url: string;
     form_data: Array<{ key: string; value: string }>;
+    access_key: string;
   }>(config, '/artifacts.prepare', {
     body: { file_name: fileName, file_type: 'default' },
   });
 
-  // Step 2: Convert data URL to Blob
   const blob = dataUrlToBlob(dataUrl);
 
-  // Step 3: Build multipart form with pre-signed fields + file
   const formData = new FormData();
   for (const { key, value } of prepared.form_data) {
     formData.append(key, value);
   }
   formData.append('file', blob, fileName);
 
-  // Step 4: Upload to pre-signed URL
-  // NO Authorization header -- pre-signed URL handles auth
-  // NO Content-Type header -- browser sets multipart boundary automatically
   const uploadResponse = await fetch(prepared.url, {
     method: 'POST',
     body: formData,
@@ -359,7 +360,11 @@ export async function uploadArtifact(
     throw new DevRevError(uploadResponse.status, 'Artifact upload failed');
   }
 
-  return prepared.id;
+  return {
+    id: prepared.id,
+    accessKey: prepared.access_key,
+    fileName,
+  };
 }
 
 // ---------------------------------------------------------------------------

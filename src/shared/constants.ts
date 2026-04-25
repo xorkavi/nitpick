@@ -4,7 +4,15 @@ export const STORAGE_KEYS = {
   domains: 'nitpick_domains',
 } as const;
 
-export const DEFAULT_DOMAINS = ['app.devrev.ai', 'devrev.ai', 'app.dev.devrev-eng.ai'];
+export const DEFAULT_DOMAINS = [
+  'app.devrev.ai',
+  'devrev.ai',
+  'app.dev.devrev-eng.ai',
+  'support.devrev.ai',
+  'support.dev.devrev-eng.ai',
+  'developer.devrev.ai',
+  'app.qa.devrev-eng.ai',
+];
 
 export const COLORS = {
   selectionBlue: '#0D99FF',
