@@ -11,6 +11,7 @@
   "description": "UI bug reporting for DevRev",
   "dependencies": {
     "@preact/signals": "^2.9.0",
+    "@xorkavi/arcade-gen": "^0.1.0",
     "nanoid": "^5.1.9",
     "openai": "^6.34.0",
     "preact": "^10.29.1",
