@@ -119,8 +119,6 @@ export function setupMessageHandler(): void {
                 uploadedArtifacts.push(artifact);
               }
 
-              const artifactIds = uploadedArtifacts.map(a => a.id);
-
               // Build inline markdown images using permanent download URLs
               let description = msg.issueData.description || '';
               if (uploadedArtifacts.length > 0) {
@@ -133,7 +131,6 @@ export function setupMessageHandler(): void {
               const issueData = {
                 ...msg.issueData,
                 description,
-                artifactIds,
               };
               const result = await createIssue(config, issueData);
 

@@ -385,7 +385,6 @@ export async function createIssue(
   if (payload.partId) body.applies_to_part = payload.partId;
   if (payload.ownerId) body.owned_by = [payload.ownerId];
   if (payload.reportedById) body.reported_by = [payload.reportedById];
-  if (payload.artifactIds?.length) body.artifacts = payload.artifactIds;
 
   const tagId = getNitpickedTagId();
   if (tagId) body.tags = [{ id: tagId }];
