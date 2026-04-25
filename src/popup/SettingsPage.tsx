@@ -1,5 +1,6 @@
 import { useSignal, useComputed } from '@preact/signals';
 import { useEffect } from 'preact/hooks';
+import { Button, Input } from '@xorkavi/arcade-gen';
 import { STORAGE_KEYS, DEFAULT_DOMAINS } from '../shared/constants';
 
 type FieldStatus = 'idle' | 'saving' | 'saved' | 'error';
@@ -151,7 +152,7 @@ export function SettingsPage() {
     handleSaveDomains();
   };
 
-  const handleDomainKeyDown = (e: KeyboardEvent) => {
+  const handleDomainKeyDown = (e: any) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       handleAddDomain();
@@ -170,26 +171,6 @@ export function SettingsPage() {
     }
   };
 
-  const fieldBtnStyle = (status: FieldStatus, hasValue: boolean) => ({
-    padding: '8px 16px',
-    border: 'none',
-    borderRadius: '6px',
-    fontSize: '12px',
-    fontWeight: 600,
-    cursor: hasValue && status !== 'saving' ? 'pointer' : 'not-allowed',
-    backgroundColor: status === 'saved' ? '#16a34a' : status === 'error' ? '#DC2626' : hasValue ? '#0D99FF' : '#B0D9F7',
-    color: '#FFFFFF',
-    opacity: status === 'saving' ? 0.7 : 1,
-    whiteSpace: 'nowrap' as const,
-    flexShrink: 0,
-  });
-
-  const fieldMessageStyle = (status: FieldStatus) => ({
-    fontSize: '11px',
-    color: status === 'error' ? '#DC2626' : status === 'saved' ? '#16a34a' : '#666666',
-    margin: '4px 0 0 0',
-    lineHeight: '1.4',
-  });
 
   return (
     <div
@@ -214,100 +195,86 @@ export function SettingsPage() {
 
       {/* DevRev PAT */}
       <div style={{ marginBottom: '16px' }}>
-        <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: '#1A1A1A', marginBottom: '6px', lineHeight: '1.4' }}>
-          DevRev Personal Access Token
-        </label>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
           <div style={{ position: 'relative', flex: 1 }}>
-            <input
+            <Input
+              label="DevRev Personal Access Token"
               type={showPat.value ? 'text' : 'password'}
-              value={pat.value}
+              size="md"
               placeholder="Paste your token here"
-              onInput={(e) => { pat.value = (e.target as HTMLInputElement).value; if (pat.value !== patSavedValue.value) { patStatus.value = 'idle'; patMessage.value = ''; } }}
-              onBlur={() => { patTouched.value = true; }}
-              style={{
-                width: '100%',
-                padding: '8px 36px 8px 12px',
-                backgroundColor: '#F5F5F5',
-                border: `1px solid ${patEmpty.value ? '#DC2626' : '#E5E5E5'}`,
-                borderRadius: '6px',
-                fontSize: '14px',
-                color: '#1A1A1A',
-                outline: 'none',
-                boxSizing: 'border-box',
+              value={pat.value}
+              onInput={(e: any) => {
+                pat.value = (e.target as HTMLInputElement).value;
+                if (pat.value !== patSavedValue.value) {
+                  patStatus.value = 'idle';
+                  patMessage.value = '';
+                }
               }}
+              onBlur={() => { patTouched.value = true; }}
+              error={patEmpty.value ? 'A valid token is required to create issues' : undefined}
+              helperText={!patEmpty.value ? (patMessage.value || 'Find this in DevRev > Settings > Account > Developer') : undefined}
             />
             <button
               type="button"
               onClick={() => { showPat.value = !showPat.value; }}
-              style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#666666', padding: '2px 4px' }}
+              style={{ position: 'absolute', right: '8px', top: '32px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#666666', padding: '2px 4px' }}
             >
               {showPat.value ? 'Hide' : 'Show'}
             </button>
           </div>
-          <button
-            type="button"
+          <Button
+            variant={patStatus.value === 'error' ? 'destructive' : 'primary'}
+            size="sm"
             onClick={handleSavePAT}
             disabled={!pat.value.trim() || patStatus.value === 'saving'}
-            style={fieldBtnStyle(patStatus.value, !!pat.value.trim())}
+            loading={patStatus.value === 'saving'}
+            style={{ marginBottom: '22px' }}
           >
-            {patStatus.value === 'saving' ? 'Verifying...' : patStatus.value === 'saved' ? 'Saved' : patStatus.value === 'error' ? 'Saved' : 'Save'}
-          </button>
+            {patStatus.value === 'saving' ? 'Verifying...' : patStatus.value === 'saved' ? 'Saved' : 'Save'}
+          </Button>
         </div>
-        <p style={fieldMessageStyle(patStatus.value)}>
-          {patEmpty.value
-            ? 'A valid token is required to create issues'
-            : patMessage.value || 'Find this in DevRev > Settings > Account > Developer'}
-        </p>
       </div>
 
       {/* OpenAI API Key */}
       <div style={{ marginBottom: '16px' }}>
-        <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: '#1A1A1A', marginBottom: '6px', lineHeight: '1.4' }}>
-          OpenAI API Key
-        </label>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
           <div style={{ position: 'relative', flex: 1 }}>
-            <input
+            <Input
+              label="OpenAI API Key"
               type={showOpenaiKey.value ? 'text' : 'password'}
-              value={openaiKey.value}
+              size="md"
               placeholder="sk-..."
-              onInput={(e) => { openaiKey.value = (e.target as HTMLInputElement).value; if (openaiKey.value !== openaiKeySavedValue.value) { openaiKeyStatus.value = 'idle'; openaiKeyMessage.value = ''; } }}
-              onBlur={() => { openaiKeyTouched.value = true; }}
-              style={{
-                width: '100%',
-                padding: '8px 36px 8px 12px',
-                backgroundColor: '#F5F5F5',
-                border: `1px solid ${openaiKeyEmpty.value ? '#DC2626' : '#E5E5E5'}`,
-                borderRadius: '6px',
-                fontSize: '14px',
-                color: '#1A1A1A',
-                outline: 'none',
-                boxSizing: 'border-box',
+              value={openaiKey.value}
+              onInput={(e: any) => {
+                openaiKey.value = (e.target as HTMLInputElement).value;
+                if (openaiKey.value !== openaiKeySavedValue.value) {
+                  openaiKeyStatus.value = 'idle';
+                  openaiKeyMessage.value = '';
+                }
               }}
+              onBlur={() => { openaiKeyTouched.value = true; }}
+              error={openaiKeyEmpty.value ? 'A valid API key is required' : undefined}
+              helperText={!openaiKeyEmpty.value ? (openaiKeyMessage.value || 'Used for AI-powered issue descriptions') : undefined}
             />
             <button
               type="button"
               onClick={() => { showOpenaiKey.value = !showOpenaiKey.value; }}
-              style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#666666', padding: '2px 4px' }}
+              style={{ position: 'absolute', right: '8px', top: '32px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#666666', padding: '2px 4px' }}
             >
               {showOpenaiKey.value ? 'Hide' : 'Show'}
             </button>
           </div>
-          <button
-            type="button"
+          <Button
+            variant={openaiKeyStatus.value === 'error' ? 'destructive' : 'primary'}
+            size="sm"
             onClick={handleSaveOpenAIKey}
             disabled={!openaiKey.value.trim() || openaiKeyStatus.value === 'saving'}
-            style={fieldBtnStyle(openaiKeyStatus.value, !!openaiKey.value.trim())}
+            loading={openaiKeyStatus.value === 'saving'}
+            style={{ marginBottom: '22px' }}
           >
-            {openaiKeyStatus.value === 'saving' ? 'Verifying...' : openaiKeyStatus.value === 'saved' ? 'Saved' : openaiKeyStatus.value === 'error' ? 'Saved' : 'Save'}
-          </button>
+            {openaiKeyStatus.value === 'saving' ? 'Verifying...' : openaiKeyStatus.value === 'saved' ? 'Saved' : 'Save'}
+          </Button>
         </div>
-        <p style={fieldMessageStyle(openaiKeyStatus.value)}>
-          {openaiKeyEmpty.value
-            ? 'A valid API key is required'
-            : openaiKeyMessage.value || 'Used for AI-powered issue descriptions'}
-        </p>
       </div>
 
       {/* Domain List */}
@@ -341,48 +308,39 @@ export function SettingsPage() {
             </div>
           ))}
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <input
-            type="text"
-            value={newDomain.value}
-            placeholder="example.com"
-            onInput={(e) => { newDomain.value = (e.target as HTMLInputElement).value; domainError.value = ''; }}
-            onKeyDown={handleDomainKeyDown}
-            style={{ flex: 1, padding: '6px 10px', backgroundColor: '#F5F5F5', border: `1px solid ${domainError.value ? '#DC2626' : '#E5E5E5'}`, borderRadius: '6px', fontSize: '13px', color: '#1A1A1A', outline: 'none', boxSizing: 'border-box' }}
-          />
-          <button
-            type="button"
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+          <div style={{ flex: 1 }}>
+            <Input
+              size="sm"
+              placeholder="example.com"
+              value={newDomain.value}
+              onInput={(e: any) => {
+                newDomain.value = (e.target as HTMLInputElement).value;
+                domainError.value = '';
+              }}
+              onKeyDown={handleDomainKeyDown}
+              error={domainError.value || undefined}
+            />
+          </div>
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={handleAddDomain}
-            style={{ padding: '6px 12px', backgroundColor: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: '6px', fontSize: '12px', fontWeight: 500, color: '#1A1A1A', cursor: 'pointer' }}
           >
             Add
-          </button>
+          </Button>
         </div>
-        {domainError.value && (
-          <p style={{ fontSize: '11px', color: '#DC2626', margin: '4px 0 0 0', lineHeight: '1.4' }}>
-            {domainError.value}
-          </p>
-        )}
       </div>
 
       {bothSaved.value && (
-        <button
-          type="button"
+        <Button
+          variant="expressive"
+          size="md"
           onClick={handleStartCommenting}
-          style={{
-            width: '100%',
-            padding: '12px',
-            backgroundColor: '#0D99FF',
-            color: '#FFFFFF',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '14px',
-            fontWeight: 600,
-            cursor: 'pointer',
-          }}
+          style={{ width: '100%' }}
         >
           Start Commenting
-        </button>
+        </Button>
       )}
     </div>
   );
