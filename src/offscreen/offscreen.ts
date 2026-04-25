@@ -43,7 +43,19 @@ chrome.runtime.onMessage.addListener(
           console.error('[Nitpick Offscreen] Crop failed:', err);
           sendResponse({ croppedDataUrl: '' });
         });
-      return true; // async response
+      return true;
+    }
+
+    if (msg.action === 'DRAW_HIGHLIGHT') {
+      drawHighlightOnViewport(
+        msg.viewportDataUrl!,
+        msg.highlightRect!,
+        msg.highlightColor ?? '#0D99FF',
+        msg.dpr ?? 1,
+      )
+        .then((resultDataUrl) => sendResponse({ resultDataUrl } as any))
+        .catch(() => sendResponse({ resultDataUrl: msg.viewportDataUrl } as any));
+      return true;
     }
 
     return undefined;
@@ -98,6 +110,42 @@ async function cropScreenshot(
     ctx.setLineDash([6 * dpr, 4 * dpr]);
     ctx.strokeRect(hx, hy, hw, hh);
   }
+
+  return canvas.toDataURL('image/png');
+}
+
+async function drawHighlightOnViewport(
+  viewportDataUrl: string,
+  highlightRect: { left: number; top: number; width: number; height: number },
+  highlightColor: string,
+  dpr: number,
+): Promise<string> {
+  const img = new Image();
+  await new Promise<void>((resolve, reject) => {
+    img.onload = () => resolve();
+    img.onerror = reject;
+    img.src = viewportDataUrl;
+  });
+
+  const canvas = document.createElement('canvas');
+  canvas.width = img.width;
+  canvas.height = img.height;
+  const ctx = canvas.getContext('2d')!;
+
+  ctx.drawImage(img, 0, 0);
+
+  const hx = highlightRect.left * dpr;
+  const hy = highlightRect.top * dpr;
+  const hw = highlightRect.width * dpr;
+  const hh = highlightRect.height * dpr;
+
+  ctx.fillStyle = 'rgba(13, 153, 255, 0.08)';
+  ctx.fillRect(hx, hy, hw, hh);
+
+  ctx.strokeStyle = highlightColor;
+  ctx.lineWidth = 2 * dpr;
+  ctx.setLineDash([6 * dpr, 4 * dpr]);
+  ctx.strokeRect(hx, hy, hw, hh);
 
   return canvas.toDataURL('image/png');
 }
