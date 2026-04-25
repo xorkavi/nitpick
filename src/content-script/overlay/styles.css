@@ -11,7 +11,7 @@
 /* Hover highlight bounding box */
 .nitpick-hover-highlight {
   position: fixed;
-  border: 2px dashed #0D99FF;
+  border: 2px dashed var(--core-blueberry-blue-500);
   background: rgba(13, 153, 255, 0.03);
   pointer-events: none;
   box-sizing: border-box;
@@ -23,7 +23,7 @@
   position: absolute;
   width: 8px;
   height: 8px;
-  background: #0D99FF;
+  background: var(--core-blueberry-blue-500);
   border-radius: 50%;
   pointer-events: none;
 }
@@ -35,7 +35,7 @@
 /* Selection box (persistent after click) */
 .nitpick-selection-box {
   position: fixed;
-  border: 2px dashed #0D99FF;
+  border: 2px dashed var(--core-blueberry-blue-500);
   background: rgba(13, 153, 255, 0.03);
   pointer-events: none;
   box-sizing: border-box;
@@ -53,7 +53,7 @@
 /* Area drag selection rectangle */
 .nitpick-drag-selection {
   position: fixed;
-  border: 2px dashed #0D99FF;
+  border: 2px dashed var(--core-blueberry-blue-500);
   background: rgba(13, 153, 255, 0.03);
   pointer-events: none;
   box-sizing: border-box;
@@ -80,12 +80,12 @@
 /* Comment bubble */
 .nitpick-comment-bubble {
   width: 100%;
-  background: #FFFFFF;
-  border-radius: 12px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+  background: var(--surface-overlay);
+  border-radius: var(--corner-bubble);
+  box-shadow: var(--elevation-04);
   padding: 12px;
   box-sizing: border-box;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-text);
 }
 
 .nitpick-comment-input-row {
@@ -96,31 +96,31 @@
 
 .nitpick-comment-input {
   flex: 1;
-  border: 1px solid #E5E5E5;
-  border-radius: 8px;
+  border: 1px solid var(--stroke-neutral-subtle);
+  border-radius: var(--corner-square-x2);
   padding: 8px 12px;
-  font-size: 14px;
+  font-size: var(--typography-body-small-font-size);
   font-family: inherit;
-  color: #1A1A1A;
-  background: #FFFFFF;
+  color: var(--fg-neutral-prominent);
+  background: var(--surface-overlay);
   outline: none;
   resize: none;
   overflow: hidden;
   min-height: 36px;
   max-height: 120px;
-  line-height: 1.5;
+  line-height: var(--typography-body-small-line-height);
   box-sizing: border-box;
 }
-.nitpick-comment-input::placeholder { color: #666666; }
-.nitpick-comment-input:focus { border-color: #0D99FF; }
+.nitpick-comment-input::placeholder { color: var(--fg-neutral-medium); }
+.nitpick-comment-input:focus { border-color: var(--core-blueberry-blue-500); }
 
 .nitpick-send-btn {
   width: 32px;
   height: 32px;
   border: none;
-  border-radius: 8px;
-  background: #E5E5E5;
-  color: #999999;
+  border-radius: var(--corner-square-x2);
+  background: var(--stroke-neutral-subtle);
+  color: var(--fg-neutral-subtle);
   cursor: not-allowed;
   display: flex;
   align-items: center;
@@ -129,8 +129,8 @@
   flex-shrink: 0;
 }
 .nitpick-send-btn--active {
-  background: #0D99FF;
-  color: #FFFFFF;
+  background: var(--core-blueberry-blue-500);
+  color: var(--surface-overlay);
   cursor: pointer;
 }
 .nitpick-send-btn--active:hover { background: #0B87E0; }
@@ -138,11 +138,11 @@
 /* Issue card — child of popover container */
 .nitpick-issue-card {
   width: 100%;
-  background: #FFFFFF;
-  border-radius: 12px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+  background: var(--surface-overlay);
+  border-radius: var(--corner-bubble);
+  box-shadow: var(--elevation-04);
   padding: 12px;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-text);
   box-sizing: border-box;
 }
 
@@ -162,9 +162,9 @@
 }
 
 .nitpick-issue-badge {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1A1A1A;
+  font-size: var(--typography-body-small-font-size);
+  font-weight: var(--font-weight-medium);
+  color: var(--fg-neutral-prominent);
 }
 
 .nitpick-issue-header-actions {
@@ -173,12 +173,12 @@
 }
 
 .nitpick-icon-btn {
-  width: 28px;
-  height: 28px;
+  width: var(--control-size-default);
+  height: var(--control-size-default);
   border: none;
   background: transparent;
-  border-radius: 6px;
-  color: #999999;
+  border-radius: var(--corner-square-x2);
+  color: var(--fg-neutral-subtle);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -186,43 +186,43 @@
   transition: color 100ms ease, background-color 100ms ease;
 }
 .nitpick-icon-btn:hover {
-  color: #333333;
-  background: #F5F5F5;
+  color: var(--fg-neutral-prominent);
+  background: var(--stroke-neutral-subtle);
 }
 
 .nitpick-issue-title {
   width: 100%;
-  border: 1px solid #E5E5E5;
-  border-radius: 8px;
+  border: 1px solid var(--stroke-neutral-subtle);
+  border-radius: var(--corner-square-x2);
   padding: 8px 12px;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--typography-body-small-font-size);
+  font-weight: var(--font-weight-medium);
   font-family: inherit;
-  color: #1A1A1A;
+  color: var(--fg-neutral-prominent);
   margin-bottom: 8px;
   box-sizing: border-box;
   outline: none;
 }
-.nitpick-issue-title::placeholder { color: #666666; font-weight: 400; }
-.nitpick-issue-title:focus { border-color: #0D99FF; }
+.nitpick-issue-title::placeholder { color: var(--fg-neutral-medium); font-weight: 400; }
+.nitpick-issue-title:focus { border-color: var(--core-blueberry-blue-500); }
 
 .nitpick-issue-desc {
   width: 100%;
-  border: 1px solid #E5E5E5;
-  border-radius: 8px;
+  border: 1px solid var(--stroke-neutral-subtle);
+  border-radius: var(--corner-square-x2);
   padding: 8px 12px;
-  font-size: 14px;
+  font-size: var(--typography-body-small-font-size);
   font-family: inherit;
-  color: #1A1A1A;
+  color: var(--fg-neutral-prominent);
   margin-bottom: 12px;
   resize: vertical;
   min-height: 60px;
   box-sizing: border-box;
   outline: none;
-  line-height: 1.5;
+  line-height: var(--typography-body-small-line-height);
 }
-.nitpick-issue-desc::placeholder { color: #666666; }
-.nitpick-issue-desc:focus { border-color: #0D99FF; }
+.nitpick-issue-desc::placeholder { color: var(--fg-neutral-medium); }
+.nitpick-issue-desc:focus { border-color: var(--core-blueberry-blue-500); }
 
 .nitpick-chips-row {
   display: flex;
@@ -236,12 +236,12 @@
   align-items: center;
   gap: 4px;
   padding: 4px 10px;
-  border: 1px solid #E5E5E5;
-  border-radius: 16px;
-  background: #FFFFFF;
-  color: #666666;
-  font-size: 12px;
-  font-weight: 500;
+  border: 1px solid var(--stroke-neutral-subtle);
+  border-radius: var(--corner-circle);
+  background: var(--surface-overlay);
+  color: var(--fg-neutral-medium);
+  font-size: var(--typography-callout-font-size);
+  font-weight: var(--font-weight-medium);
   font-family: inherit;
   cursor: pointer;
   max-width: 140px;
@@ -249,17 +249,18 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.nitpick-chip:hover { border-color: #0D99FF; }
+.nitpick-chip:hover { border-color: var(--core-blueberry-blue-500); }
 
 .nitpick-create-btn {
   width: 100%;
+  height: var(--control-size-large);
   padding: 10px;
   border: none;
-  border-radius: 8px;
-  background: #7C3AED;
-  color: #FFFFFF;
-  font-size: 14px;
-  font-weight: 600;
+  border-radius: var(--corner-square);
+  background: var(--core-plum-purple-700);
+  color: var(--surface-overlay);
+  font-size: var(--typography-body-small-font-size);
+  font-weight: var(--font-weight-medium);
   font-family: inherit;
   cursor: pointer;
   transition: background-color 100ms ease;
@@ -272,8 +273,8 @@
 
 /* Loading skeleton */
 .nitpick-skeleton {
-  border-radius: 8px;
-  background: linear-gradient(90deg, #E5E5E5 25%, #F5F5F5 50%, #E5E5E5 75%);
+  border-radius: var(--corner-square-x2);
+  background: linear-gradient(90deg, var(--stroke-neutral-subtle) 25%, #F5F5F5 50%, var(--stroke-neutral-subtle) 75%);
   background-size: 200% 100%;
   animation: nitpick-shimmer 1.5s linear infinite;
 }
@@ -323,7 +324,7 @@
 }
 
 .nitpick-chip--selected {
-  color: #1A1A1A;
+  color: var(--fg-neutral-prominent);
   opacity: 1;
   cursor: pointer;
 }
@@ -350,10 +351,10 @@
   margin-top: 4px;
   width: 240px;
   max-height: 260px;
-  background: #fff;
-  border: 1px solid #E5E5E5;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  background: var(--surface-overlay);
+  border: 1px solid var(--stroke-neutral-subtle);
+  border-radius: var(--corner-square-x2);
+  box-shadow: var(--elevation-03);
   z-index: 10;
   display: flex;
   flex-direction: column;
@@ -363,16 +364,16 @@
 .nitpick-dropdown-search {
   padding: 8px 12px;
   border: none;
-  border-bottom: 1px solid #E5E5E5;
-  font-size: 13px;
+  border-bottom: 1px solid var(--stroke-neutral-subtle);
+  font-size: var(--typography-body-small-font-size);
   font-family: inherit;
-  color: #1A1A1A;
+  color: var(--fg-neutral-prominent);
   outline: none;
-  border-radius: 8px 8px 0 0;
+  border-radius: var(--corner-square-x2) var(--corner-square-x2) 0 0;
   box-sizing: border-box;
   width: 100%;
 }
-.nitpick-dropdown-search::placeholder { color: #999999; }
+.nitpick-dropdown-search::placeholder { color: var(--fg-neutral-subtle); }
 
 .nitpick-dropdown-options {
   overflow-y: auto;
@@ -388,15 +389,15 @@
   padding: 8px 12px;
   border: none;
   background: none;
-  font-size: 13px;
+  font-size: var(--typography-body-small-font-size);
   font-family: inherit;
-  color: #1A1A1A;
+  color: var(--fg-neutral-prominent);
   cursor: pointer;
   text-align: left;
 }
 .nitpick-dropdown-option:hover,
 .nitpick-dropdown-option--highlighted { background: #F0F4FF; }
-.nitpick-dropdown-option--suggested { font-weight: 500; }
+.nitpick-dropdown-option--suggested { font-weight: var(--font-weight-medium); }
 
 .nitpick-dropdown-option-label {
   display: flex;
@@ -408,7 +409,7 @@
 
 .nitpick-dropdown-option-desc {
   font-size: 11px;
-  color: #999999;
+  color: var(--fg-neutral-subtle);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -416,8 +417,8 @@
 
 .nitpick-dropdown-empty {
   padding: 12px;
-  font-size: 13px;
-  color: #999999;
+  font-size: var(--typography-body-small-font-size);
+  color: var(--fg-neutral-subtle);
   text-align: center;
 }
 
@@ -425,10 +426,10 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #6B7280;
-  color: #FFFFFF;
+  background: var(--core-neutrals-600);
+  color: var(--surface-overlay);
   font-size: 10px;
-  font-weight: 600;
+  font-weight: var(--font-weight-medium);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -445,11 +446,11 @@
 
 .nitpick-ai-badge {
   font-size: 10px;
-  font-weight: 600;
-  color: #7C3AED;
-  background: #F3E8FF;
+  font-weight: var(--font-weight-medium);
+  color: var(--fg-intelligence-prominent);
+  background: var(--bg-intelligence-subtle);
   padding: 1px 6px;
-  border-radius: 4px;
+  border-radius: var(--corner-square);
   flex-shrink: 0;
 }
 
@@ -459,56 +460,56 @@
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
-  background: #fff;
-  border: 1px solid #E5E5E5;
-  border-radius: 10px;
+  background: var(--surface-overlay);
+  border: 1px solid var(--stroke-neutral-subtle);
+  border-radius: var(--corner-bubble);
   padding: 12px 20px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  box-shadow: var(--elevation-04);
   display: flex;
   align-items: center;
   gap: 10px;
   z-index: 999999;
   animation: nitpick-toast-in 0.25s ease-out;
   pointer-events: auto;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-text);
 }
 .nitpick-toast--exiting {
   animation: nitpick-toast-out 0.2s ease-in forwards;
 }
 
 .nitpick-toast-icon {
-  color: #16A34A;
+  color: var(--feedback-fg-success-prominent);
   flex-shrink: 0;
 }
 
 .nitpick-toast-text {
-  font-size: 14px;
-  font-weight: 500;
-  color: #1A1A1A;
+  font-size: var(--typography-body-small-font-size);
+  font-weight: var(--font-weight-medium);
+  color: var(--fg-neutral-prominent);
 }
 
 .nitpick-toast-link {
-  color: #7C3AED;
+  color: var(--core-plum-purple-700);
   text-decoration: none;
-  font-weight: 500;
-  font-size: 13px;
+  font-weight: var(--font-weight-medium);
+  font-size: var(--typography-body-small-font-size);
 }
 .nitpick-toast-link:hover { text-decoration: underline; }
 
 .nitpick-toast-close {
   background: none;
   border: none;
-  color: #999999;
+  color: var(--fg-neutral-subtle);
   cursor: pointer;
   padding: 2px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
+  border-radius: var(--corner-square);
 }
 .nitpick-toast-close:hover {
-  color: #333333;
-  background: #F5F5F5;
+  color: var(--fg-neutral-prominent);
+  background: var(--stroke-neutral-subtle);
 }
 
 @keyframes nitpick-toast-in {
@@ -526,11 +527,11 @@
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
-  background: #FEF2F2;
-  border: 1px solid #FECACA;
-  border-radius: 6px;
-  font-size: 12px;
-  color: #DC2626;
+  background: var(--feedback-bg-alert-subtle);
+  border: 1px solid var(--feedback-bg-alert-subtle);
+  border-radius: var(--corner-square-x2);
+  font-size: var(--typography-callout-font-size);
+  color: var(--feedback-fg-alert-prominent);
   margin: 4px 0;
   font-family: inherit;
 }
@@ -541,18 +542,18 @@
 
 .nitpick-retry-btn {
   background: none;
-  border: 1px solid #DC2626;
-  color: #DC2626;
+  border: 1px solid var(--feedback-fg-alert-prominent);
+  color: var(--feedback-fg-alert-prominent);
   padding: 2px 10px;
-  border-radius: 4px;
-  font-size: 12px;
+  border-radius: var(--corner-square);
+  font-size: var(--typography-callout-font-size);
   cursor: pointer;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   font-family: inherit;
   flex-shrink: 0;
   margin-left: 8px;
 }
-.nitpick-retry-btn:hover { background: #FEE2E2; }
+.nitpick-retry-btn:hover { background: var(--feedback-bg-alert-subtle); }
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
