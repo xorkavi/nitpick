@@ -1,5 +1,5 @@
 import { useSignal } from '@preact/signals';
-import { useRef } from 'preact/hooks';
+import { useRef, useEffect } from 'preact/hooks';
 
 interface ChipDropdownOption {
   id: string;
@@ -23,6 +23,13 @@ export function ChipDropdown({ label, value, options, onSelect, suggested, disab
   const isOpen = useSignal(false);
   const search = useSignal('');
   const containerRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isOpen.value && searchRef.current) {
+      setTimeout(() => searchRef.current?.focus(), 50);
+    }
+  });
 
   const q = search.value.toLowerCase();
   const filtered = options.filter((opt) =>
@@ -76,6 +83,7 @@ export function ChipDropdown({ label, value, options, onSelect, suggested, disab
           <div class="nitpick-dropdown-backdrop" onClick={handleBackdropClick} />
           <div class="nitpick-dropdown-menu" role="listbox" aria-label={`${label} options`}>
             <input
+              ref={searchRef}
               class="nitpick-dropdown-search"
               placeholder={`Search ${label.toLowerCase()}...`}
               value={search.value}
@@ -84,7 +92,6 @@ export function ChipDropdown({ label, value, options, onSelect, suggested, disab
               }}
               onClick={handleSearchClick}
               onMouseDown={handleSearchClick}
-              autoFocus
             />
             <div class="nitpick-dropdown-options">
               {filtered.length === 0 && (

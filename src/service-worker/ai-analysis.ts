@@ -136,18 +136,60 @@ ${usersContext || '(no users available)'}`;
  *
  * For area selections, limits to top 5 elements (Research Pitfall 7).
  */
+function parseUserAgent(ua: string): { browser: string; os: string } {
+  let browser = 'Unknown';
+  let os = 'Unknown';
+
+  const chromeMatch = ua.match(/Chrome\/(\d+[\d.]*)/);
+  const firefoxMatch = ua.match(/Firefox\/(\d+[\d.]*)/);
+  const safariMatch = ua.match(/Version\/(\d+[\d.]*).*Safari/);
+  if (chromeMatch) browser = `Chrome ${chromeMatch[1]}`;
+  else if (firefoxMatch) browser = `Firefox ${firefoxMatch[1]}`;
+  else if (safariMatch) browser = `Safari ${safariMatch[1]}`;
+
+  if (ua.includes('Mac OS X')) {
+    const v = ua.match(/Mac OS X ([\d_]+)/);
+    os = `macOS ${v ? v[1].replace(/_/g, '.') : ''}`.trim();
+  } else if (ua.includes('Windows NT')) {
+    const v = ua.match(/Windows NT ([\d.]+)/);
+    const winMap: Record<string, string> = { '10.0': '10/11', '6.3': '8.1', '6.2': '8', '6.1': '7' };
+    os = `Windows ${v ? winMap[v[1]] || v[1] : ''}`.trim();
+  } else if (ua.includes('Linux')) {
+    os = 'Linux';
+  } else if (ua.includes('Android')) {
+    os = 'Android';
+  } else if (ua.includes('iOS') || ua.includes('iPhone')) {
+    os = 'iOS';
+  }
+
+  return { browser, os };
+}
+
+function buildEnvironmentBlock(bm: BrowserMetadata): string {
+  const { browser, os } = parseUserAgent(bm.userAgent || '');
+  return `ENVIRONMENT (copy this table verbatim into the description):
+| Property | Value |
+|----------|-------|
+| Browser | ${browser} |
+| OS | ${os} |
+| Viewport | ${bm.viewportWidth}x${bm.viewportHeight} |
+| DPR | ${bm.devicePixelRatio || 1} |
+| Page | [${bm.title || 'Page'}](${bm.url}) |`;
+}
+
 function buildUserMessage(
   comment: string,
   metadata: ElementMetadata | AreaMetadata,
   browserMetadata: BrowserMetadata,
 ): string {
-  // Area selection
+  const envBlock = buildEnvironmentBlock(browserMetadata);
+
   if ('elements' in metadata) {
     const topElements = metadata.elements.slice(0, 5);
     return `User's complaint: "${comment}"
 
-Page: ${metadata.pageContext.url} - ${metadata.pageContext.title}
-Browser: ${browserMetadata.viewportWidth}x${browserMetadata.viewportHeight}
+${envBlock}
+
 Selected area: ${metadata.selectionRect.width}x${metadata.selectionRect.height}px
 Elements in area (${metadata.elements.length} total, showing top ${topElements.length}):
 
@@ -160,11 +202,10 @@ ${topElements
   .join('\n\n')}`;
   }
 
-  // Single element
   return `User's complaint: "${comment}"
 
-Page: ${metadata.pageContext.url} - ${metadata.pageContext.title}
-Browser: ${browserMetadata.viewportWidth}x${browserMetadata.viewportHeight}, ${browserMetadata.userAgent}
+${envBlock}
+
 Element: <${metadata.tagName}> "${metadata.textContent.slice(0, 100)}"
 Path: ${metadata.domPath}
 Classes: ${metadata.classList.join(' ')}
