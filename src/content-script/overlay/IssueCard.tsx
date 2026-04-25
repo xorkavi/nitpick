@@ -163,7 +163,7 @@ export function IssueCard() {
       id: u.id,
       label: name,
       initials: getInitials(name),
-      avatarUrl: u.profile_picture_url,
+      avatarUrl: u.thumbnail,
       searchText: `${u.display_name} ${u.full_name || ''}`.toLowerCase(),
     };
   });

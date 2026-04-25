@@ -57,11 +57,7 @@ export interface DevRevUser {
   display_name: string;
   email?: string;
   full_name?: string;
-  display_picture?: {
-    display_id: string;
-    id: string;
-  };
-  profile_picture_url?: string;
+  thumbnail?: string;
 }
 
 export interface CreateIssuePayload {

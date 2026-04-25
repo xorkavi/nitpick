@@ -183,7 +183,7 @@ async function fetchAllUsers(config: DevRevConfig): Promise<DevRevUser[]> {
     const response = await devrevFetch<{
       dev_users: DevRevUser[];
       next_cursor?: string;
-    }>(config, '/dev-users.list', { body, method: 'POST' });
+    }>(config, '/internal/dev-users.list', { body, method: 'POST' });
 
     users.push(...response.dev_users);
     cursor = response.next_cursor;
@@ -200,7 +200,7 @@ async function fetchAllUsers(config: DevRevConfig): Promise<DevRevUser[]> {
 async function fetchSelf(config: DevRevConfig): Promise<DevRevUser> {
   const response = await devrevFetch<{
     dev_user: DevRevUser;
-  }>(config, '/dev-users.self', { method: 'GET' });
+  }>(config, '/internal/dev-users.self', { method: 'GET' });
 
   return response.dev_user;
 }
@@ -237,13 +237,6 @@ export async function prefetchDevRevData(): Promise<{
   if (selfResult.status === 'fulfilled') selfCache = selfResult.value;
   if (tagResult.status === 'fulfilled') nitpickedTagId = tagResult.value;
 
-  if (usersCache) {
-    await resolveProfilePictures(config, usersCache).catch(() => {});
-  }
-  if (selfCache?.display_picture?.id) {
-    await resolveProfilePictures(config, [selfCache]).catch(() => {});
-  }
-
   return {
     parts: partsCache ?? [],
     users: usersCache ?? [],
@@ -267,19 +260,6 @@ async function findNitpickedTag(config: DevRevConfig): Promise<string | null> {
     console.warn('[Nitpick] Tag lookup failed:', err);
     return null;
   }
-}
-
-async function resolveProfilePictures(config: DevRevConfig, users: DevRevUser[]): Promise<void> {
-  const withPics = users.filter(u => u.display_picture?.id);
-  const batch = withPics.slice(0, 20);
-  await Promise.allSettled(batch.map(async (user) => {
-    try {
-      const result = await devrevFetch<{ url: string }>(
-        config, '/artifacts.locate', { body: { id: user.display_picture!.id } },
-      );
-      (user as DevRevUser & { profile_picture_url?: string }).profile_picture_url = result.url;
-    } catch { /* skip */ }
-  }));
 }
 
 // ---------------------------------------------------------------------------
