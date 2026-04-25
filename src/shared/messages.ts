@@ -35,6 +35,8 @@ export type Message =
       browserMetadata: BrowserMetadata;
     }
   | { action: 'SCREENSHOTS_READY'; hasScreenshots: boolean }
+  // Phase 3: Screenshot relay to content script
+  | { action: 'RELAY_CROPPED_SCREENSHOT'; croppedScreenshotUrl: string }
   // Phase 2: DevRev data prefetch
   | { action: 'PREFETCH_DEVREV_DATA' }
   | { action: 'DEVREV_DATA_READY'; self: DevRevUser }
