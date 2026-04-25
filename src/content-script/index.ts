@@ -331,5 +331,17 @@ chrome.runtime.onMessage.addListener(
       }
       return;
     }
+    if (msg.action === 'HIDE_OVERLAY') {
+      const host = document.querySelector('nitpick-overlay') as HTMLElement | null;
+      if (host) host.style.display = 'none';
+      sendResponse({ ok: true });
+      return;
+    }
+    if (msg.action === 'SHOW_OVERLAY') {
+      const host = document.querySelector('nitpick-overlay') as HTMLElement | null;
+      if (host) host.style.display = '';
+      sendResponse({ ok: true });
+      return;
+    }
   },
 );

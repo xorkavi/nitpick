@@ -1,11 +1,3 @@
-/**
- * Screenshot capture orchestration.
- *
- * Coordinates chrome.tabs.captureVisibleTab (viewport screenshot) with the
- * offscreen document (canvas cropping + highlight overlay) to produce two
- * screenshots: full viewport and cropped element detail.
- */
-
 import { COLORS } from '../shared/constants';
 
 export async function captureScreenshots(
@@ -14,21 +6,25 @@ export async function captureScreenshots(
   highlightRect?: { left: number; top: number; width: number; height: number },
   dpr: number = 1,
 ): Promise<{ viewport: string; cropped: string }> {
-  // Step 1: Capture full viewport as PNG data URL (current window)
-  const viewportDataUrl = await chrome.tabs.captureVisibleTab({
-    format: 'png',
-  });
+  // Step 1: Hide overlay, capture clean viewport for cropping (no blue highlight)
+  await chrome.tabs.sendMessage(tabId, { action: 'HIDE_OVERLAY' });
+  await new Promise(r => setTimeout(r, 50));
+  const cleanDataUrl = await chrome.tabs.captureVisibleTab({ format: 'png' });
 
-  // Step 2: Ensure offscreen document exists for canvas operations
+  // Step 2: Show overlay back, capture viewport with highlight visible
+  await chrome.tabs.sendMessage(tabId, { action: 'SHOW_OVERLAY' });
+  await new Promise(r => setTimeout(r, 50));
+  const viewportDataUrl = await chrome.tabs.captureVisibleTab({ format: 'png' });
+
+  // Step 3: Crop the clean capture (no overlay artifacts)
   await ensureOffscreenDocument();
 
-  // Step 3: Send crop request to offscreen document (no highlight on crop per user feedback)
   const croppedDataUrl = await new Promise<string>((resolve, reject) => {
     chrome.runtime.sendMessage(
       {
         target: 'offscreen',
         action: 'CROP_SCREENSHOT',
-        viewportDataUrl,
+        viewportDataUrl: cleanDataUrl,
         cropRect: boundingRect,
         highlightRect: null,
         highlightColor: COLORS.selectionBlue,
@@ -48,7 +44,6 @@ export async function captureScreenshots(
 }
 
 async function ensureOffscreenDocument(): Promise<void> {
-  // Only one offscreen document per extension
   const existingContexts = await chrome.runtime.getContexts({
     contextTypes: [chrome.runtime.ContextType.OFFSCREEN_DOCUMENT],
   });
