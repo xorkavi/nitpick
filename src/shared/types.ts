@@ -71,7 +71,7 @@ export interface CreateIssuePayload {
   ownerId: string;
   priority: 'p0' | 'p1' | 'p2' | 'p3';
   reportedById: string;
-  artifactIds: string[];
+  artifactIds?: string[];
 }
 
 export interface BrowserMetadata {

@@ -339,7 +339,7 @@ export async function uploadArtifact(
     url: string;
     form_data: Array<{ key: string; value: string }>;
     access_key: string;
-  }>(config, '/artifacts.prepare', {
+  }>(config, '/internal/artifacts.prepare', {
     body: { file_name: fileName, file_type: 'default' },
   });
 
