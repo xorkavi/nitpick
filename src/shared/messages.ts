@@ -5,6 +5,7 @@ import type {
   BrowserMetadata,
   DevRevPart,
   DevRevUser,
+  DevRevTag,
   CreateIssuePayload,
 } from './types';
 
@@ -46,6 +47,9 @@ export type Message =
   // Phase 2: Live users search
   | { action: 'SEARCH_USERS'; query: string; limit?: number }
   | { action: 'SEARCH_USERS_RESULT'; users: DevRevUser[] }
+  // Phase 3: Tags search
+  | { action: 'SEARCH_TAGS'; query: string; limit?: number }
+  | { action: 'SEARCH_TAGS_RESULT'; tags: DevRevTag[] }
   // Phase 2: Issue creation
   | { action: 'CREATE_ISSUE'; issueData: CreateIssuePayload }
   | {

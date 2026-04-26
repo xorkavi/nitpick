@@ -16,6 +16,7 @@ import {
   createIssue,
   searchParts,
   searchUsers,
+  searchTags,
 } from './devrev-api';
 
 export function setupMessageHandler(): void {
@@ -120,6 +121,19 @@ export function setupMessageHandler(): void {
             } catch (err) {
               console.error('[Nitpick] Users search failed:', err);
               sendResponse({ action: 'SEARCH_USERS_RESULT', users: [] });
+            }
+          })();
+          return true;
+        }
+
+        case 'SEARCH_TAGS': {
+          (async () => {
+            try {
+              const tags = await searchTags(msg.query ?? '', msg.limit ?? 20);
+              sendResponse({ action: 'SEARCH_TAGS_RESULT', tags });
+            } catch (err) {
+              console.error('[Nitpick] Tags search failed:', err);
+              sendResponse({ action: 'SEARCH_TAGS_RESULT', tags: [] });
             }
           })();
           return true;

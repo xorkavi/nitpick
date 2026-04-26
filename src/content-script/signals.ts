@@ -1,5 +1,5 @@
 import { signal, computed } from '@preact/signals';
-import type { DevRevPart, DevRevUser, ElementMetadata, AreaMetadata } from '../shared/types';
+import type { DevRevPart, DevRevUser, DevRevTag, ElementMetadata, AreaMetadata } from '../shared/types';
 
 // Comment mode active state
 export const isActive = signal<boolean>(false);
@@ -99,6 +99,11 @@ export const partSearchLoading = signal<boolean>(false);
 // Phase 2: Live users search
 export const userSearchResults = signal<DevRevUser[]>([]);
 export const userSearchLoading = signal<boolean>(false);
+
+// Phase 3: Tags search and selection
+export const tagSearchResults = signal<DevRevTag[]>([]);
+export const tagSearchLoading = signal<boolean>(false);
+export const selectedTags = signal<DevRevTag[]>([]);
 
 // Phase 2: Issue creation state
 export const isCreatingIssue = signal<boolean>(false);

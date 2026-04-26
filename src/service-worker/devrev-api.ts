@@ -209,6 +209,37 @@ export async function searchUsers(
 }
 
 // ---------------------------------------------------------------------------
+// Tags search (POST /tags.list)
+// ---------------------------------------------------------------------------
+
+export async function searchTags(
+  query: string,
+  limit: number = 20,
+): Promise<import('../shared/types').DevRevTag[]> {
+  const config = await getDevRevConfig();
+  const body: Record<string, unknown> = { limit };
+  if (query) body.name = [query];
+
+  const response = await devrevFetch<{
+    tags: Array<{
+      id: string;
+      name: string;
+      description?: string;
+      allowed_values?: string[];
+      style_new?: { color?: string };
+    }>;
+  }>(config, '/tags.list', { body });
+
+  return response.tags.map(t => ({
+    id: t.id,
+    name: t.name,
+    color: t.style_new?.color,
+    description: t.description,
+    allowed_values: t.allowed_values,
+  }));
+}
+
+// ---------------------------------------------------------------------------
 // Self (GET)
 // ---------------------------------------------------------------------------
 
@@ -365,8 +396,11 @@ export async function createIssue(
   if (payload.ownerId) body.owned_by = [payload.ownerId];
   if (payload.reportedById) body.reported_by = [payload.reportedById];
 
-  const tagId = getNitpickedTagId();
-  if (tagId) body.tags = [{ id: tagId }];
+  const tags: Array<{ id: string }> = [];
+  const nitpickedId = getNitpickedTagId();
+  if (nitpickedId) tags.push({ id: nitpickedId });
+  if (payload.tagIds) payload.tagIds.forEach(id => tags.push({ id }));
+  if (tags.length > 0) body.tags = tags;
 
   const response = await devrevFetch<{
     work: { id: string; display_id: string };

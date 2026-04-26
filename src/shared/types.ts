@@ -60,6 +60,14 @@ export interface DevRevUser {
   thumbnail?: string;
 }
 
+export interface DevRevTag {
+  id: string;
+  name: string;
+  color?: string;
+  description?: string;
+  allowed_values?: string[];
+}
+
 export interface CreateIssuePayload {
   title: string;
   description: string;
@@ -68,6 +76,7 @@ export interface CreateIssuePayload {
   priority: 'p0' | 'p1' | 'p2' | 'p3';
   reportedById: string;
   artifactIds?: string[];
+  tagIds?: string[];
 }
 
 export interface BrowserMetadata {

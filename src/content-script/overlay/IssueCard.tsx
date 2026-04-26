@@ -23,10 +23,14 @@ import {
   screenshotsReady,
   croppedScreenshotUrl,
   viewportScreenshotUrl,
+  tagSearchResults,
+  tagSearchLoading,
+  selectedTags,
 } from '../signals';
 import { useRef } from 'preact/hooks';
 import { useSignalEffect } from '@preact/signals';
 import { ChipDropdown } from './ChipDropdown';
+import { TagChipMultiSelect } from './TagChipMultiSelect';
 import { PRIORITY_OPTIONS } from '../../shared/constants';
 
 function getInitials(name: string): string {
@@ -70,6 +74,7 @@ export function IssueCard() {
     issueError.value = null;
     aiSuggestedPart.value = undefined;
     aiSuggestedOwner.value = undefined;
+    selectedTags.value = [];
     const self = devrevSelf.value;
     issueFormData.value = {
       title: '', description: '',
@@ -90,6 +95,7 @@ export function IssueCard() {
     issueError.value = null;
     aiSuggestedPart.value = undefined;
     aiSuggestedOwner.value = undefined;
+    selectedTags.value = [];
     aiStreamingDone.value = false;
   }
 
@@ -117,7 +123,8 @@ export function IssueCard() {
           ownerId: form.ownerId || reportedById,
           priority: form.priorityId as 'p0' | 'p1' | 'p2' | 'p3',
           reportedById,
-          artifactIds: [], // Service worker adds artifact IDs from screenshot store
+          artifactIds: [],
+          tagIds: selectedTags.value.map(t => t.id),
         },
       },
       (response) => {
@@ -148,6 +155,7 @@ export function IssueCard() {
           aiStreamingDone.value = false;
           aiSuggestedPart.value = undefined;
           aiSuggestedOwner.value = undefined;
+    selectedTags.value = [];
 
           // Clear selection state
           selectedElement.value = null;
@@ -201,6 +209,19 @@ export function IssueCard() {
         userSearchLoading.value = false;
         if (response?.action === 'SEARCH_USERS_RESULT') {
           userSearchResults.value = (response.users || []) as import('../../shared/types').DevRevUser[];
+        }
+      },
+    );
+  }
+
+  function handleTagSearch(query: string): void {
+    tagSearchLoading.value = true;
+    chrome.runtime.sendMessage(
+      { action: 'SEARCH_TAGS', query, limit: 20 },
+      (response: { action?: string; tags?: unknown[] } | undefined) => {
+        tagSearchLoading.value = false;
+        if (response?.action === 'SEARCH_TAGS_RESULT') {
+          tagSearchResults.value = (response.tags || []) as import('../../shared/types').DevRevTag[];
         }
       },
     );
@@ -364,6 +385,23 @@ export function IssueCard() {
           onSelect={(id, label) => {
             issueFormData.value = { ...issueFormData.value, priority: label, priorityId: id };
           }}
+          disabled={chipsDisabled}
+        />
+        <TagChipMultiSelect
+          tags={tagSearchResults.value}
+          selectedTags={selectedTags.value}
+          onSearch={handleTagSearch}
+          onToggle={(tag) => {
+            const current = selectedTags.value;
+            const exists = current.find(t => t.id === tag.id);
+            selectedTags.value = exists
+              ? current.filter(t => t.id !== tag.id)
+              : [...current, tag];
+          }}
+          onRemove={(tagId) => {
+            selectedTags.value = selectedTags.value.filter(t => t.id !== tagId);
+          }}
+          loading={tagSearchLoading.value}
           disabled={chipsDisabled}
         />
       </div>
