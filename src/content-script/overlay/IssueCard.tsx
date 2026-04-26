@@ -247,7 +247,7 @@ export function IssueCard() {
             issueFormData.value = { ...form, description: el.value };
             // Auto-grow textarea during streaming
             el.style.height = 'auto';
-            el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
+            el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
           }}
           rows={3}
         />

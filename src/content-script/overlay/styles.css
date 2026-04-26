@@ -209,56 +209,47 @@
   background: var(--control-bg-neutral-subtle-hover);
 }
 
-/* Title input — matches Arcade Input (md) */
+/* Title — plain text style, no visible input box */
 .nitpick-issue-title {
   width: 100%;
-  height: var(--control-size-default);
-  border: 1px solid transparent;
-  border-radius: var(--corner-square);
-  padding: 5px 12px;
-  font-size: 13px;
+  border: none;
+  border-radius: 0;
+  padding: 4px 0;
+  font-size: 15px;
   font-weight: 520;
   letter-spacing: -0.13px;
   font-family: inherit;
   color: var(--fg-neutral-prominent);
-  background: var(--input-bg-idle);
-  margin-bottom: 8px;
+  background: transparent;
+  margin-bottom: 4px;
   box-sizing: border-box;
   outline: none;
-  line-height: 16px;
+  line-height: 20px;
 }
 .nitpick-issue-title::placeholder { color: var(--input-fg-placeholder); font-weight: 460; }
-.nitpick-issue-title:hover { border-color: var(--input-stroke-hover); }
-.nitpick-issue-title:focus {
-  border-color: var(--input-stroke-focus);
-  background: transparent;
-}
 
-/* Description textarea — matches Arcade Input (md) */
+/* Description — plain text style, auto-grows with content */
 .nitpick-issue-desc {
   width: 100%;
-  border: 1px solid transparent;
-  border-radius: var(--corner-square);
-  padding: 6px 12px;
+  border: none;
+  border-radius: 0;
+  padding: 4px 0;
   font-size: 13px;
   font-weight: 460;
   letter-spacing: -0.13px;
   font-family: inherit;
   color: var(--fg-neutral-prominent);
-  background: var(--input-bg-idle);
+  background: transparent;
   margin-bottom: 8px;
-  resize: vertical;
-  min-height: 60px;
+  resize: none;
+  min-height: 40px;
+  max-height: 160px;
+  overflow-y: auto;
   box-sizing: border-box;
   outline: none;
-  line-height: 16px;
+  line-height: 18px;
 }
 .nitpick-issue-desc::placeholder { color: var(--input-fg-placeholder); }
-.nitpick-issue-desc:hover { border-color: var(--input-stroke-hover); }
-.nitpick-issue-desc:focus {
-  border-color: var(--input-stroke-focus);
-  background: transparent;
-}
 
 .nitpick-screenshot-thumbnail {
   width: 120px;
