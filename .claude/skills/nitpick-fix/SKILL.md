@@ -175,15 +175,34 @@ Use Grep and Glob aggressively. Spawn an Explore agent if the search space is la
 
 **Design system defaults**: If the description mentions a size/variant mismatch, check the component's default props in the design system — the element may not have an explicit prop and is relying on a default.
 
-## 10. Identify the styling system
+## 10. Identify the styling system — trace classes to their source
 
-Before applying a fix, check how the target component gets its styles:
+The Tailwind class causing the bug may NOT be in the component file. It could come from a design system theme config. **Always trace before fixing.**
 
-1. **Direct Tailwind classes** — classes are in the JSX/TSX source. Fix by adding/removing/overriding classes.
-2. **Design system theme** — many DS components compose classes from theme configs (e.g. `variants`, `sizes`, `defaultProps`). If the CSS class you need to change (like `p-2`) comes from a theme config and not the component JSX, the fix might be a theme override (`!px-0`) or editing the theme config.
-3. **CSS-in-JS / styled-components** — styles are in template literals or style objects.
+### Step 1: Grep the class in the component file
 
-Check if the component imports a theme, uses `cva()`, `tv()`, or similar variant utilities. If it does, the class you see in the DOM may not appear literally in the component file.
+If the class (e.g. `h-6`, `p-1`, `rounded-md`) appears literally in the component JSX → fix it there. Done.
+
+### Step 2: If the class is NOT in the component file → trace the DS theme
+
+This is the common case for DS components. The class comes from a theme config, not the JSX. Follow this traceback:
+
+1. **Find the theme import:** Look for `useTheme('componentName', ...)` or `createThemeConfig('componentName', ...)` in the component file. The first argument (e.g. `'tabItem'`, `'tabList'`, `'button'`) is the theme key.
+2. **Find the theme config:** Grep for `ThemeProviderProps['<themeKey>']` or look in `libs/design-system/shared/themes/devrev-app-theme/src/components/<component-name>.ts`. This file defines all the Tailwind classes for that component.
+3. **Find the slot:** Theme configs have named slots (e.g. `root`, `listWrapper`, `itemBackground`). Each slot has a `className` string and optional `variants`/`compoundVariants`. Match the DOM classes to the right slot — that's where the bug lives.
+4. **Check the math:** For layout bugs, verify that the slot's classes are geometrically consistent with parent/sibling slots. Example: if a parent slot has `p-1` (4px padding each side) and a child slot has `h-6` (24px), but the parent is only 28px tall, the child overflows (28 - 8 = 20px available, 24px needed). This arithmetic is often the root cause.
+
+### Step 3: Decide where to fix
+
+- **Theme config** — if the class is wrong for ALL usages of this component (e.g. `h-6` should be `h-5` everywhere)
+- **Component JSX override** — if only this specific usage needs a different value (pass a className prop)
+- **Consumer override** — if the DS component is correct but the consumer is using the wrong variant/size
+
+### Fallback: other styling systems
+
+- **`cva()` / `tv()`** — variant utilities that compose classes. Grep for the variant key.
+- **CSS-in-JS / styled-components** — styles in template literals or style objects.
+- **CSS Modules / SCSS** — `.module.scss` files alongside the component (check for these in the DS theme directory too).
 
 ## 11. Fix the bug
 
