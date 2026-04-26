@@ -28,9 +28,11 @@ export function mountOverlay(): ShadowRoot {
   shadowRoot = hostElement.attachShadow({ mode: 'closed' });
 
   // Inject tokens + overlay styles into shadow DOM
+  // Token CSS uses :root selector which doesn't match inside Shadow DOM.
+  // Replace :root with :host so variables are defined on the shadow host.
   const style = document.createElement('style');
   style.textContent = [
-    arcadeTokens,
+    arcadeTokens.replaceAll(':root', ':host'),
     overlayStyles,
   ].join('\n');
   shadowRoot.appendChild(style);
