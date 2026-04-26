@@ -81,7 +81,7 @@
 .nitpick-comment-bubble {
   width: 100%;
   background: var(--surface-overlay);
-  border-radius: var(--corner-bubble);
+  border-radius: var(--corner-square-x2);
   box-shadow: var(--elevation-04);
   padding: 12px;
   box-sizing: border-box;
@@ -139,7 +139,7 @@
 .nitpick-issue-card {
   width: 100%;
   background: var(--surface-overlay);
-  border-radius: var(--corner-bubble);
+  border-radius: var(--corner-square-x2);
   box-shadow: var(--elevation-04);
   padding: 12px;
   font-family: var(--font-text);
@@ -473,7 +473,7 @@
   transform: translateX(-50%);
   background: var(--surface-overlay);
   border: 1px solid var(--stroke-neutral-subtle);
-  border-radius: var(--corner-bubble);
+  border-radius: var(--corner-square-x2);
   padding: 12px 20px;
   box-shadow: var(--elevation-04);
   display: flex;
