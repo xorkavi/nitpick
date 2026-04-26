@@ -42,6 +42,7 @@ export function Toast() {
 
   return (
     <div class={`nitpick-toast ${isExiting.value ? 'nitpick-toast--exiting' : ''}`}>
+      <div class="nitpick-toast-progress" />
       <svg class="nitpick-toast-icon" width="16" height="16" viewBox="0 0 32 32" fill="currentColor">
         <path d="M23.735 9.825c-3.91 3.96-7.42 8.87-9.69 13.94h-1.6l-4.18-4.93 1.71-1.45a20.9 20.9 0 0 1 2.938 4.51l.45-.01c.728-1.924 3.43-8.283 8.782-13.65z"/>
       </svg>
