@@ -99,33 +99,27 @@
   align-items: flex-end;
 }
 
-/* Comment input — matches Arcade Input (md) */
+/* Comment input — borderless, the bubble itself is the visual container (Figma-style) */
 .nitpick-comment-input {
   flex: 1;
-  height: var(--control-size-default);
-  border: 1px solid transparent;
-  border-radius: var(--corner-square);
-  padding: 0 12px;
+  border: none;
+  border-radius: 0;
+  padding: 6px 0;
   font-size: 13px;
   font-weight: 460;
   letter-spacing: -0.13px;
   font-family: inherit;
   color: var(--fg-neutral-prominent);
-  background: var(--input-bg-idle);
+  background: transparent;
   outline: none;
   resize: none;
   overflow: hidden;
-  min-height: var(--control-size-default);
+  min-height: 28px;
   max-height: 120px;
   line-height: 16px;
   box-sizing: border-box;
 }
 .nitpick-comment-input::placeholder { color: var(--input-fg-placeholder); }
-.nitpick-comment-input:hover { border-color: var(--input-stroke-hover); }
-.nitpick-comment-input:focus {
-  border-color: var(--input-stroke-focus);
-  background: transparent;
-}
 
 /* Send button — matches Arcade Button primary (md) */
 .nitpick-send-btn {
@@ -221,7 +215,7 @@
   height: var(--control-size-default);
   border: 1px solid transparent;
   border-radius: var(--corner-square);
-  padding: 0 12px;
+  padding: 5px 12px;
   font-size: 13px;
   font-weight: 520;
   letter-spacing: -0.13px;
@@ -231,6 +225,7 @@
   margin-bottom: 8px;
   box-sizing: border-box;
   outline: none;
+  line-height: 16px;
 }
 .nitpick-issue-title::placeholder { color: var(--input-fg-placeholder); font-weight: 460; }
 .nitpick-issue-title:hover { border-color: var(--input-stroke-hover); }
@@ -425,28 +420,24 @@
   pointer-events: auto;
 }
 
-/* Dropdown search — matches Arcade Input (md) */
+/* Dropdown search — no focus border, blends into dropdown */
 .nitpick-dropdown-search {
-  padding: 0 12px;
-  height: var(--control-size-default);
-  border: 1px solid transparent;
+  padding: 6px 12px;
+  border: none;
   border-bottom: 1px solid var(--stroke-neutral-subtle);
-  border-radius: var(--corner-square) var(--corner-square) 0 0;
+  border-radius: var(--corner-square-x2) var(--corner-square-x2) 0 0;
   font-size: 13px;
   font-weight: 460;
   letter-spacing: -0.13px;
+  line-height: 16px;
   font-family: inherit;
   color: var(--fg-neutral-prominent);
-  background: var(--input-bg-idle);
+  background: transparent;
   outline: none;
   box-sizing: border-box;
   width: 100%;
 }
 .nitpick-dropdown-search::placeholder { color: var(--input-fg-placeholder); }
-.nitpick-dropdown-search:focus {
-  border-color: var(--input-stroke-focus);
-  background: transparent;
-}
 
 .nitpick-dropdown-options {
   overflow-y: auto;

@@ -136,8 +136,8 @@ export function ChipDropdown({ label, value, options, onSelect, onSearch, sugges
         disabled={disabled}
       >
         {value || label}
-        <svg width="10" height="10" viewBox="0 0 10 10">
-          <path d="M2 4L5 7L8 4" stroke="currentColor" stroke-width="1.2" fill="none" />
+        <svg width="12" height="12" viewBox="0 0 32 32" fill="currentColor">
+          <path d="M16.71 20.295h-1.42l-7-7 1.59-1.59a49 49 0 0 1 5.715 6.845h.81a49 49 0 0 1 5.715-6.845l1.59 1.59z"/>
         </svg>
       </button>
 

@@ -222,8 +222,8 @@ export function CommentBubble() {
                 disabled={!canSend}
                 aria-label="Send comment"
               >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M14 2L7 9M14 2L9.5 14L7 9M14 2L2 6.5L7 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor">
+                  <path d="M21.37 19.285a49 49 0 0 1 .57-7.506l-.42-.204A446 446 0 0 1 9.979 23.619l-1.598-1.598a446 446 0 0 1 12.044-11.54l-.204-.421a49 49 0 0 1-7.505.57V8.38l9.99.008h.326l.58.58v.325l.007 9.992z"/>
                 </svg>
               </button>
             </div>
@@ -248,8 +248,8 @@ export function CommentBubble() {
                 disabled={!canSend}
                 aria-label="Send comment"
               >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M14 2L7 9M14 2L9.5 14L7 9M14 2L2 6.5L7 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor">
+                  <path d="M21.37 19.285a49 49 0 0 1 .57-7.506l-.42-.204A446 446 0 0 1 9.979 23.619l-1.598-1.598a446 446 0 0 1 12.044-11.54l-.204-.421a49 49 0 0 1-7.505.57V8.38l9.99.008h.326l.58.58v.325l.007 9.992z"/>
                 </svg>
               </button>
             </div>
