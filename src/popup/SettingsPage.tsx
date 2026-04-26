@@ -323,14 +323,14 @@ export function SettingsPage() {
 
       {/* Advanced Settings */}
       <Accordion.Root type="multiple" style={{ marginBottom: '16px' }}>
-        <Accordion.Item value="domains">
-          <Accordion.Trigger>
+        <Accordion.Item value="domains" style={{ borderBottom: 'none' }}>
+          <Accordion.Trigger style={{ padding: '8px 0' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               Active Domains
               <Badge variant="neutral">{domains.value.length}</Badge>
             </span>
           </Accordion.Trigger>
-          <Accordion.Content>
+          <Accordion.Content style={{ animation: 'none' }}>
             <p style={{ fontSize: 'var(--typography-system-small-font-size)', color: 'var(--fg-neutral-subtle)', margin: '0 0 8px 0', lineHeight: '1.4' }}>
               Nitpick activates on these domains
             </p>
@@ -349,10 +349,11 @@ export function SettingsPage() {
                   <IconButton
                     variant="tertiary"
                     size="sm"
-                    icon={<CrossIcon />}
                     aria-label={`Remove ${domain}`}
                     onClick={() => handleRemoveDomain(domain)}
-                  />
+                  >
+                    <CrossIcon />
+                  </IconButton>
                 </div>
               ))}
             </div>
