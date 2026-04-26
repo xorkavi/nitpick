@@ -62,7 +62,7 @@
 /* Popover container — positions both bubble and issue card together */
 .nitpick-popover-container {
   position: fixed;
-  width: 320px;
+  width: 350px;
   z-index: 5;
   opacity: 0;
   transform: translateY(8px);
@@ -209,7 +209,7 @@
   background: var(--control-bg-neutral-subtle-hover);
 }
 
-/* Title — plain text style, no visible input box */
+/* Title — plain text style, wraps to fit content */
 .nitpick-issue-title {
   width: 100%;
   border: none;
@@ -225,6 +225,8 @@
   box-sizing: border-box;
   outline: none;
   line-height: 20px;
+  resize: none;
+  overflow: hidden;
 }
 .nitpick-issue-title::placeholder { color: var(--input-fg-placeholder); font-weight: 460; }
 
@@ -243,7 +245,7 @@
   margin-bottom: 8px;
   resize: none;
   min-height: 40px;
-  max-height: 160px;
+  max-height: 143px;
   overflow-y: auto;
   box-sizing: border-box;
   outline: none;

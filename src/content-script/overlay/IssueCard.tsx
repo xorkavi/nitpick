@@ -23,6 +23,8 @@ import {
   screenshotsReady,
   croppedScreenshotUrl,
 } from '../signals';
+import { useRef } from 'preact/hooks';
+import { useSignalEffect } from '@preact/signals';
 import { ChipDropdown } from './ChipDropdown';
 import { PRIORITY_OPTIONS } from '../../shared/constants';
 
@@ -32,6 +34,24 @@ function getInitials(name: string): string {
 
 export function IssueCard() {
   if (!showIssueCard.value) return null;
+
+  const descRef = useRef<HTMLTextAreaElement>(null);
+  const titleRef = useRef<HTMLTextAreaElement>(null);
+
+  useSignalEffect(() => {
+    const desc = issueFormData.value.description;
+    const el = descRef.current;
+    if (el) {
+      el.style.height = 'auto';
+      el.style.height = `${Math.min(el.scrollHeight, 143)}px`;
+    }
+    const title = issueFormData.value.title;
+    const titleEl = titleRef.current;
+    if (titleEl) {
+      titleEl.style.height = 'auto';
+      titleEl.style.height = `${titleEl.scrollHeight}px`;
+    }
+  });
 
   const isLoading = issueCardLoading.value;
   const form = issueFormData.value;
@@ -224,13 +244,17 @@ export function IssueCard() {
       {isLoading ? (
         <div class="nitpick-skeleton nitpick-skeleton--title" />
       ) : (
-        <input
-          type="text"
+        <textarea
+          ref={titleRef}
           class="nitpick-issue-title"
           placeholder="Issue title"
           value={form.title}
+          rows={1}
           onInput={(e) => {
-            issueFormData.value = { ...form, title: (e.target as HTMLInputElement).value };
+            const el = e.target as HTMLTextAreaElement;
+            issueFormData.value = { ...form, title: el.value };
+            el.style.height = 'auto';
+            el.style.height = `${el.scrollHeight}px`;
           }}
         />
       )}
@@ -239,6 +263,7 @@ export function IssueCard() {
         <div class="nitpick-skeleton nitpick-skeleton--desc" />
       ) : (
         <textarea
+          ref={descRef}
           class="nitpick-issue-desc"
           placeholder="Describe the problem..."
           value={form.description}
@@ -247,7 +272,7 @@ export function IssueCard() {
             issueFormData.value = { ...form, description: el.value };
             // Auto-grow textarea during streaming
             el.style.height = 'auto';
-            el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
+            el.style.height = `${Math.min(el.scrollHeight, 143)}px`;
           }}
           rows={3}
         />
