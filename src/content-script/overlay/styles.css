@@ -170,6 +170,7 @@
   border-radius: var(--corner-square-x2);
   box-shadow: var(--elevation-04);
   padding: 10px 12px;
+  overflow-x: hidden;
   overflow-y: auto;
   min-height: 0;
   font-family: var(--core-font-text), sans-serif;
@@ -464,6 +465,11 @@
   bottom: 100%;
   margin-top: 0;
   margin-bottom: 4px;
+}
+
+.nitpick-dropdown-menu--right {
+  left: auto;
+  right: 0;
 }
 
 /* Dropdown search — no focus border, blends into dropdown */
