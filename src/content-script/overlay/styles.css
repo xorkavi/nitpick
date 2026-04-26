@@ -78,6 +78,16 @@
   animation: nitpick-fade-down 150ms ease-out forwards;
 }
 
+/*
+ * Typography presets from Arcade (used as shorthand below):
+ *   system:              13px / 16px / 460 / -0.13px
+ *   system-medium:       13px / 16px / 520 / -0.13px
+ *   system-small:        11px / 16px / 460 / -0.11px
+ *   system-small-medium: 11px / 16px / 520 / -0.11px
+ *   body-small:          13px / 20px / 460 / -0.13px
+ *   body:                15px / 24px / 460 / -0.15px
+ */
+
 /* Comment bubble — matches Arcade Popover */
 .nitpick-comment-bubble {
   width: 100%;
@@ -88,7 +98,9 @@
   padding: 10px 12px;
   box-sizing: border-box;
   font-family: var(--core-font-text), sans-serif;
+  /* Arcade: system */
   font-size: var(--typography-system-font-size);
+  font-weight: var(--typography-system-font-weight);
   letter-spacing: var(--typography-system-letter-spacing);
   line-height: var(--typography-system-line-height);
   color: var(--fg-neutral-prominent);
@@ -106,9 +118,11 @@
   border: none;
   border-radius: 0;
   padding: 6px 0;
+  /* Arcade: system */
   font-size: var(--typography-system-font-size);
-  font-weight: var(--font-weight-regular);
+  font-weight: var(--typography-system-font-weight);
   letter-spacing: var(--typography-system-letter-spacing);
+  line-height: var(--typography-system-line-height);
   font-family: inherit;
   color: var(--fg-neutral-prominent);
   background: transparent;
@@ -117,7 +131,6 @@
   overflow: hidden;
   min-height: 28px;
   max-height: 120px;
-  line-height: var(--typography-system-line-height);
   box-sizing: border-box;
 }
 .nitpick-comment-input::placeholder { color: var(--input-fg-placeholder); }
@@ -160,7 +173,9 @@
   overflow-y: auto;
   min-height: 0;
   font-family: var(--core-font-text), sans-serif;
+  /* Arcade: system */
   font-size: var(--typography-system-font-size);
+  font-weight: var(--typography-system-font-weight);
   letter-spacing: var(--typography-system-letter-spacing);
   line-height: var(--typography-system-line-height);
   color: var(--fg-neutral-prominent);
@@ -183,8 +198,11 @@
 }
 
 .nitpick-issue-badge {
-  font-size: var(--typography-system-font-size);
-  font-weight: var(--font-weight-medium);
+  /* Arcade: system-medium */
+  font-size: var(--typography-system-medium-font-size);
+  font-weight: var(--typography-system-medium-font-weight);
+  letter-spacing: var(--typography-system-medium-letter-spacing);
+  line-height: var(--typography-system-medium-line-height);
   color: var(--fg-neutral-prominent);
 }
 
@@ -218,16 +236,17 @@
   border: none;
   border-radius: 0;
   padding: 4px 0;
-  font-size: var(--typography-body-font-size);
+  /* Arcade: body-small but with medium weight (closest match for a title at 13px) */
+  font-size: var(--typography-body-small-font-size);
   font-weight: var(--font-weight-medium);
-  letter-spacing: var(--typography-system-letter-spacing);
+  letter-spacing: var(--typography-body-small-letter-spacing);
+  line-height: var(--typography-body-small-line-height);
   font-family: inherit;
   color: var(--fg-neutral-prominent);
   background: transparent;
   margin-bottom: 4px;
   box-sizing: border-box;
   outline: none;
-  line-height: var(--typography-body-small-line-height);
   resize: none;
   overflow: hidden;
 }
@@ -239,9 +258,11 @@
   border: none;
   border-radius: 0;
   padding: 4px 0;
-  font-size: var(--typography-system-font-size);
-  font-weight: var(--font-weight-regular);
-  letter-spacing: var(--typography-system-letter-spacing);
+  /* Arcade: body-small */
+  font-size: var(--typography-body-small-font-size);
+  font-weight: var(--typography-body-small-font-weight);
+  letter-spacing: var(--typography-body-small-letter-spacing);
+  line-height: var(--typography-body-small-line-height);
   font-family: inherit;
   color: var(--fg-neutral-prominent);
   background: transparent;
@@ -252,7 +273,6 @@
   overflow-y: auto;
   box-sizing: border-box;
   outline: none;
-  line-height: 18px;
 }
 .nitpick-issue-desc::placeholder { color: var(--input-fg-placeholder); }
 
@@ -262,8 +282,11 @@
 
 .nitpick-screenshots-label {
   display: block;
+  /* Arcade: system-small */
   font-size: var(--typography-system-small-font-size);
-  font-weight: var(--font-weight-regular);
+  font-weight: var(--typography-system-small-font-weight);
+  letter-spacing: var(--typography-system-small-letter-spacing);
+  line-height: var(--typography-system-small-line-height);
   color: var(--fg-neutral-subtle);
   margin-bottom: 6px;
 }
@@ -303,10 +326,11 @@
   border-radius: var(--corner-square);
   background: var(--bg-neutral-subtle);
   color: var(--fg-neutral-prominent);
+  /* Arcade: system-small */
   font-size: var(--typography-system-small-font-size);
-  font-weight: var(--font-weight-regular);
+  font-weight: var(--typography-system-small-font-weight);
   letter-spacing: var(--typography-system-small-letter-spacing);
-  line-height: var(--typography-system-line-height);
+  line-height: var(--typography-system-small-line-height);
   font-family: inherit;
   cursor: pointer;
   max-width: 140px;
@@ -327,8 +351,9 @@
   border-radius: 9999px;
   background: var(--component-button-primary-bg-idle);
   color: var(--component-button-primary-fg-idle);
+  /* Arcade: system */
   font-size: var(--typography-system-font-size);
-  font-weight: var(--font-weight-regular);
+  font-weight: var(--typography-system-font-weight);
   letter-spacing: var(--typography-system-letter-spacing);
   font-family: inherit;
   cursor: pointer;
@@ -447,8 +472,9 @@
   border: none;
   border-bottom: 1px solid var(--stroke-neutral-subtle);
   border-radius: var(--corner-square-x2) var(--corner-square-x2) 0 0;
+  /* Arcade: system */
   font-size: var(--typography-system-font-size);
-  font-weight: var(--font-weight-regular);
+  font-weight: var(--typography-system-font-weight);
   letter-spacing: var(--typography-system-letter-spacing);
   line-height: var(--typography-system-line-height);
   font-family: inherit;
@@ -476,8 +502,9 @@
   border: none;
   background: none;
   border-radius: var(--corner-square);
+  /* Arcade: system */
   font-size: var(--typography-system-font-size);
-  font-weight: var(--font-weight-regular);
+  font-weight: var(--typography-system-font-weight);
   letter-spacing: var(--typography-system-letter-spacing);
   font-family: inherit;
   color: var(--fg-neutral-prominent);
@@ -486,7 +513,7 @@
 }
 .nitpick-dropdown-option:hover,
 .nitpick-dropdown-option--highlighted {
-  background: var(--control-bg-neutral-subtle-hover);
+  background: var(--component-menu-item-bg-hover);
 }
 .nitpick-dropdown-option--suggested { font-weight: var(--font-weight-medium); }
 
@@ -499,7 +526,9 @@
 }
 
 .nitpick-dropdown-option-desc {
+  /* Arcade: system-small */
   font-size: var(--typography-system-small-font-size);
+  letter-spacing: var(--typography-system-small-letter-spacing);
   color: var(--fg-neutral-subtle);
   white-space: nowrap;
   overflow: hidden;
@@ -508,6 +537,7 @@
 
 .nitpick-dropdown-empty {
   padding: 12px;
+  /* Arcade: system */
   font-size: var(--typography-system-font-size);
   color: var(--fg-neutral-subtle);
   text-align: center;
@@ -519,8 +549,10 @@
   border-radius: 50%;
   background: var(--core-neutrals-600);
   color: var(--surface-overlay);
+  /* Arcade: numerical + medium weight */
   font-size: var(--typography-numerical-font-size);
   font-weight: var(--font-weight-medium);
+  line-height: var(--typography-numerical-line-height);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -536,8 +568,10 @@
 }
 
 .nitpick-ai-badge {
+  /* Arcade: numerical + medium weight */
   font-size: var(--typography-numerical-font-size);
   font-weight: var(--font-weight-medium);
+  line-height: var(--typography-numerical-line-height);
   color: var(--fg-intelligence-prominent);
   background: var(--bg-intelligence-subtle);
   padding: 1px 6px;
@@ -575,16 +609,22 @@
 }
 
 .nitpick-toast-text {
-  font-size: var(--typography-system-font-size);
-  font-weight: var(--font-weight-medium);
+  /* Arcade: system-medium */
+  font-size: var(--typography-system-medium-font-size);
+  font-weight: var(--typography-system-medium-font-weight);
+  letter-spacing: var(--typography-system-medium-letter-spacing);
+  line-height: var(--typography-system-medium-line-height);
   color: var(--component-toast-success-fg);
 }
 
 .nitpick-toast-link {
   color: var(--component-toast-success-fg);
   text-decoration: none;
-  font-weight: var(--font-weight-medium);
-  font-size: var(--typography-system-small-font-size);
+  /* Arcade: system-small-medium */
+  font-size: var(--typography-system-small-medium-font-size);
+  font-weight: var(--typography-system-small-medium-font-weight);
+  letter-spacing: var(--typography-system-small-medium-letter-spacing);
+  line-height: var(--typography-system-small-medium-line-height);
   border: 1px solid currentColor;
   padding: 4px 8px;
   border-radius: var(--corner-square);
@@ -641,6 +681,7 @@
   background: var(--component-toast-alert-bg);
   border: 1px solid var(--component-toast-alert-stroke);
   border-radius: var(--corner-square-x2);
+  /* Arcade: system */
   font-size: var(--typography-system-font-size);
   color: var(--component-toast-alert-fg);
   margin: 4px 0;
@@ -658,9 +699,12 @@
   color: var(--component-toast-alert-fg);
   padding: 4px 8px;
   border-radius: var(--corner-square);
-  font-size: var(--typography-system-small-font-size);
+  /* Arcade: system-small-medium */
+  font-size: var(--typography-system-small-medium-font-size);
+  font-weight: var(--typography-system-small-medium-font-weight);
+  letter-spacing: var(--typography-system-small-medium-letter-spacing);
+  line-height: var(--typography-system-small-medium-line-height);
   cursor: pointer;
-  font-weight: var(--font-weight-medium);
   font-family: inherit;
   flex-shrink: 0;
   margin-left: 8px;
