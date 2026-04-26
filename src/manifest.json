@@ -26,8 +26,8 @@
   "commands": {
     "_execute_action": {
       "suggested_key": {
-        "default": "Ctrl+Shift+Quote",
-        "mac": "Command+Shift+Quote"
+        "default": "Ctrl+Semicolon",
+        "mac": "Command+Semicolon"
       },
       "description": "Activate comment mode"
     }

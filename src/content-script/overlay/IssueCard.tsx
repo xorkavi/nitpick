@@ -258,7 +258,16 @@ export function IssueCard() {
           src={croppedScreenshotUrl.value}
           alt="Cropped screenshot of selected element"
           class="nitpick-screenshot-thumbnail"
-          onClick={() => window.open(croppedScreenshotUrl.value!, "_blank")}
+          onClick={() => {
+            const dataUrl = croppedScreenshotUrl.value!;
+            const byteString = atob(dataUrl.split(',')[1]);
+            const mimeType = dataUrl.split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+            const blob = new Blob([ab], { type: mimeType });
+            window.open(URL.createObjectURL(blob), '_blank');
+          }}
           role="button"
           aria-label="View full-size screenshot"
         />
