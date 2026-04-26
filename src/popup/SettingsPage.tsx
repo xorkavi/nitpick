@@ -63,6 +63,23 @@ function CrossIcon() {
   );
 }
 
+function EyeIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor" style={{ display: 'block' }}>
+      <path d="M28.33 11.305c-2.96-4.87-7.65-7.29-12.33-7.27-4.68-.02-9.37 2.4-12.33 7.27-.94 1.46-1.71 2.99-2.28 4.69.57 1.71 1.34 3.24 2.28 4.7 2.96 4.86 7.65 7.28 12.33 7.27 4.68.01 9.37-2.41 12.33-7.27.94-1.46 1.71-2.99 2.28-4.7-.57-1.7-1.34-3.23-2.28-4.69m-1.74 8.27c-2.56 4.18-6.58 6.26-10.59 6.25-4.01.01-8.03-2.07-10.59-6.25-.74-1.12-1.41-2.36-1.88-3.58.47-1.21 1.14-2.45 1.88-3.57 2.56-4.18 6.58-6.26 10.59-6.25 4.01-.01 8.03 2.07 10.59 6.25.74 1.12 1.41 2.36 1.88 3.57-.47 1.22-1.14 2.46-1.88 3.58"/>
+      <path d="M23.077 15.998c.057 6.182-7.792 9.301-12.12 4.993-2.807-2.569-2.808-7.419.001-9.987 4.328-4.307 12.177-1.19 12.119 4.994m-2.25 0c-.182-6.603-9.57-6.6-9.75 0 .182 6.602 9.568 6.6 9.75 0"/>
+    </svg>
+  );
+}
+
+function EyeCrossedIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor" style={{ display: 'block' }}>
+      <path d="M28.33 11.31C25.37 6.44 20.68 4.02 16 4.04c-.96 0-1.93.1-2.88.31L12.34 2h-2.11l.97 2.91c-2.92 1.08-5.6 3.22-7.53 6.4-.94 1.46-1.71 2.99-2.28 4.69.57 1.71 1.34 3.24 2.28 4.7 2.96 4.86 7.65 7.28 12.33 7.27.93 0 1.87-.09 2.79-.29l.77 2.32h2.11l-.96-2.87c2.96-1.08 5.67-3.22 7.62-6.43.94-1.46 1.71-2.99 2.28-4.7-.57-1.7-1.34-3.23-2.28-4.69m-14.87.39 3.07 9.21c-2.57.3-5.36-1.34-5.46-4.91.06-2.1 1.06-3.54 2.39-4.3m1.91-.61c2.57-.3 5.36 1.34 5.46 4.91-.06 2.1-1.06 3.54-2.39 4.3zM16 25.83c-4.01.01-8.03-2.07-10.59-6.25C4.67 18.46 4 17.22 3.53 16c.47-1.21 1.14-2.45 1.88-3.57 1.67-2.73 3.96-4.56 6.46-5.5l.93 2.77c-.66.32-1.28.75-1.84 1.31-2.81 2.56-2.81 7.41 0 9.98 1.75 1.74 4.08 2.27 6.22 1.87l.93 2.78c-.7.13-1.4.19-2.11.19m10.59-6.25c-1.69 2.76-4.01 4.6-6.55 5.53l-.96-2.87c2.29-1.09 4.02-3.32 4-6.24.04-4.62-4.35-7.53-8.37-6.9l-.91-2.71c.73-.14 1.46-.21 2.2-.21 4.01-.01 8.03 2.07 10.59 6.25.74 1.12 1.41 2.36 1.88 3.57-.47 1.22-1.14 2.46-1.88 3.58"/>
+    </svg>
+  );
+}
+
 export function SettingsPage() {
   const pat = useSignal('');
   const openaiKey = useSignal('');
@@ -212,94 +229,96 @@ export function SettingsPage() {
 
       {/* DevRev PAT */}
       <div style={{ marginBottom: '16px' }}>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-          <div style={{ position: 'relative', flex: 1 }}>
-            <Input
-              label="DevRev Personal Access Token"
-              type={showPat.value ? 'text' : 'password'}
-              size="md"
-              placeholder="Paste your token here"
-              value={pat.value}
-              onInput={(e: any) => {
-                pat.value = (e.target as HTMLInputElement).value;
-                if (pat.value !== patSavedValue.value) {
-                  patStatus.value = 'idle';
-                  patMessage.value = '';
-                }
-              }}
-              onBlur={() => { patTouched.value = true; }}
-              error={patEmpty.value ? 'A valid token is required to create issues' : undefined}
-            />
-            <button
-              type="button"
-              onClick={() => { showPat.value = !showPat.value; }}
-              style={{ position: 'absolute', right: '8px', top: '28px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--typography-system-small-font-size)', color: 'var(--fg-neutral-subtle)', padding: '4px' }}
-            >
-              {showPat.value ? 'Hide' : 'Show'}
-            </button>
-          </div>
+        <div style={{ flex: 1 }}>
+          <Input
+            label="DevRev Personal Access Token"
+            type={showPat.value ? 'text' : 'password'}
+            size="md"
+            placeholder="Paste your token here"
+            value={pat.value}
+            iconRight={
+              <button
+                type="button"
+                onClick={() => { showPat.value = !showPat.value; }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--fg-neutral-subtle)', padding: '0', display: 'flex' }}
+              >
+                {showPat.value ? <EyeCrossedIcon /> : <EyeIcon />}
+              </button>
+            }
+            onInput={(e: any) => {
+              pat.value = (e.target as HTMLInputElement).value;
+              if (pat.value !== patSavedValue.value) {
+                patStatus.value = 'idle';
+                patMessage.value = '';
+              }
+            }}
+            onBlur={() => { patTouched.value = true; }}
+            error={patEmpty.value ? 'A valid token is required to create issues' : undefined}
+          />
+        </div>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '8px' }}>
           <Button
             variant={patStatus.value === 'error' ? 'destructive' : 'primary'}
             size="md"
             onClick={handleSavePAT}
             disabled={!pat.value.trim() || patStatus.value === 'saving'}
             loading={patStatus.value === 'saving'}
-            style={{ marginTop: '20px' }}
           >
             {patStatus.value === 'saving' ? 'Verifying...' : patStatus.value === 'saved' ? 'Saved' : 'Save'}
           </Button>
+          {patHelperText && (
+            <span style={{ fontSize: 'var(--typography-system-small-font-size)', color: helperColor(patStatus.value), lineHeight: '1.4' }}>
+              {patHelperText}
+            </span>
+          )}
         </div>
-        {patHelperText && (
-          <p style={{ fontSize: 'var(--typography-system-small-font-size)', color: helperColor(patStatus.value), margin: '4px 0 0 0', lineHeight: '1.4' }}>
-            {patHelperText}
-          </p>
-        )}
       </div>
 
       {/* OpenAI API Key */}
       <div style={{ marginBottom: '16px' }}>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-          <div style={{ position: 'relative', flex: 1 }}>
-            <Input
-              label="OpenAI API Key"
-              type={showOpenaiKey.value ? 'text' : 'password'}
-              size="md"
-              placeholder="sk-..."
-              value={openaiKey.value}
-              onInput={(e: any) => {
-                openaiKey.value = (e.target as HTMLInputElement).value;
-                if (openaiKey.value !== openaiKeySavedValue.value) {
-                  openaiKeyStatus.value = 'idle';
-                  openaiKeyMessage.value = '';
-                }
-              }}
-              onBlur={() => { openaiKeyTouched.value = true; }}
-              error={openaiKeyEmpty.value ? 'A valid API key is required' : undefined}
-            />
-            <button
-              type="button"
-              onClick={() => { showOpenaiKey.value = !showOpenaiKey.value; }}
-              style={{ position: 'absolute', right: '8px', top: '28px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--typography-system-small-font-size)', color: 'var(--fg-neutral-subtle)', padding: '4px' }}
-            >
-              {showOpenaiKey.value ? 'Hide' : 'Show'}
-            </button>
-          </div>
+        <div style={{ flex: 1 }}>
+          <Input
+            label="OpenAI API Key"
+            type={showOpenaiKey.value ? 'text' : 'password'}
+            size="md"
+            placeholder="sk-..."
+            value={openaiKey.value}
+            iconRight={
+              <button
+                type="button"
+                onClick={() => { showOpenaiKey.value = !showOpenaiKey.value; }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--fg-neutral-subtle)', padding: '0', display: 'flex' }}
+              >
+                {showOpenaiKey.value ? <EyeCrossedIcon /> : <EyeIcon />}
+              </button>
+            }
+            onInput={(e: any) => {
+              openaiKey.value = (e.target as HTMLInputElement).value;
+              if (openaiKey.value !== openaiKeySavedValue.value) {
+                openaiKeyStatus.value = 'idle';
+                openaiKeyMessage.value = '';
+              }
+            }}
+            onBlur={() => { openaiKeyTouched.value = true; }}
+            error={openaiKeyEmpty.value ? 'A valid API key is required' : undefined}
+          />
+        </div>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '8px' }}>
           <Button
             variant={openaiKeyStatus.value === 'error' ? 'destructive' : 'primary'}
             size="md"
             onClick={handleSaveOpenAIKey}
             disabled={!openaiKey.value.trim() || openaiKeyStatus.value === 'saving'}
             loading={openaiKeyStatus.value === 'saving'}
-            style={{ marginTop: '20px' }}
           >
             {openaiKeyStatus.value === 'saving' ? 'Verifying...' : openaiKeyStatus.value === 'saved' ? 'Saved' : 'Save'}
           </Button>
+          {openaiHelperText && (
+            <span style={{ fontSize: 'var(--typography-system-small-font-size)', color: helperColor(openaiKeyStatus.value), lineHeight: '1.4' }}>
+              {openaiHelperText}
+            </span>
+          )}
         </div>
-        {openaiHelperText && (
-          <p style={{ fontSize: 'var(--typography-system-small-font-size)', color: helperColor(openaiKeyStatus.value), margin: '4px 0 0 0', lineHeight: '1.4' }}>
-            {openaiHelperText}
-          </p>
-        )}
       </div>
 
       {/* Domain List */}
