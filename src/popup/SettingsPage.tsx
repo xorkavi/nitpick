@@ -1,6 +1,6 @@
 import { useSignal, useComputed } from '@preact/signals';
 import { useEffect } from 'preact/hooks';
-import { Button, Input } from '@xorkavi/arcade-gen';
+import { Button, Input, IconButton, Badge, Accordion } from '@xorkavi/arcade-gen';
 import { STORAGE_KEYS, DEFAULT_DOMAINS } from '../shared/constants';
 
 type FieldStatus = 'idle' | 'saving' | 'saved' | 'error';
@@ -172,7 +172,7 @@ export function SettingsPage() {
       domainError.value = 'Domain already added';
       return;
     }
-    domains.value = [...domains.value, value];
+    domains.value = [value, ...domains.value];
     newDomain.value = '';
     domainError.value = '';
     handleSaveDomains();
@@ -321,60 +321,66 @@ export function SettingsPage() {
         </div>
       </div>
 
-      {/* Domain List */}
-      <div style={{ marginBottom: '16px' }}>
-        <h2 style={{ fontSize: 'var(--typography-system-font-size)', fontWeight: 'var(--font-weight-medium)', color: 'var(--fg-neutral-prominent)', margin: '0 0 4px 0', lineHeight: '1.4' }}>
-          Active Domains
-        </h2>
-        <p style={{ fontSize: 'var(--typography-system-small-font-size)', color: 'var(--fg-neutral-subtle)', margin: '0 0 8px 0', lineHeight: '1.4' }}>
-          Nitpick activates on these domains
-        </p>
-        <div style={{ maxHeight: '160px', overflowY: 'auto', marginBottom: '8px' }}>
-          {domains.value.length === 0 && (
-            <p style={{ fontSize: 'var(--typography-system-small-font-size)', color: 'var(--fg-neutral-subtle)', margin: '0', padding: '8px', textAlign: 'center', lineHeight: '1.4' }}>
-              No domains configured. Add a domain to get started.
+      {/* Advanced Settings */}
+      <Accordion.Root type="multiple" style={{ marginBottom: '16px' }}>
+        <Accordion.Item value="domains">
+          <Accordion.Trigger>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              Active Domains
+              <Badge variant="neutral">{domains.value.length}</Badge>
+            </span>
+          </Accordion.Trigger>
+          <Accordion.Content>
+            <p style={{ fontSize: 'var(--typography-system-small-font-size)', color: 'var(--fg-neutral-subtle)', margin: '0 0 8px 0', lineHeight: '1.4' }}>
+              Nitpick activates on these domains
             </p>
-          )}
-          {domains.value.map((domain) => (
-            <div
-              key={domain}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px', backgroundColor: 'var(--input-bg-idle)', borderRadius: 'var(--corner-square)', marginBottom: '4px' }}
-            >
-              <span style={{ fontSize: 'var(--typography-system-font-size)', color: 'var(--fg-neutral-prominent)' }}>{domain}</span>
-              <button
-                type="button"
-                onClick={() => handleRemoveDomain(domain)}
-                aria-label={`Remove ${domain}`}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--fg-neutral-subtle)', padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--corner-square)' }}
-              >
-                <CrossIcon />
-              </button>
+            <div style={{ maxHeight: '160px', overflowY: 'auto', marginBottom: '8px' }}>
+              {domains.value.length === 0 && (
+                <p style={{ fontSize: 'var(--typography-system-small-font-size)', color: 'var(--fg-neutral-subtle)', margin: '0', padding: '8px', textAlign: 'center', lineHeight: '1.4' }}>
+                  No domains configured. Add a domain to get started.
+                </p>
+              )}
+              {domains.value.map((domain) => (
+                <div
+                  key={domain}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 2px 2px 8px', backgroundColor: 'var(--input-bg-idle)', borderRadius: 'var(--corner-square)', marginBottom: '4px' }}
+                >
+                  <span style={{ fontSize: 'var(--typography-system-font-size)', color: 'var(--fg-neutral-prominent)' }}>{domain}</span>
+                  <IconButton
+                    variant="tertiary"
+                    size="sm"
+                    icon={<CrossIcon />}
+                    aria-label={`Remove ${domain}`}
+                    onClick={() => handleRemoveDomain(domain)}
+                  />
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-          <div style={{ flex: 1 }}>
-            <Input
-              size="md"
-              placeholder="example.com"
-              value={newDomain.value}
-              onInput={(e: any) => {
-                newDomain.value = (e.target as HTMLInputElement).value;
-                domainError.value = '';
-              }}
-              onKeyDown={handleDomainKeyDown}
-              error={domainError.value || undefined}
-            />
-          </div>
-          <Button
-            variant="secondary"
-            size="md"
-            onClick={handleAddDomain}
-          >
-            Add
-          </Button>
-        </div>
-      </div>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+              <div style={{ flex: 1 }}>
+                <Input
+                  size="md"
+                  placeholder="example.com"
+                  value={newDomain.value}
+                  onInput={(e: any) => {
+                    newDomain.value = (e.target as HTMLInputElement).value;
+                    domainError.value = '';
+                  }}
+                  onKeyDown={handleDomainKeyDown}
+                  error={domainError.value || undefined}
+                />
+              </div>
+              <Button
+                variant="secondary"
+                size="md"
+                onClick={handleAddDomain}
+              >
+                Add
+              </Button>
+            </div>
+          </Accordion.Content>
+        </Accordion.Item>
+      </Accordion.Root>
 
       {bothSaved.value && (
         <Button
