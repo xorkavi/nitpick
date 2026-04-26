@@ -77,15 +77,20 @@
   animation: nitpick-fade-down 150ms ease-out forwards;
 }
 
-/* Comment bubble */
+/* Comment bubble — matches Arcade Popover */
 .nitpick-comment-bubble {
   width: 100%;
   background: var(--surface-overlay);
+  border: 1px solid var(--stroke-neutral-subtle);
   border-radius: var(--corner-square-x2);
-  box-shadow: var(--elevation-04);
-  padding: 12px;
+  box-shadow: var(--elevation-03);
+  padding: 16px;
   box-sizing: border-box;
-  font-family: var(--font-text);
+  font-family: var(--core-font-text), sans-serif;
+  font-size: 13px;
+  letter-spacing: -0.13px;
+  line-height: 16px;
+  color: var(--fg-neutral-prominent);
 }
 
 .nitpick-comment-input-row {
@@ -94,55 +99,74 @@
   align-items: flex-end;
 }
 
+/* Comment input — matches Arcade Input (md) */
 .nitpick-comment-input {
   flex: 1;
-  border: 1px solid var(--stroke-neutral-subtle);
-  border-radius: var(--corner-square-x2);
-  padding: 8px 12px;
-  font-size: var(--typography-body-small-font-size);
+  height: var(--control-size-default);
+  border: 1px solid transparent;
+  border-radius: var(--corner-square);
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 460;
+  letter-spacing: -0.13px;
   font-family: inherit;
   color: var(--fg-neutral-prominent);
-  background: var(--surface-overlay);
+  background: var(--input-bg-idle);
   outline: none;
   resize: none;
   overflow: hidden;
-  min-height: 36px;
+  min-height: var(--control-size-default);
   max-height: 120px;
-  line-height: var(--typography-body-small-line-height);
+  line-height: 16px;
   box-sizing: border-box;
 }
-.nitpick-comment-input::placeholder { color: var(--fg-neutral-medium); }
-.nitpick-comment-input:focus { border-color: var(--core-blueberry-blue-500); }
+.nitpick-comment-input::placeholder { color: var(--input-fg-placeholder); }
+.nitpick-comment-input:hover { border-color: var(--input-stroke-hover); }
+.nitpick-comment-input:focus {
+  border-color: var(--input-stroke-focus);
+  background: transparent;
+}
 
+/* Send button — matches Arcade Button primary (md) */
 .nitpick-send-btn {
-  width: 32px;
-  height: 32px;
-  border: none;
-  border-radius: var(--corner-square-x2);
-  background: var(--stroke-neutral-subtle);
-  color: var(--fg-neutral-subtle);
+  width: var(--control-size-default);
+  height: var(--control-size-default);
+  border: 1px solid var(--component-button-primary-stroke-idle);
+  border-radius: 9999px;
+  background: var(--component-button-primary-bg-idle);
+  color: var(--component-button-primary-fg-idle);
   cursor: not-allowed;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background-color 100ms ease;
   flex-shrink: 0;
+  opacity: 0.5;
 }
 .nitpick-send-btn--active {
-  background: var(--core-blueberry-blue-500);
-  color: var(--surface-overlay);
+  background: var(--component-button-primary-bg-idle);
+  color: var(--component-button-primary-fg-idle);
   cursor: pointer;
+  opacity: 1;
 }
-.nitpick-send-btn--active:hover { background: #0B87E0; }
+.nitpick-send-btn--active:hover {
+  background: var(--component-button-primary-bg-hover);
+  border-color: var(--component-button-primary-stroke-hover);
+}
 
-/* Issue card — child of popover container */
+/* Issue card — matches Arcade Popover */
 .nitpick-issue-card {
   width: 100%;
   background: var(--surface-overlay);
+  border: 1px solid var(--stroke-neutral-subtle);
   border-radius: var(--corner-square-x2);
-  box-shadow: var(--elevation-04);
-  padding: 12px;
-  font-family: var(--font-text);
+  box-shadow: var(--elevation-03);
+  padding: 16px;
+  font-family: var(--core-font-text), sans-serif;
+  font-size: 13px;
+  letter-spacing: -0.13px;
+  line-height: 16px;
+  color: var(--fg-neutral-prominent);
   box-sizing: border-box;
 }
 
@@ -162,8 +186,8 @@
 }
 
 .nitpick-issue-badge {
-  font-size: var(--typography-body-small-font-size);
-  font-weight: var(--font-weight-medium);
+  font-size: 13px;
+  font-weight: 520;
   color: var(--fg-neutral-prominent);
 }
 
@@ -172,12 +196,13 @@
   gap: 4px;
 }
 
+/* Icon buttons — matches Arcade Button tertiary */
 .nitpick-icon-btn {
   width: var(--control-size-default);
   height: var(--control-size-default);
   border: none;
   background: transparent;
-  border-radius: var(--corner-square-x2);
+  border-radius: var(--corner-square);
   color: var(--fg-neutral-subtle);
   cursor: pointer;
   display: flex;
@@ -187,42 +212,58 @@
 }
 .nitpick-icon-btn:hover {
   color: var(--fg-neutral-prominent);
-  background: var(--stroke-neutral-subtle);
+  background: var(--control-bg-neutral-subtle-hover);
 }
 
+/* Title input — matches Arcade Input (md) */
 .nitpick-issue-title {
   width: 100%;
-  border: 1px solid var(--stroke-neutral-subtle);
-  border-radius: var(--corner-square-x2);
-  padding: 8px 12px;
-  font-size: var(--typography-body-small-font-size);
-  font-weight: var(--font-weight-medium);
+  height: var(--control-size-default);
+  border: 1px solid transparent;
+  border-radius: var(--corner-square);
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 520;
+  letter-spacing: -0.13px;
   font-family: inherit;
   color: var(--fg-neutral-prominent);
+  background: var(--input-bg-idle);
   margin-bottom: 8px;
   box-sizing: border-box;
   outline: none;
 }
-.nitpick-issue-title::placeholder { color: var(--fg-neutral-medium); font-weight: 400; }
-.nitpick-issue-title:focus { border-color: var(--core-blueberry-blue-500); }
+.nitpick-issue-title::placeholder { color: var(--input-fg-placeholder); font-weight: 460; }
+.nitpick-issue-title:hover { border-color: var(--input-stroke-hover); }
+.nitpick-issue-title:focus {
+  border-color: var(--input-stroke-focus);
+  background: transparent;
+}
 
+/* Description textarea — matches Arcade Input (md) */
 .nitpick-issue-desc {
   width: 100%;
-  border: 1px solid var(--stroke-neutral-subtle);
-  border-radius: var(--corner-square-x2);
-  padding: 8px 12px;
-  font-size: var(--typography-body-small-font-size);
+  border: 1px solid transparent;
+  border-radius: var(--corner-square);
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 460;
+  letter-spacing: -0.13px;
   font-family: inherit;
   color: var(--fg-neutral-prominent);
+  background: var(--input-bg-idle);
   margin-bottom: 8px;
   resize: vertical;
   min-height: 60px;
   box-sizing: border-box;
   outline: none;
-  line-height: var(--typography-body-small-line-height);
+  line-height: 16px;
 }
-.nitpick-issue-desc::placeholder { color: var(--fg-neutral-medium); }
-.nitpick-issue-desc:focus { border-color: var(--core-blueberry-blue-500); }
+.nitpick-issue-desc::placeholder { color: var(--input-fg-placeholder); }
+.nitpick-issue-desc:hover { border-color: var(--input-stroke-hover); }
+.nitpick-issue-desc:focus {
+  border-color: var(--input-stroke-focus);
+  background: transparent;
+}
 
 .nitpick-screenshot-thumbnail {
   width: 120px;
@@ -242,17 +283,21 @@
   margin-bottom: 12px;
 }
 
+/* Chips — matches Arcade Tag (tinted neutral) */
 .nitpick-chip {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 10px;
-  border: 1px solid var(--stroke-neutral-subtle);
-  border-radius: var(--corner-circle);
-  background: var(--surface-overlay);
-  color: var(--fg-neutral-medium);
-  font-size: var(--typography-callout-font-size);
-  font-weight: var(--font-weight-medium);
+  height: var(--control-size-small);
+  padding: 0 8px;
+  border: none;
+  border-radius: var(--corner-square);
+  background: rgba(33, 30, 32, 0.15);
+  color: var(--fg-neutral-prominent);
+  font-size: 11px;
+  font-weight: 460;
+  letter-spacing: -0.11px;
+  line-height: 16px;
   font-family: inherit;
   cursor: pointer;
   max-width: 140px;
@@ -260,37 +305,44 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.nitpick-chip:hover { border-color: var(--core-blueberry-blue-500); }
+.nitpick-chip:hover {
+  background: rgba(33, 30, 32, 0.25);
+}
 
+/* Create Issue button — matches Arcade Button primary (lg) */
 .nitpick-create-btn {
   width: 100%;
   height: var(--control-size-large);
-  padding: 10px;
-  border: none;
-  border-radius: var(--corner-square);
-  background: var(--core-plum-purple-700);
-  color: var(--surface-overlay);
-  font-size: var(--typography-body-small-font-size);
-  font-weight: var(--font-weight-medium);
+  padding: 0 16px;
+  border: 1px solid var(--component-button-primary-stroke-idle);
+  border-radius: 9999px;
+  background: var(--component-button-primary-bg-idle);
+  color: var(--component-button-primary-fg-idle);
+  font-size: 13px;
+  font-weight: 460;
+  letter-spacing: -0.13px;
   font-family: inherit;
   cursor: pointer;
   transition: background-color 100ms ease;
 }
-.nitpick-create-btn:hover { background: #6D28D9; }
+.nitpick-create-btn:hover {
+  background: var(--component-button-primary-bg-hover);
+  border-color: var(--component-button-primary-stroke-hover);
+}
 .nitpick-create-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
 /* Loading skeleton */
 .nitpick-skeleton {
-  border-radius: var(--corner-square-x2);
-  background: linear-gradient(90deg, var(--stroke-neutral-subtle) 25%, #F5F5F5 50%, var(--stroke-neutral-subtle) 75%);
+  border-radius: var(--corner-square);
+  background: linear-gradient(90deg, var(--input-bg-idle) 25%, var(--surface-overlay) 50%, var(--input-bg-idle) 75%);
   background-size: 200% 100%;
   animation: nitpick-shimmer 1.5s linear infinite;
 }
 .nitpick-skeleton--title {
-  height: 38px;
+  height: var(--control-size-default);
   margin-bottom: 8px;
 }
 .nitpick-skeleton--desc {
@@ -341,7 +393,7 @@
 }
 
 .nitpick-chip--disabled {
-  opacity: 0.4;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
@@ -354,6 +406,7 @@
   z-index: 9;
 }
 
+/* Dropdown menu — matches Arcade Select content */
 .nitpick-dropdown-menu {
   position: absolute;
   top: 100%;
@@ -362,29 +415,38 @@
   margin-top: 4px;
   width: 240px;
   max-height: 260px;
+  padding: 4px;
   background: var(--surface-overlay);
   border: 1px solid var(--stroke-neutral-subtle);
   border-radius: var(--corner-square-x2);
   box-shadow: var(--elevation-03);
-  z-index: 10;
   display: flex;
   flex-direction: column;
   pointer-events: auto;
 }
 
+/* Dropdown search — matches Arcade Input (md) */
 .nitpick-dropdown-search {
-  padding: 8px 12px;
-  border: none;
+  padding: 0 12px;
+  height: var(--control-size-default);
+  border: 1px solid transparent;
   border-bottom: 1px solid var(--stroke-neutral-subtle);
-  font-size: var(--typography-body-small-font-size);
+  border-radius: var(--corner-square) var(--corner-square) 0 0;
+  font-size: 13px;
+  font-weight: 460;
+  letter-spacing: -0.13px;
   font-family: inherit;
   color: var(--fg-neutral-prominent);
+  background: var(--input-bg-idle);
   outline: none;
-  border-radius: var(--corner-square-x2) var(--corner-square-x2) 0 0;
   box-sizing: border-box;
   width: 100%;
 }
-.nitpick-dropdown-search::placeholder { color: var(--fg-neutral-subtle); }
+.nitpick-dropdown-search::placeholder { color: var(--input-fg-placeholder); }
+.nitpick-dropdown-search:focus {
+  border-color: var(--input-stroke-focus);
+  background: transparent;
+}
 
 .nitpick-dropdown-options {
   overflow-y: auto;
@@ -392,23 +454,29 @@
   padding: 4px 0;
 }
 
+/* Dropdown option — matches Arcade Select item */
 .nitpick-dropdown-option {
   display: flex;
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: 8px 12px;
+  padding: 6px 12px;
   border: none;
   background: none;
-  font-size: var(--typography-body-small-font-size);
+  border-radius: var(--corner-square);
+  font-size: 13px;
+  font-weight: 460;
+  letter-spacing: -0.13px;
   font-family: inherit;
   color: var(--fg-neutral-prominent);
   cursor: pointer;
   text-align: left;
 }
 .nitpick-dropdown-option:hover,
-.nitpick-dropdown-option--highlighted { background: #F0F4FF; }
-.nitpick-dropdown-option--suggested { font-weight: var(--font-weight-medium); }
+.nitpick-dropdown-option--highlighted {
+  background: var(--control-bg-neutral-subtle-hover);
+}
+.nitpick-dropdown-option--suggested { font-weight: 520; }
 
 .nitpick-dropdown-option-label {
   display: flex;
@@ -428,7 +496,7 @@
 
 .nitpick-dropdown-empty {
   padding: 12px;
-  font-size: var(--typography-body-small-font-size);
+  font-size: 13px;
   color: var(--fg-neutral-subtle);
   text-align: center;
 }
@@ -440,7 +508,7 @@
   background: var(--core-neutrals-600);
   color: var(--surface-overlay);
   font-size: 10px;
-  font-weight: var(--font-weight-medium);
+  font-weight: 520;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -457,7 +525,7 @@
 
 .nitpick-ai-badge {
   font-size: 10px;
-  font-weight: var(--font-weight-medium);
+  font-weight: 520;
   color: var(--fg-intelligence-prominent);
   background: var(--bg-intelligence-subtle);
   padding: 1px 6px;
@@ -465,62 +533,66 @@
   flex-shrink: 0;
 }
 
-/* Toast notification */
+/* Toast — matches Arcade Toast (success) */
 .nitpick-toast {
   position: fixed;
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--surface-overlay);
-  border: 1px solid var(--stroke-neutral-subtle);
+  background: var(--component-toast-success-bg);
+  border: 1px solid var(--component-toast-success-stroke);
   border-radius: var(--corner-square-x2);
-  padding: 12px 20px;
-  box-shadow: var(--elevation-04);
+  padding: 16px;
+  box-shadow: var(--elevation-03);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   z-index: 999999;
   animation: nitpick-toast-in 0.25s ease-out;
   pointer-events: auto;
-  font-family: var(--font-text);
+  font-family: var(--core-font-text), sans-serif;
 }
 .nitpick-toast--exiting {
   animation: nitpick-toast-out 0.2s ease-in forwards;
 }
 
 .nitpick-toast-icon {
-  color: var(--feedback-fg-success-prominent);
+  color: var(--component-toast-success-fg);
   flex-shrink: 0;
 }
 
 .nitpick-toast-text {
-  font-size: var(--typography-body-small-font-size);
-  font-weight: var(--font-weight-medium);
-  color: var(--fg-neutral-prominent);
+  font-size: 13px;
+  font-weight: 520;
+  color: var(--component-toast-success-fg);
 }
 
 .nitpick-toast-link {
-  color: var(--core-plum-purple-700);
+  color: var(--component-toast-success-fg);
   text-decoration: none;
-  font-weight: var(--font-weight-medium);
-  font-size: var(--typography-body-small-font-size);
+  font-weight: 520;
+  font-size: 11px;
+  border: 1px solid currentColor;
+  padding: 4px 8px;
+  border-radius: var(--corner-square);
+  opacity: 0.8;
 }
-.nitpick-toast-link:hover { text-decoration: underline; }
+.nitpick-toast-link:hover { opacity: 1; text-decoration: none; }
 
 .nitpick-toast-close {
   background: none;
   border: none;
-  color: var(--fg-neutral-subtle);
+  color: var(--component-toast-success-fg);
   cursor: pointer;
-  padding: 2px;
+  padding: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--corner-square);
+  opacity: 0.6;
 }
 .nitpick-toast-close:hover {
-  color: var(--fg-neutral-prominent);
-  background: var(--stroke-neutral-subtle);
+  opacity: 1;
 }
 
 @keyframes nitpick-toast-in {
@@ -532,17 +604,17 @@
   to { opacity: 0; transform: translateX(-50%) translateY(12px); }
 }
 
-/* Issue error display */
+/* Issue error display — matches Arcade Toast (alert) */
 .nitpick-issue-error {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
-  background: var(--feedback-bg-alert-subtle);
-  border: 1px solid var(--feedback-bg-alert-subtle);
+  background: var(--component-toast-alert-bg);
+  border: 1px solid var(--component-toast-alert-stroke);
   border-radius: var(--corner-square-x2);
-  font-size: var(--typography-callout-font-size);
-  color: var(--feedback-fg-alert-prominent);
+  font-size: 13px;
+  color: var(--component-toast-alert-fg);
   margin: 4px 0;
   font-family: inherit;
 }
@@ -551,20 +623,22 @@
   min-width: 0;
 }
 
+/* Retry button — matches Arcade Toast action */
 .nitpick-retry-btn {
   background: none;
-  border: 1px solid var(--feedback-fg-alert-prominent);
-  color: var(--feedback-fg-alert-prominent);
-  padding: 2px 10px;
+  border: 1px solid currentColor;
+  color: var(--component-toast-alert-fg);
+  padding: 4px 8px;
   border-radius: var(--corner-square);
-  font-size: var(--typography-callout-font-size);
+  font-size: 11px;
   cursor: pointer;
-  font-weight: var(--font-weight-medium);
+  font-weight: 520;
   font-family: inherit;
   flex-shrink: 0;
   margin-left: 8px;
+  opacity: 0.8;
 }
-.nitpick-retry-btn:hover { background: var(--feedback-bg-alert-subtle); }
+.nitpick-retry-btn:hover { opacity: 1; }
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
