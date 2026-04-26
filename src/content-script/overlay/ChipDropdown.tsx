@@ -23,6 +23,7 @@ interface ChipDropdownProps {
 
 export function ChipDropdown({ label, value, options, onSelect, onSearch, suggested, disabled, loading }: ChipDropdownProps) {
   const isOpen = useSignal(false);
+  const flipUp = useSignal(false);
   const search = useSignal('');
   const highlightIndex = useSignal(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -52,10 +53,16 @@ export function ChipDropdown({ label, value, options, onSelect, onSearch, sugges
     e.stopPropagation();
     if (disabled) return;
     isOpen.value = !isOpen.value;
-    if (isOpen.value && onSearch) {
-      onSearch('');
-    }
-    if (!isOpen.value) {
+    if (isOpen.value) {
+      if (onSearch) onSearch('');
+      const el = containerRef.current;
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const dropdownHeight = 264;
+        flipUp.value = spaceBelow < dropdownHeight;
+      }
+    } else {
       search.value = '';
       highlightIndex.value = 0;
     }
@@ -144,7 +151,7 @@ export function ChipDropdown({ label, value, options, onSelect, onSearch, sugges
       {isOpen.value && (
         <>
           <div class="nitpick-dropdown-backdrop" onClick={handleBackdropClick} />
-          <div class="nitpick-dropdown-menu" role="listbox" aria-label={`${label} options`}>
+          <div class={`nitpick-dropdown-menu ${flipUp.value ? 'nitpick-dropdown-menu--flip' : ''}`} role="listbox" aria-label={`${label} options`}>
             <input
               ref={searchRef}
               class="nitpick-dropdown-search"

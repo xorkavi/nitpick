@@ -434,6 +434,13 @@
   pointer-events: auto;
 }
 
+.nitpick-dropdown-menu--flip {
+  top: auto;
+  bottom: 100%;
+  margin-top: 0;
+  margin-bottom: 4px;
+}
+
 /* Dropdown search — no focus border, blends into dropdown */
 .nitpick-dropdown-search {
   padding: 6px 12px;
