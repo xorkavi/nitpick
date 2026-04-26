@@ -245,7 +245,7 @@
   margin-bottom: 8px;
   resize: none;
   min-height: 40px;
-  max-height: 286px;
+  max-height: 190px;
   overflow-y: auto;
   box-sizing: border-box;
   outline: none;
@@ -253,15 +253,33 @@
 }
 .nitpick-issue-desc::placeholder { color: var(--input-fg-placeholder); }
 
+.nitpick-screenshots-section {
+  margin-bottom: 8px;
+}
+
+.nitpick-screenshots-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 460;
+  color: var(--fg-neutral-subtle);
+  margin-bottom: 6px;
+}
+
+.nitpick-screenshots-row {
+  display: flex;
+  gap: 8px;
+}
+
 .nitpick-screenshot-thumbnail {
-  width: 120px;
-  height: auto;
-  max-height: 80px;
+  width: 80px;
+  height: 50px;
   border: 1px solid var(--stroke-neutral-subtle);
   border-radius: var(--corner-square);
-  margin-bottom: 12px;
-  object-fit: contain;
+  object-fit: cover;
   cursor: pointer;
+}
+.nitpick-screenshot-thumbnail:hover {
+  border-color: var(--fg-neutral-subtle);
 }
 
 .nitpick-chips-row {

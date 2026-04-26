@@ -19,6 +19,7 @@ import {
   popoverAnchorPoint,
   screenshotsReady,
   croppedScreenshotUrl,
+  viewportScreenshotUrl,
   aiStreamingDone,
   issueError,
   isCreatingIssue,
@@ -288,6 +289,7 @@ function deactivateCommentMode(): void {
   // Phase 2 signal resets
   screenshotsReady.value = false;
   croppedScreenshotUrl.value = null;
+  viewportScreenshotUrl.value = null;
   aiStreamingDone.value = false;
   issueError.value = null;
   isCreatingIssue.value = false;
@@ -320,7 +322,7 @@ function deactivateCommentMode(): void {
 }
 
 chrome.runtime.onMessage.addListener(
-  (msg: { action: string; croppedScreenshotUrl?: string }, _sender, sendResponse) => {
+  (msg: { action: string; croppedScreenshotUrl?: string; viewportScreenshotUrl?: string }, _sender, sendResponse) => {
     if (msg.action === 'PING') {
       sendResponse({ pong: true });
       return;
@@ -333,9 +335,12 @@ chrome.runtime.onMessage.addListener(
       }
       return;
     }
-    if (msg.action === 'RELAY_CROPPED_SCREENSHOT') {
+    if (msg.action === 'RELAY_SCREENSHOTS') {
       if (msg.croppedScreenshotUrl) {
         croppedScreenshotUrl.value = msg.croppedScreenshotUrl;
+      }
+      if (msg.viewportScreenshotUrl) {
+        viewportScreenshotUrl.value = msg.viewportScreenshotUrl;
       }
       return;
     }

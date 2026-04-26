@@ -80,8 +80,9 @@ export const aiSuggestedOwner = signal<string | undefined>(undefined);
 // Phase 2: Screenshot state
 export const screenshotsReady = signal<boolean>(false);
 
-// Phase 3: Cropped screenshot data URL for thumbnail display
+// Phase 3: Screenshot data URLs for thumbnail display
 export const croppedScreenshotUrl = signal<string | null>(null);
+export const viewportScreenshotUrl = signal<string | null>(null);
 
 // Phase 2: AI streaming state
 export const aiStreamingDone = signal<boolean>(false);

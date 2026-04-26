@@ -22,6 +22,7 @@ import {
   areaSelection,
   screenshotsReady,
   croppedScreenshotUrl,
+  viewportScreenshotUrl,
 } from '../signals';
 import { useRef } from 'preact/hooks';
 import { useSignalEffect } from '@preact/signals';
@@ -43,7 +44,7 @@ export function IssueCard() {
     const el = descRef.current;
     if (el) {
       el.style.height = 'auto';
-      el.style.height = `${Math.min(el.scrollHeight, 286)}px`;
+      el.style.height = `${Math.min(el.scrollHeight, 190)}px`;
     }
     const title = issueFormData.value.title;
     const titleEl = titleRef.current;
@@ -272,30 +273,56 @@ export function IssueCard() {
             issueFormData.value = { ...form, description: el.value };
             // Auto-grow textarea during streaming
             el.style.height = 'auto';
-            el.style.height = `${Math.min(el.scrollHeight, 286)}px`;
+            el.style.height = `${Math.min(el.scrollHeight, 190)}px`;
           }}
           rows={3}
         />
       )}
 
-      {croppedScreenshotUrl.value && (
-        <img
-          src={croppedScreenshotUrl.value}
-          alt="Cropped screenshot of selected element"
-          class="nitpick-screenshot-thumbnail"
-          onClick={() => {
-            const dataUrl = croppedScreenshotUrl.value!;
-            const byteString = atob(dataUrl.split(',')[1]);
-            const mimeType = dataUrl.split(':')[1].split(';')[0];
-            const ab = new ArrayBuffer(byteString.length);
-            const ia = new Uint8Array(ab);
-            for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
-            const blob = new Blob([ab], { type: mimeType });
-            window.open(URL.createObjectURL(blob), '_blank');
-          }}
-          role="button"
-          aria-label="View full-size screenshot"
-        />
+      {(croppedScreenshotUrl.value || viewportScreenshotUrl.value) && (
+        <div class="nitpick-screenshots-section">
+          <span class="nitpick-screenshots-label">Attaching screenshots:</span>
+          <div class="nitpick-screenshots-row">
+            {croppedScreenshotUrl.value && (
+              <img
+                src={croppedScreenshotUrl.value}
+                alt="Cropped screenshot"
+                class="nitpick-screenshot-thumbnail"
+                onClick={() => {
+                  const dataUrl = croppedScreenshotUrl.value!;
+                  const byteString = atob(dataUrl.split(',')[1]);
+                  const mimeType = dataUrl.split(':')[1].split(';')[0];
+                  const ab = new ArrayBuffer(byteString.length);
+                  const ia = new Uint8Array(ab);
+                  for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+                  const blob = new Blob([ab], { type: mimeType });
+                  window.open(URL.createObjectURL(blob), '_blank');
+                }}
+                role="button"
+                aria-label="View cropped screenshot"
+              />
+            )}
+            {viewportScreenshotUrl.value && (
+              <img
+                src={viewportScreenshotUrl.value}
+                alt="Full viewport screenshot"
+                class="nitpick-screenshot-thumbnail"
+                onClick={() => {
+                  const dataUrl = viewportScreenshotUrl.value!;
+                  const byteString = atob(dataUrl.split(',')[1]);
+                  const mimeType = dataUrl.split(':')[1].split(';')[0];
+                  const ab = new ArrayBuffer(byteString.length);
+                  const ia = new Uint8Array(ab);
+                  for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+                  const blob = new Blob([ab], { type: mimeType });
+                  window.open(URL.createObjectURL(blob), '_blank');
+                }}
+                role="button"
+                aria-label="View full viewport screenshot"
+              />
+            )}
+          </div>
+        </div>
       )}
 
       {error && (
