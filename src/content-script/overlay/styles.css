@@ -47,7 +47,7 @@
   pointer-events: none;
   transform: translate(0, -100%);
   z-index: 10;
-  filter: drop-shadow(0 2px 4px rgba(0, 156, 255, 0.4));
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15));
 }
 
 /* Area drag selection rectangle */
@@ -83,7 +83,7 @@
   background: var(--surface-overlay);
   border: 1px solid var(--stroke-neutral-subtle);
   border-radius: var(--corner-square-x2);
-  box-shadow: var(--elevation-03);
+  box-shadow: var(--elevation-04);
   padding: 10px 12px;
   box-sizing: border-box;
   font-family: var(--core-font-text), sans-serif;
@@ -154,7 +154,7 @@
   background: var(--surface-overlay);
   border: 1px solid var(--stroke-neutral-subtle);
   border-radius: var(--corner-square-x2);
-  box-shadow: var(--elevation-03);
+  box-shadow: var(--elevation-04);
   padding: 10px 12px;
   font-family: var(--core-font-text), sans-serif;
   font-size: 13px;
