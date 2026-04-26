@@ -16,7 +16,7 @@ async function updatePopupMode(): Promise<void> {
   }
 }
 
-async function toggleCommentMode(tabId: number): Promise<void> {
+export async function toggleCommentMode(tabId: number): Promise<void> {
   const mode = await getMode();
   const activeTab = await getActiveTabId();
 

@@ -1,6 +1,7 @@
 import type { Message } from '../shared/messages';
 import { getSettings, saveSettings } from './storage';
 import { captureScreenshots } from './capture';
+import { toggleCommentMode } from './index';
 import {
   storeScreenshots,
   storeBrowserMetadata,
@@ -24,6 +25,12 @@ export function setupMessageHandler(): void {
         case 'PING':
           sendResponse({ pong: true });
           return;
+
+        case 'TOGGLE_COMMENT_MODE':
+          chrome.tabs.query({ active: true, currentWindow: true }).then(([tab]) => {
+            if (tab?.id) toggleCommentMode(tab.id).then(() => sendResponse({ ok: true }));
+          });
+          return true;
 
         case 'GET_SETTINGS':
           getSettings().then((settings) => {
