@@ -257,9 +257,9 @@ export function SettingsPage() {
             onClick={handleSavePAT}
             disabled={!pat.value.trim() || patStatus.value === 'saving'}
             loading={patStatus.value === 'saving'}
-            style={{ marginTop: '20px' }}
+            style={{ marginTop: '20px', minWidth: '80px' }}
           >
-            {patStatus.value === 'saving' ? 'Verifying...' : patStatus.value === 'saved' ? 'Saved' : 'Save'}
+            {patStatus.value === 'saving' ? '' : patStatus.value === 'saved' ? 'Saved' : 'Save'}
           </Button>
         </div>
       </div>
