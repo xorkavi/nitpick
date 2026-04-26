@@ -2,6 +2,7 @@
 name: nitpick-fix
 description: "Fetch a Nitpick-filed DevRev issue and fix it in the current repo using the captured metadata"
 argument-hint: "<issue-display-id> e.g. ISS-1234"
+model: sonnet
 allowed-tools:
   - Read
   - Write
@@ -39,10 +40,11 @@ Use `GET /works.get` with the display ID directly — no need to search or list:
 ```bash
 source .env 2>/dev/null
 curl -s -X GET "https://api.dev.devrev-eng.ai/works.get?id=<DISPLAY_ID>" \
-  -H "Authorization: $DEVREV_PAT"
+  -H "Authorization: $DEVREV_PAT" \
+  | jq '{work: .work | {title, body, display_id, priority, priority_v2, tags, artifacts, applies_to_part, owned_by, reported_by}}'
 ```
 
-The `id` parameter accepts display IDs like `ISS-69076` directly. This returns a single `work` object with all fields.
+The `id` parameter accepts display IDs like `ISS-69076` directly. The `jq` filter strips `custom_fields` and other bulk data that wastes context tokens — only bug-relevant fields are kept.
 
 ## 4. Parse the issue
 
