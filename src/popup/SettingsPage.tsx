@@ -317,7 +317,7 @@ export function SettingsPage() {
             <p style={{ fontSize: 'var(--typography-system-small-font-size)', color: 'var(--fg-neutral-subtle)', margin: '0 0 8px 0', lineHeight: '1.4' }}>
               Nitpick activates on these domains
             </p>
-            <div style={{ maxHeight: '160px', overflowY: 'auto', marginBottom: '8px', paddingRight: '4px' }}>
+            <div style={{ maxHeight: '160px', overflowY: 'auto', marginBottom: '8px', scrollbarGutter: 'stable' }}>
               {domains.value.length === 0 && (
                 <p style={{ fontSize: 'var(--typography-system-small-font-size)', color: 'var(--fg-neutral-subtle)', margin: '0', padding: '8px', textAlign: 'center', lineHeight: '1.4' }}>
                   No domains configured. Add a domain to get started.
