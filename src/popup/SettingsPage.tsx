@@ -49,6 +49,20 @@ async function validateOpenAIKey(key: string): Promise<string | null> {
   }
 }
 
+function helperColor(status: FieldStatus): string {
+  if (status === 'saved') return 'var(--feedback-fg-success-prominent)';
+  if (status === 'error') return 'var(--feedback-fg-alert-prominent)';
+  return 'var(--fg-neutral-subtle)';
+}
+
+function CrossIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 32 32" fill="currentColor" style={{ display: 'block' }}>
+      <path d="M17.208 16.194a100 100 0 0 1 6.662 6.081l-1.59 1.59c-1.2-1.16-2.32-2.39-3.45-3.62-.894-1.006-1.789-2.004-2.65-3.04H15.8a93 93 0 0 1-6.081 6.66l-1.59-1.59c1.17-1.19 2.4-2.32 3.63-3.45 1.006-.885 1.995-1.78 3.032-2.641v-.378A100 100 0 0 1 8.13 9.725l1.59-1.59c1.2 1.16 2.32 2.4 3.45 3.62.894 1.006 1.789 2.003 2.65 3.04h.378a93 93 0 0 1 6.082-6.66l1.59 1.59c-1.17 1.19-2.4 2.32-3.63 3.45-1.006.894-1.995 1.78-3.031 2.641z"/>
+    </svg>
+  );
+}
+
 export function SettingsPage() {
   const pat = useSignal('');
   const openaiKey = useSignal('');
@@ -171,12 +185,14 @@ export function SettingsPage() {
     }
   };
 
+  const patHelperText = !patEmpty.value ? (patMessage.value || 'Find this in DevRev > Settings > Account > Developer') : undefined;
+  const openaiHelperText = !openaiKeyEmpty.value ? (openaiKeyMessage.value || 'Used for AI-powered issue descriptions') : undefined;
 
   return (
     <div
       style={{
         width: '360px',
-        padding: '32px',
+        padding: '16px',
         fontFamily: 'var(--core-font-text), sans-serif',
         backgroundColor: 'var(--surface-overlay)',
         color: 'var(--fg-neutral-prominent)',
@@ -187,7 +203,7 @@ export function SettingsPage() {
           fontSize: 'var(--typography-body-font-size)',
           fontWeight: 'var(--font-weight-bold)',
           color: 'var(--fg-neutral-prominent)',
-          margin: '0 0 24px 0',
+          margin: '0 0 16px 0',
           lineHeight: '1.3',
         }}
       >
@@ -196,7 +212,7 @@ export function SettingsPage() {
 
       {/* DevRev PAT */}
       <div style={{ marginBottom: '16px' }}>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
           <div style={{ position: 'relative', flex: 1 }}>
             <Input
               label="DevRev Personal Access Token"
@@ -213,32 +229,36 @@ export function SettingsPage() {
               }}
               onBlur={() => { patTouched.value = true; }}
               error={patEmpty.value ? 'A valid token is required to create issues' : undefined}
-              helperText={!patEmpty.value ? (patMessage.value || 'Find this in DevRev > Settings > Account > Developer') : undefined}
             />
             <button
               type="button"
               onClick={() => { showPat.value = !showPat.value; }}
-              style={{ position: 'absolute', right: '8px', top: '32px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--typography-callout-font-size)', color: 'var(--fg-neutral-subtle)', padding: '2px 4px' }}
+              style={{ position: 'absolute', right: '8px', top: '28px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--typography-system-small-font-size)', color: 'var(--fg-neutral-subtle)', padding: '4px' }}
             >
               {showPat.value ? 'Hide' : 'Show'}
             </button>
           </div>
           <Button
             variant={patStatus.value === 'error' ? 'destructive' : 'primary'}
-            size="sm"
+            size="md"
             onClick={handleSavePAT}
             disabled={!pat.value.trim() || patStatus.value === 'saving'}
             loading={patStatus.value === 'saving'}
-            style={{ marginBottom: '22px' }}
+            style={{ marginTop: '20px' }}
           >
             {patStatus.value === 'saving' ? 'Verifying...' : patStatus.value === 'saved' ? 'Saved' : 'Save'}
           </Button>
         </div>
+        {patHelperText && (
+          <p style={{ fontSize: 'var(--typography-system-small-font-size)', color: helperColor(patStatus.value), margin: '4px 0 0 0', lineHeight: '1.4' }}>
+            {patHelperText}
+          </p>
+        )}
       </div>
 
       {/* OpenAI API Key */}
       <div style={{ marginBottom: '16px' }}>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
           <div style={{ position: 'relative', flex: 1 }}>
             <Input
               label="OpenAI API Key"
@@ -255,38 +275,42 @@ export function SettingsPage() {
               }}
               onBlur={() => { openaiKeyTouched.value = true; }}
               error={openaiKeyEmpty.value ? 'A valid API key is required' : undefined}
-              helperText={!openaiKeyEmpty.value ? (openaiKeyMessage.value || 'Used for AI-powered issue descriptions') : undefined}
             />
             <button
               type="button"
               onClick={() => { showOpenaiKey.value = !showOpenaiKey.value; }}
-              style={{ position: 'absolute', right: '8px', top: '32px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--typography-callout-font-size)', color: 'var(--fg-neutral-subtle)', padding: '2px 4px' }}
+              style={{ position: 'absolute', right: '8px', top: '28px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--typography-system-small-font-size)', color: 'var(--fg-neutral-subtle)', padding: '4px' }}
             >
               {showOpenaiKey.value ? 'Hide' : 'Show'}
             </button>
           </div>
           <Button
             variant={openaiKeyStatus.value === 'error' ? 'destructive' : 'primary'}
-            size="sm"
+            size="md"
             onClick={handleSaveOpenAIKey}
             disabled={!openaiKey.value.trim() || openaiKeyStatus.value === 'saving'}
             loading={openaiKeyStatus.value === 'saving'}
-            style={{ marginBottom: '22px' }}
+            style={{ marginTop: '20px' }}
           >
             {openaiKeyStatus.value === 'saving' ? 'Verifying...' : openaiKeyStatus.value === 'saved' ? 'Saved' : 'Save'}
           </Button>
         </div>
+        {openaiHelperText && (
+          <p style={{ fontSize: 'var(--typography-system-small-font-size)', color: helperColor(openaiKeyStatus.value), margin: '4px 0 0 0', lineHeight: '1.4' }}>
+            {openaiHelperText}
+          </p>
+        )}
       </div>
 
       {/* Domain List */}
-      <div style={{ marginBottom: '24px' }}>
-        <h2 style={{ fontSize: 'var(--typography-callout-font-size)', fontWeight: 'var(--font-weight-medium)', color: 'var(--fg-neutral-prominent)', margin: '0 0 4px 0', lineHeight: '1.4' }}>
+      <div style={{ marginBottom: '16px' }}>
+        <h2 style={{ fontSize: 'var(--typography-system-font-size)', fontWeight: 'var(--font-weight-medium)', color: 'var(--fg-neutral-prominent)', margin: '0 0 4px 0', lineHeight: '1.4' }}>
           Active Domains
         </h2>
         <p style={{ fontSize: 'var(--typography-system-small-font-size)', color: 'var(--fg-neutral-subtle)', margin: '0 0 8px 0', lineHeight: '1.4' }}>
           Nitpick activates on these domains
         </p>
-        <div style={{ maxHeight: '120px', overflowY: 'auto', marginBottom: '8px' }}>
+        <div style={{ maxHeight: '160px', overflowY: 'auto', marginBottom: '8px' }}>
           {domains.value.length === 0 && (
             <p style={{ fontSize: 'var(--typography-system-small-font-size)', color: 'var(--fg-neutral-subtle)', margin: '0', padding: '8px', textAlign: 'center', lineHeight: '1.4' }}>
               No domains configured. Add a domain to get started.
@@ -295,16 +319,16 @@ export function SettingsPage() {
           {domains.value.map((domain) => (
             <div
               key={domain}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 8px', backgroundColor: 'var(--input-bg-idle)', borderRadius: 'var(--corner-square)', marginBottom: '4px' }}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px', backgroundColor: 'var(--input-bg-idle)', borderRadius: 'var(--corner-square)', marginBottom: '4px' }}
             >
               <span style={{ fontSize: 'var(--typography-system-font-size)', color: 'var(--fg-neutral-prominent)' }}>{domain}</span>
               <button
                 type="button"
                 onClick={() => handleRemoveDomain(domain)}
                 aria-label={`Remove ${domain}`}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--fg-neutral-subtle)', fontSize: 'var(--typography-callout-font-size)', padding: '0 4px', lineHeight: '1' }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--fg-neutral-subtle)', padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--corner-square)' }}
               >
-                x
+                <CrossIcon />
               </button>
             </div>
           ))}
@@ -312,7 +336,7 @@ export function SettingsPage() {
         <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
           <div style={{ flex: 1 }}>
             <Input
-              size="sm"
+              size="md"
               placeholder="example.com"
               value={newDomain.value}
               onInput={(e: any) => {
@@ -325,7 +349,7 @@ export function SettingsPage() {
           </div>
           <Button
             variant="secondary"
-            size="sm"
+            size="md"
             onClick={handleAddDomain}
           >
             Add
