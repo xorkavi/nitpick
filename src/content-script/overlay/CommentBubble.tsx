@@ -13,6 +13,7 @@ import {
   aiSuggestedOwner,
   lastSelectedMetadata,
   devrevSelf,
+  selectedTags,
 } from '../signals';
 import { IssueCard } from './IssueCard';
 
@@ -65,6 +66,13 @@ export function CommentBubble() {
     issueError.value = null;
     aiSuggestedPart.value = undefined;
     aiSuggestedOwner.value = undefined;
+
+    // Pre-select the "nitpicked" tag
+    chrome.runtime.sendMessage({ action: 'SEARCH_TAGS', query: 'nitpicked', limit: 1 }, (resp) => {
+      if (resp?.tags?.length) {
+        selectedTags.value = resp.tags;
+      }
+    });
 
     // Owner starts empty — user picks from dropdown
 
