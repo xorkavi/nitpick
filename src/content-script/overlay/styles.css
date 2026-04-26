@@ -197,7 +197,7 @@
   border: none;
   background: transparent;
   border-radius: var(--corner-square);
-  color: var(--fg-neutral-subtle);
+  color: var(--fg-neutral-prominent);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -245,7 +245,7 @@
   margin-bottom: 8px;
   resize: none;
   min-height: 40px;
-  max-height: 143px;
+  max-height: 286px;
   overflow-y: auto;
   box-sizing: border-box;
   outline: none;

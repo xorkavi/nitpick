@@ -43,7 +43,7 @@ export function IssueCard() {
     const el = descRef.current;
     if (el) {
       el.style.height = 'auto';
-      el.style.height = `${Math.min(el.scrollHeight, 143)}px`;
+      el.style.height = `${Math.min(el.scrollHeight, 286)}px`;
     }
     const title = issueFormData.value.title;
     const titleEl = titleRef.current;
@@ -272,7 +272,7 @@ export function IssueCard() {
             issueFormData.value = { ...form, description: el.value };
             // Auto-grow textarea during streaming
             el.style.height = 'auto';
-            el.style.height = `${Math.min(el.scrollHeight, 143)}px`;
+            el.style.height = `${Math.min(el.scrollHeight, 286)}px`;
           }}
           rows={3}
         />
