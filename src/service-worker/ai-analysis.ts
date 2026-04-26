@@ -505,7 +505,7 @@ export async function streamAnalysis(
       input: [
         { role: 'user', content: userContent },
       ],
-      reasoning: { effort: 'medium' },
+      reasoning: { effort: 'low' },
       max_output_tokens: 1200,
     });
 
