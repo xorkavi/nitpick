@@ -47,7 +47,7 @@
   pointer-events: none;
   transform: translate(0, -100%);
   z-index: 10;
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15));
+  filter: drop-shadow(var(--elevation-02));
 }
 
 /* Area drag selection rectangle */
@@ -88,9 +88,9 @@
   padding: 10px 12px;
   box-sizing: border-box;
   font-family: var(--core-font-text), sans-serif;
-  font-size: 13px;
-  letter-spacing: -0.13px;
-  line-height: 16px;
+  font-size: var(--typography-system-font-size);
+  letter-spacing: var(--typography-system-letter-spacing);
+  line-height: var(--typography-system-line-height);
   color: var(--fg-neutral-prominent);
 }
 
@@ -106,9 +106,9 @@
   border: none;
   border-radius: 0;
   padding: 6px 0;
-  font-size: 13px;
-  font-weight: 460;
-  letter-spacing: -0.13px;
+  font-size: var(--typography-system-font-size);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--typography-system-letter-spacing);
   font-family: inherit;
   color: var(--fg-neutral-prominent);
   background: transparent;
@@ -117,7 +117,7 @@
   overflow: hidden;
   min-height: 28px;
   max-height: 120px;
-  line-height: 16px;
+  line-height: var(--typography-system-line-height);
   box-sizing: border-box;
 }
 .nitpick-comment-input::placeholder { color: var(--input-fg-placeholder); }
@@ -160,9 +160,9 @@
   overflow-y: auto;
   min-height: 0;
   font-family: var(--core-font-text), sans-serif;
-  font-size: 13px;
-  letter-spacing: -0.13px;
-  line-height: 16px;
+  font-size: var(--typography-system-font-size);
+  letter-spacing: var(--typography-system-letter-spacing);
+  line-height: var(--typography-system-line-height);
   color: var(--fg-neutral-prominent);
   box-sizing: border-box;
 }
@@ -183,8 +183,8 @@
 }
 
 .nitpick-issue-badge {
-  font-size: 13px;
-  font-weight: 520;
+  font-size: var(--typography-system-font-size);
+  font-weight: var(--font-weight-medium);
   color: var(--fg-neutral-prominent);
 }
 
@@ -218,20 +218,20 @@
   border: none;
   border-radius: 0;
   padding: 4px 0;
-  font-size: 15px;
-  font-weight: 520;
-  letter-spacing: -0.13px;
+  font-size: var(--typography-body-font-size);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--typography-system-letter-spacing);
   font-family: inherit;
   color: var(--fg-neutral-prominent);
   background: transparent;
   margin-bottom: 4px;
   box-sizing: border-box;
   outline: none;
-  line-height: 20px;
+  line-height: var(--typography-body-small-line-height);
   resize: none;
   overflow: hidden;
 }
-.nitpick-issue-title::placeholder { color: var(--input-fg-placeholder); font-weight: 460; }
+.nitpick-issue-title::placeholder { color: var(--input-fg-placeholder); font-weight: var(--font-weight-regular); }
 
 /* Description — plain text style, auto-grows with content */
 .nitpick-issue-desc {
@@ -239,9 +239,9 @@
   border: none;
   border-radius: 0;
   padding: 4px 0;
-  font-size: 13px;
-  font-weight: 460;
-  letter-spacing: -0.13px;
+  font-size: var(--typography-system-font-size);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--typography-system-letter-spacing);
   font-family: inherit;
   color: var(--fg-neutral-prominent);
   background: transparent;
@@ -262,8 +262,8 @@
 
 .nitpick-screenshots-label {
   display: block;
-  font-size: 11px;
-  font-weight: 460;
+  font-size: var(--typography-system-small-font-size);
+  font-weight: var(--font-weight-regular);
   color: var(--fg-neutral-subtle);
   margin-bottom: 6px;
 }
@@ -301,12 +301,12 @@
   padding: 0 8px;
   border: none;
   border-radius: var(--corner-square);
-  background: rgba(33, 30, 32, 0.15);
+  background: var(--bg-neutral-subtle);
   color: var(--fg-neutral-prominent);
-  font-size: 11px;
-  font-weight: 460;
-  letter-spacing: -0.11px;
-  line-height: 16px;
+  font-size: var(--typography-system-small-font-size);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--typography-system-small-letter-spacing);
+  line-height: var(--typography-system-line-height);
   font-family: inherit;
   cursor: pointer;
   max-width: 140px;
@@ -315,7 +315,7 @@
   text-overflow: ellipsis;
 }
 .nitpick-chip:hover {
-  background: rgba(33, 30, 32, 0.25);
+  background: var(--control-bg-neutral-medium-idle);
 }
 
 /* Create Issue button — matches Arcade Button primary (lg) */
@@ -327,9 +327,9 @@
   border-radius: 9999px;
   background: var(--component-button-primary-bg-idle);
   color: var(--component-button-primary-fg-idle);
-  font-size: 13px;
-  font-weight: 460;
-  letter-spacing: -0.13px;
+  font-size: var(--typography-system-font-size);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--typography-system-letter-spacing);
   font-family: inherit;
   cursor: pointer;
   transition: background-color 100ms ease;
@@ -447,10 +447,10 @@
   border: none;
   border-bottom: 1px solid var(--stroke-neutral-subtle);
   border-radius: var(--corner-square-x2) var(--corner-square-x2) 0 0;
-  font-size: 13px;
-  font-weight: 460;
-  letter-spacing: -0.13px;
-  line-height: 16px;
+  font-size: var(--typography-system-font-size);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--typography-system-letter-spacing);
+  line-height: var(--typography-system-line-height);
   font-family: inherit;
   color: var(--fg-neutral-prominent);
   background: transparent;
@@ -476,9 +476,9 @@
   border: none;
   background: none;
   border-radius: var(--corner-square);
-  font-size: 13px;
-  font-weight: 460;
-  letter-spacing: -0.13px;
+  font-size: var(--typography-system-font-size);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--typography-system-letter-spacing);
   font-family: inherit;
   color: var(--fg-neutral-prominent);
   cursor: pointer;
@@ -488,7 +488,7 @@
 .nitpick-dropdown-option--highlighted {
   background: var(--control-bg-neutral-subtle-hover);
 }
-.nitpick-dropdown-option--suggested { font-weight: 520; }
+.nitpick-dropdown-option--suggested { font-weight: var(--font-weight-medium); }
 
 .nitpick-dropdown-option-label {
   display: flex;
@@ -499,7 +499,7 @@
 }
 
 .nitpick-dropdown-option-desc {
-  font-size: 11px;
+  font-size: var(--typography-system-small-font-size);
   color: var(--fg-neutral-subtle);
   white-space: nowrap;
   overflow: hidden;
@@ -508,7 +508,7 @@
 
 .nitpick-dropdown-empty {
   padding: 12px;
-  font-size: 13px;
+  font-size: var(--typography-system-font-size);
   color: var(--fg-neutral-subtle);
   text-align: center;
 }
@@ -519,8 +519,8 @@
   border-radius: 50%;
   background: var(--core-neutrals-600);
   color: var(--surface-overlay);
-  font-size: 10px;
-  font-weight: 520;
+  font-size: var(--typography-numerical-font-size);
+  font-weight: var(--font-weight-medium);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -536,8 +536,8 @@
 }
 
 .nitpick-ai-badge {
-  font-size: 10px;
-  font-weight: 520;
+  font-size: var(--typography-numerical-font-size);
+  font-weight: var(--font-weight-medium);
   color: var(--fg-intelligence-prominent);
   background: var(--bg-intelligence-subtle);
   padding: 1px 6px;
@@ -575,16 +575,16 @@
 }
 
 .nitpick-toast-text {
-  font-size: 13px;
-  font-weight: 520;
+  font-size: var(--typography-system-font-size);
+  font-weight: var(--font-weight-medium);
   color: var(--component-toast-success-fg);
 }
 
 .nitpick-toast-link {
   color: var(--component-toast-success-fg);
   text-decoration: none;
-  font-weight: 520;
-  font-size: 11px;
+  font-weight: var(--font-weight-medium);
+  font-size: var(--typography-system-small-font-size);
   border: 1px solid currentColor;
   padding: 4px 8px;
   border-radius: var(--corner-square);
@@ -641,7 +641,7 @@
   background: var(--component-toast-alert-bg);
   border: 1px solid var(--component-toast-alert-stroke);
   border-radius: var(--corner-square-x2);
-  font-size: 13px;
+  font-size: var(--typography-system-font-size);
   color: var(--component-toast-alert-fg);
   margin: 4px 0;
   font-family: inherit;
@@ -658,9 +658,9 @@
   color: var(--component-toast-alert-fg);
   padding: 4px 8px;
   border-radius: var(--corner-square);
-  font-size: 11px;
+  font-size: var(--typography-system-small-font-size);
   cursor: pointer;
-  font-weight: 520;
+  font-weight: var(--font-weight-medium);
   font-family: inherit;
   flex-shrink: 0;
   margin-left: 8px;

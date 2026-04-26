@@ -177,15 +177,16 @@ export function SettingsPage() {
       style={{
         width: '360px',
         padding: '32px',
-        fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-        backgroundColor: '#FFFFFF',
+        fontFamily: 'var(--core-font-text), sans-serif',
+        backgroundColor: 'var(--surface-overlay)',
+        color: 'var(--fg-neutral-prominent)',
       }}
     >
       <h1
         style={{
-          fontSize: '16px',
-          fontWeight: 600,
-          color: '#1A1A1A',
+          fontSize: 'var(--typography-body-font-size)',
+          fontWeight: 'var(--font-weight-bold)',
+          color: 'var(--fg-neutral-prominent)',
           margin: '0 0 24px 0',
           lineHeight: '1.3',
         }}
@@ -217,7 +218,7 @@ export function SettingsPage() {
             <button
               type="button"
               onClick={() => { showPat.value = !showPat.value; }}
-              style={{ position: 'absolute', right: '8px', top: '32px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#666666', padding: '2px 4px' }}
+              style={{ position: 'absolute', right: '8px', top: '32px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--typography-callout-font-size)', color: 'var(--fg-neutral-subtle)', padding: '2px 4px' }}
             >
               {showPat.value ? 'Hide' : 'Show'}
             </button>
@@ -259,7 +260,7 @@ export function SettingsPage() {
             <button
               type="button"
               onClick={() => { showOpenaiKey.value = !showOpenaiKey.value; }}
-              style={{ position: 'absolute', right: '8px', top: '32px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#666666', padding: '2px 4px' }}
+              style={{ position: 'absolute', right: '8px', top: '32px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 'var(--typography-callout-font-size)', color: 'var(--fg-neutral-subtle)', padding: '2px 4px' }}
             >
               {showOpenaiKey.value ? 'Hide' : 'Show'}
             </button>
@@ -279,29 +280,29 @@ export function SettingsPage() {
 
       {/* Domain List */}
       <div style={{ marginBottom: '24px' }}>
-        <h2 style={{ fontSize: '12px', fontWeight: 500, color: '#1A1A1A', margin: '0 0 4px 0', lineHeight: '1.4' }}>
+        <h2 style={{ fontSize: 'var(--typography-callout-font-size)', fontWeight: 'var(--font-weight-medium)', color: 'var(--fg-neutral-prominent)', margin: '0 0 4px 0', lineHeight: '1.4' }}>
           Active Domains
         </h2>
-        <p style={{ fontSize: '11px', color: '#666666', margin: '0 0 8px 0', lineHeight: '1.4' }}>
+        <p style={{ fontSize: 'var(--typography-system-small-font-size)', color: 'var(--fg-neutral-subtle)', margin: '0 0 8px 0', lineHeight: '1.4' }}>
           Nitpick activates on these domains
         </p>
         <div style={{ maxHeight: '120px', overflowY: 'auto', marginBottom: '8px' }}>
           {domains.value.length === 0 && (
-            <p style={{ fontSize: '11px', color: '#666666', margin: '0', padding: '8px', textAlign: 'center', lineHeight: '1.4' }}>
+            <p style={{ fontSize: 'var(--typography-system-small-font-size)', color: 'var(--fg-neutral-subtle)', margin: '0', padding: '8px', textAlign: 'center', lineHeight: '1.4' }}>
               No domains configured. Add a domain to get started.
             </p>
           )}
           {domains.value.map((domain) => (
             <div
               key={domain}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 8px', backgroundColor: '#F5F5F5', borderRadius: '4px', marginBottom: '4px' }}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 8px', backgroundColor: 'var(--input-bg-idle)', borderRadius: 'var(--corner-square)', marginBottom: '4px' }}
             >
-              <span style={{ fontSize: '13px', color: '#1A1A1A' }}>{domain}</span>
+              <span style={{ fontSize: 'var(--typography-system-font-size)', color: 'var(--fg-neutral-prominent)' }}>{domain}</span>
               <button
                 type="button"
                 onClick={() => handleRemoveDomain(domain)}
                 aria-label={`Remove ${domain}`}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#999999', fontSize: '14px', padding: '0 4px', lineHeight: '1' }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--fg-neutral-subtle)', fontSize: 'var(--typography-callout-font-size)', padding: '0 4px', lineHeight: '1' }}
               >
                 x
               </button>
