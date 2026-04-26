@@ -1,6 +1,6 @@
 import { useSignal, useComputed } from '@preact/signals';
-import { useEffect } from 'preact/hooks';
-import { Button, Input, IconButton, Badge, Accordion } from '@xorkavi/arcade-gen';
+import { useEffect, useRef } from 'preact/hooks';
+import { Button, Input, IconButton, Badge } from '@xorkavi/arcade-gen';
 import { STORAGE_KEYS, DEFAULT_DOMAINS } from '../shared/constants';
 
 type FieldStatus = 'idle' | 'saving' | 'saved' | 'error';
@@ -92,6 +92,7 @@ export function SettingsPage() {
   const openaiKeyMessage = useSignal('');
 
   const domainError = useSignal('');
+  const domainsOpen = useSignal(false);
 
   const showPat = useSignal(false);
   const showOpenaiKey = useSignal(false);
@@ -252,7 +253,7 @@ export function SettingsPage() {
             <button
               type="button"
               onClick={() => { showPat.value = !showPat.value; }}
-              style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--fg-neutral-subtle)', padding: '4px', display: 'flex', zIndex: 1 }}
+              style={{ position: 'absolute', right: '0', top: '50%', transform: 'translateY(-50%)', background: 'linear-gradient(to right, transparent, var(--input-bg-idle) 30%)', border: 'none', cursor: 'pointer', color: 'var(--fg-neutral-subtle)', padding: '4px 8px 4px 16px', display: 'flex', zIndex: 1, borderRadius: '0 var(--corner-square) var(--corner-square) 0' }}
             >
               {showPat.value ? <EyeCrossedIcon /> : <EyeIcon />}
             </button>
@@ -299,7 +300,7 @@ export function SettingsPage() {
             <button
               type="button"
               onClick={() => { showOpenaiKey.value = !showOpenaiKey.value; }}
-              style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--fg-neutral-subtle)', padding: '4px', display: 'flex', zIndex: 1 }}
+              style={{ position: 'absolute', right: '0', top: '50%', transform: 'translateY(-50%)', background: 'linear-gradient(to right, transparent, var(--input-bg-idle) 30%)', border: 'none', cursor: 'pointer', color: 'var(--fg-neutral-subtle)', padding: '4px 8px 4px 16px', display: 'flex', zIndex: 1, borderRadius: '0 var(--corner-square) var(--corner-square) 0' }}
             >
               {showOpenaiKey.value ? <EyeCrossedIcon /> : <EyeIcon />}
             </button>
@@ -321,67 +322,117 @@ export function SettingsPage() {
         )}
       </div>
 
-      {/* Advanced Settings */}
-      <Accordion.Root type="multiple" style={{ marginBottom: '16px' }}>
-        <Accordion.Item value="domains" style={{ borderBottom: 'none' }}>
-          <Accordion.Trigger style={{ padding: '8px 0' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              Active Domains
-              <Badge variant="neutral">{domains.value.length}</Badge>
-            </span>
-          </Accordion.Trigger>
-          <Accordion.Content style={{ animation: 'none' }}>
-            <p style={{ fontSize: 'var(--typography-system-small-font-size)', color: 'var(--fg-neutral-subtle)', margin: '0 0 8px 0', lineHeight: '1.4' }}>
-              Nitpick activates on these domains
-            </p>
-            <div style={{ maxHeight: '160px', overflowY: 'auto', marginBottom: '8px' }}>
-              {domains.value.length === 0 && (
-                <p style={{ fontSize: 'var(--typography-system-small-font-size)', color: 'var(--fg-neutral-subtle)', margin: '0', padding: '8px', textAlign: 'center', lineHeight: '1.4' }}>
-                  No domains configured. Add a domain to get started.
-                </p>
-              )}
-              {domains.value.map((domain) => (
-                <div
-                  key={domain}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 2px 2px 8px', backgroundColor: 'var(--input-bg-idle)', borderRadius: 'var(--corner-square)', marginBottom: '4px' }}
-                >
-                  <span style={{ fontSize: 'var(--typography-system-font-size)', color: 'var(--fg-neutral-prominent)' }}>{domain}</span>
-                  <IconButton
-                    variant="tertiary"
-                    size="sm"
-                    aria-label={`Remove ${domain}`}
-                    onClick={() => handleRemoveDomain(domain)}
-                  >
-                    <CrossIcon />
-                  </IconButton>
-                </div>
-              ))}
-            </div>
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-              <div style={{ flex: 1 }}>
-                <Input
-                  size="md"
-                  placeholder="example.com"
-                  value={newDomain.value}
-                  onInput={(e: any) => {
-                    newDomain.value = (e.target as HTMLInputElement).value;
-                    domainError.value = '';
-                  }}
-                  onKeyDown={handleDomainKeyDown}
-                  error={domainError.value || undefined}
-                />
-              </div>
-              <Button
-                variant="secondary"
-                size="md"
-                onClick={handleAddDomain}
+      {/* Active Domains — Preact native collapsible styled like Arcade Accordion */}
+      {(() => {
+        const contentRef = useRef<HTMLDivElement>(null);
+
+        function toggleDomains() {
+          domainsOpen.value = !domainsOpen.value;
+          const el = contentRef.current;
+          if (!el) return;
+          if (domainsOpen.value) {
+            el.style.height = el.scrollHeight + 'px';
+          } else {
+            el.style.height = el.scrollHeight + 'px';
+            requestAnimationFrame(() => { el.style.height = '0px'; });
+          }
+        }
+
+        function onTransitionEnd() {
+          const el = contentRef.current;
+          if (el && domainsOpen.value) el.style.height = 'auto';
+        }
+
+        return (
+          <div style={{ marginBottom: '0' }}>
+            <button
+              type="button"
+              onClick={toggleDomains}
+              style={{
+                display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between',
+                padding: '8px 0', background: 'var(--component-accordion-trigger-bg-idle)', border: 'none',
+                cursor: 'pointer', fontFamily: 'inherit',
+                fontSize: 'var(--typography-system-font-size)', fontWeight: 'var(--font-weight-medium)',
+                color: 'var(--component-accordion-trigger-fg-idle)',
+                borderRadius: 'var(--corner-square)', transition: 'background-color 150ms ease',
+              }}
+              onMouseEnter={(e: any) => { e.currentTarget.style.background = 'var(--component-accordion-trigger-bg-hover)'; }}
+              onMouseLeave={(e: any) => { e.currentTarget.style.background = 'var(--component-accordion-trigger-bg-idle)'; }}
+            >
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                Active Domains
+                <Badge variant="neutral">{domains.value.length}</Badge>
+              </span>
+              <svg
+                width="16" height="16" viewBox="0 0 16 16" fill="none"
+                style={{ color: 'var(--component-accordion-icon-fg)', transition: 'transform 200ms ease', transform: domainsOpen.value ? 'rotate(180deg)' : 'rotate(0deg)' }}
               >
-                Add
-              </Button>
+                <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div
+              ref={contentRef}
+              onTransitionEnd={onTransitionEnd}
+              style={{
+                overflow: 'hidden', height: '0px',
+                transition: 'height 200ms ease',
+                background: 'var(--component-accordion-content-bg)',
+              }}
+            >
+              <div style={{ paddingTop: '4px' }}>
+                <p style={{ fontSize: 'var(--typography-system-small-font-size)', color: 'var(--fg-neutral-subtle)', margin: '0 0 8px 0', lineHeight: '1.4' }}>
+                  Nitpick activates on these domains
+                </p>
+                <div style={{ maxHeight: '160px', overflowY: 'auto', marginBottom: '8px' }}>
+                  {domains.value.length === 0 && (
+                    <p style={{ fontSize: 'var(--typography-system-small-font-size)', color: 'var(--fg-neutral-subtle)', margin: '0', padding: '8px', textAlign: 'center', lineHeight: '1.4' }}>
+                      No domains configured. Add a domain to get started.
+                    </p>
+                  )}
+                  {domains.value.map((domain) => (
+                    <div
+                      key={domain}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 2px 2px 8px', backgroundColor: 'var(--input-bg-idle)', borderRadius: 'var(--corner-square)', marginBottom: '4px' }}
+                    >
+                      <span style={{ fontSize: 'var(--typography-system-font-size)', color: 'var(--fg-neutral-prominent)' }}>{domain}</span>
+                      <IconButton
+                        variant="tertiary"
+                        size="sm"
+                        aria-label={`Remove ${domain}`}
+                        onClick={() => handleRemoveDomain(domain)}
+                      >
+                        <CrossIcon />
+                      </IconButton>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                  <div style={{ flex: 1 }}>
+                    <Input
+                      size="md"
+                      placeholder="example.com"
+                      value={newDomain.value}
+                      onInput={(e: any) => {
+                        newDomain.value = (e.target as HTMLInputElement).value;
+                        domainError.value = '';
+                      }}
+                      onKeyDown={handleDomainKeyDown}
+                      error={domainError.value || undefined}
+                    />
+                  </div>
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    onClick={handleAddDomain}
+                  >
+                    Add
+                  </Button>
+                </div>
+              </div>
             </div>
-          </Accordion.Content>
-        </Accordion.Item>
-      </Accordion.Root>
+          </div>
+        );
+      })()}
 
       {bothSaved.value && (
         <Button
