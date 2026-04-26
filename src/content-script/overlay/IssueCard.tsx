@@ -28,13 +28,51 @@ import {
   selectedTags,
 } from '../signals';
 import { useRef } from 'preact/hooks';
-import { useSignalEffect } from '@preact/signals';
+import { useSignal, useSignalEffect } from '@preact/signals';
 import { ChipDropdown } from './ChipDropdown';
 import { TagChipMultiSelect } from './TagChipMultiSelect';
 import { PRIORITY_OPTIONS } from '../../shared/constants';
+import type { PartType } from '../../shared/types';
+import type { ComponentChildren } from 'preact';
+import { h } from 'preact';
 
 function getInitials(name: string): string {
   return name.split(/[\s-]+/).map(w => w[0]?.toUpperCase() || '').slice(0, 2).join('');
+}
+
+const PRIORITY_COLORS: Record<string, { bg: string; text: string }> = {
+  p0: { bg: 'var(--core-chili-red-200)', text: 'var(--core-chili-red-700)' },
+  p1: { bg: 'var(--core-marmalade-orange-200)', text: 'var(--core-marmalade-orange-700)' },
+  p2: { bg: 'var(--core-yuzu-yellow-200)', text: 'var(--core-yuzu-yellow-700)' },
+  p3: { bg: 'var(--core-matcha-green-200)', text: 'var(--core-matcha-green-700)' },
+};
+
+function PartTypeIcon({ type }: { type?: PartType }): ComponentChildren {
+  const size = 14;
+  switch (type) {
+    case 'product':
+      return h('svg', { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'var(--core-matcha-green-600)', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+        h('path', { d: 'M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z' }),
+        h('polyline', { points: '3.27 6.96 12 12.01 20.73 6.96' }),
+        h('line', { x1: '12', y1: '22.08', x2: '12', y2: '12' }),
+      );
+    case 'feature':
+      return h('svg', { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'var(--core-blueberry-blue-500)', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+        h('polygon', { points: '12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2' }),
+      );
+    case 'capability':
+      return h('svg', { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'var(--core-plum-purple-500)', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+        h('circle', { cx: '12', cy: '12', r: '10' }),
+        h('circle', { cx: '12', cy: '12', r: '6' }),
+        h('circle', { cx: '12', cy: '12', r: '2' }),
+      );
+    case 'enhancement':
+      return h('svg', { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'var(--core-marmalade-orange-500)', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+        h('polygon', { points: '13 2 3 14 12 14 11 22 21 10 12 10 13 2' }),
+      );
+    default:
+      return null;
+  }
 }
 
 export function IssueCard() {
@@ -199,6 +237,7 @@ export function IssueCard() {
     id: p.id,
     label: p.name,
     description: p.description,
+    icon: PartTypeIcon({ type: p.part_type }),
   }));
 
   function handleUserSearch(query: string): void {
@@ -227,19 +266,39 @@ export function IssueCard() {
     );
   }
 
+  const thumbnailCache = useSignal<Record<string, string>>({});
+
+  useSignalEffect(() => {
+    const users = userSearchResults.value;
+    users.forEach((u) => {
+      if (u.thumbnail && !thumbnailCache.value[u.id]) {
+        chrome.runtime.sendMessage(
+          { action: 'FETCH_THUMBNAIL', url: u.thumbnail },
+          (response: { dataUrl?: string | null } | undefined) => {
+            if (response?.dataUrl) {
+              thumbnailCache.value = { ...thumbnailCache.value, [u.id]: response.dataUrl };
+            }
+          },
+        );
+      }
+    });
+  });
+
   const ownerOptions = userSearchResults.value.map((u) => {
     const name = u.full_name || u.display_name;
     return {
       id: u.id,
       label: name,
       initials: getInitials(name),
-      avatarUrl: u.thumbnail,
+      avatarUrl: thumbnailCache.value[u.id] || undefined,
     };
   });
 
   const priorityOptions = PRIORITY_OPTIONS.map((p) => ({
     id: p.id,
     label: p.label,
+    colorBg: PRIORITY_COLORS[p.id]?.bg,
+    colorText: PRIORITY_COLORS[p.id]?.text,
   }));
 
   // Chips disabled during streaming (before AI_DONE)
@@ -248,7 +307,17 @@ export function IssueCard() {
   return (
     <div class="nitpick-issue-card" role="dialog" aria-label="New issue form">
       <div class="nitpick-issue-header">
-        <span class="nitpick-issue-badge">New Issue</span>
+        <nav class="nitpick-issue-breadcrumb" aria-label="Breadcrumb">
+          {devrevSelf.value?.org_name && (
+            <>
+              <span class="nitpick-issue-breadcrumb-org">{devrevSelf.value.org_name}</span>
+              <svg class="nitpick-issue-breadcrumb-sep" width="16" height="16" viewBox="0 0 32 32" fill="currentColor">
+                <path d="M12.3 8.3a1 1 0 0 1 1.4 0l7 7a1 1 0 0 1 0 1.4l-7 7a1 1 0 0 1-1.4-1.4L18.58 16l-6.3-6.3a1 1 0 0 1 0-1.4z"/>
+              </svg>
+            </>
+          )}
+          <span class="nitpick-issue-breadcrumb-current">New Issue</span>
+        </nav>
         <div class="nitpick-issue-header-actions">
           <button class="nitpick-icon-btn" onClick={handleRefresh} aria-label="Reset form">
             <svg width="16" height="16" viewBox="0 0 256 256" fill="currentColor">
@@ -365,6 +434,7 @@ export function IssueCard() {
           loading={partSearchLoading.value}
           suggested={aiSuggestedPart.value}
           disabled={chipsDisabled}
+          selectedIcon={PartTypeIcon({ type: partSearchResults.value.find(p => p.id === form.partId)?.part_type })}
         />
         <ChipDropdown
           label="Owner"
@@ -386,6 +456,8 @@ export function IssueCard() {
             issueFormData.value = { ...issueFormData.value, priority: label, priorityId: id };
           }}
           disabled={chipsDisabled}
+          selectedColorBg={PRIORITY_COLORS[form.priorityId]?.bg}
+          selectedColorText={PRIORITY_COLORS[form.priorityId]?.text}
         />
         <TagChipMultiSelect
           tags={tagSearchResults.value}
@@ -397,9 +469,6 @@ export function IssueCard() {
             selectedTags.value = exists
               ? current.filter(t => t.id !== tag.id)
               : [...current, tag];
-          }}
-          onRemove={(tagId) => {
-            selectedTags.value = selectedTags.value.filter(t => t.id !== tagId);
           }}
           loading={tagSearchLoading.value}
           disabled={chipsDisabled}

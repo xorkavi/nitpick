@@ -1,3 +1,28 @@
+export interface AncestorInfo {
+  tagName: string;
+  classList: string[];
+  dataAttributes: Record<string, string>;
+  reactComponentName: string | null;
+}
+
+export interface SiblingInfo {
+  tagName: string;
+  textContent: string;
+  classList: string[];
+  dataAttributes: Record<string, string>;
+  reactComponentName: string | null;
+}
+
+export interface ChildInfo {
+  tagName: string;
+  textContent: string;
+  classList: string[];
+  dataAttributes: Record<string, string>;
+  htmlAttributes: Record<string, string>;
+  reactComponentName: string | null;
+  computedStyles: Record<string, string>;
+}
+
 export interface ElementMetadata {
   tagName: string;
   id: string;
@@ -12,6 +37,12 @@ export interface ElementMetadata {
   };
   computedStyles: Record<string, string>;
   cssVariables: Record<string, string>;
+  dataAttributes: Record<string, string>;
+  htmlAttributes: Record<string, string>;
+  reactComponentName: string | null;
+  ancestorChain: AncestorInfo[];
+  siblingContext: SiblingInfo[];
+  childContext: ChildInfo[];
   contrastRatio: number | null;
   pageContext: {
     url: string;
@@ -43,12 +74,15 @@ export type NitpickMode = 'idle' | 'inspecting';
 
 // Phase 2: DevRev entities
 
+export type PartType = 'product' | 'feature' | 'capability' | 'enhancement' | 'component' | string;
+
 export interface DevRevPart {
   id: string;
   display_id: string;
   name: string;
   description?: string;
   owned_by?: Array<{ id: string; display_name: string }>;
+  part_type?: PartType;
 }
 
 export interface DevRevUser {
@@ -58,6 +92,7 @@ export interface DevRevUser {
   email?: string;
   full_name?: string;
   thumbnail?: string;
+  org_name?: string;
 }
 
 export interface DevRevTag {

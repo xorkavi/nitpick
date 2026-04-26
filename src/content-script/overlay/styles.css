@@ -169,7 +169,7 @@
   border: 1px solid var(--stroke-neutral-subtle);
   border-radius: var(--corner-square-x2);
   box-shadow: var(--elevation-04);
-  padding: 10px 12px;
+  padding: 12px;
   font-family: var(--core-font-text), sans-serif;
   /* Arcade: system */
   font-size: var(--typography-system-font-size);
@@ -195,12 +195,28 @@
   margin-bottom: 12px;
 }
 
-.nitpick-issue-badge {
+.nitpick-issue-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 2px;
   /* Arcade: system-medium */
   font-size: var(--typography-system-medium-font-size);
   font-weight: var(--typography-system-medium-font-weight);
   letter-spacing: var(--typography-system-medium-letter-spacing);
   line-height: var(--typography-system-medium-line-height);
+}
+
+.nitpick-issue-breadcrumb-org {
+  color: var(--fg-neutral-subtle);
+  font-weight: var(--typography-system-font-weight);
+}
+
+.nitpick-issue-breadcrumb-sep {
+  color: var(--fg-neutral-subtle);
+  flex-shrink: 0;
+}
+
+.nitpick-issue-breadcrumb-current {
   color: var(--fg-neutral-prominent);
 }
 
@@ -234,15 +250,15 @@
   border: none;
   border-radius: 0;
   padding: 4px 0;
-  /* Arcade: body-small but with medium weight (closest match for a title at 13px) */
-  font-size: var(--typography-body-small-font-size);
-  font-weight: var(--font-weight-medium);
-  letter-spacing: var(--typography-body-small-letter-spacing);
-  line-height: var(--typography-body-small-line-height);
+  /* Arcade: body-large-bold */
+  font-size: var(--typography-body-large-font-size);
+  font-weight: var(--typography-body-large-bold-font-weight);
+  letter-spacing: var(--typography-body-large-letter-spacing);
+  line-height: var(--typography-body-large-line-height);
   font-family: inherit;
   color: var(--fg-neutral-prominent);
   background: transparent;
-  margin-bottom: 4px;
+  margin-bottom: 0;
   box-sizing: border-box;
   outline: none;
   resize: none;
@@ -256,11 +272,11 @@
   border: none;
   border-radius: 0;
   padding: 4px 0;
-  /* Arcade: body-small */
-  font-size: var(--typography-body-small-font-size);
-  font-weight: var(--typography-body-small-font-weight);
-  letter-spacing: var(--typography-body-small-letter-spacing);
-  line-height: var(--typography-body-small-line-height);
+  /* Arcade: body */
+  font-size: var(--typography-body-font-size);
+  font-weight: var(--typography-body-font-weight);
+  letter-spacing: var(--typography-body-letter-spacing);
+  line-height: var(--typography-body-line-height);
   font-family: inherit;
   color: var(--fg-neutral-prominent);
   background: transparent;
@@ -275,7 +291,7 @@
 .nitpick-issue-desc::placeholder { color: var(--input-fg-placeholder); }
 
 .nitpick-screenshots-section {
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .nitpick-screenshots-label {
@@ -310,32 +326,10 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 16px;
 }
 
-/* Tag pills — removable selected tags shown below chips */
-.nitpick-tag-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 4px;
-}
-
-.nitpick-tag-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  height: 18px;
-  padding: 0 6px;
-  border: 1px solid var(--stroke-neutral-subtle);
-  border-radius: 9999px;
-  background: var(--surface-overlay);
-  color: var(--fg-neutral-prominent);
-  font-size: var(--typography-numerical-font-size);
-  font-weight: var(--font-weight-regular);
-  line-height: var(--typography-numerical-line-height);
-}
-
+/* Tag color dot */
 .nitpick-tag-dot {
   width: 6px;
   height: 6px;
@@ -343,18 +337,22 @@
   flex-shrink: 0;
 }
 
-.nitpick-tag-pill-remove {
-  display: flex;
+/* Stacked dots for 2+ tags in chip */
+.nitpick-tag-dots-stack {
+  display: inline-flex;
   align-items: center;
-  background: none;
-  border: none;
-  color: var(--fg-neutral-subtle);
-  cursor: pointer;
-  padding: 0;
-  margin-left: 2px;
 }
-.nitpick-tag-pill-remove:hover { color: var(--fg-neutral-prominent); }
 
+.nitpick-tag-dot-stacked {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid var(--bg-neutral-subtle);
+  box-sizing: border-box;
+}
+
+/* Tag checkbox in dropdown — empty outline on hover, filled when checked */
 .nitpick-tag-checkbox {
   width: 14px;
   height: 14px;
@@ -362,34 +360,79 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: var(--fg-neutral-prominent);
+  border-radius: 3px;
+  border: 1.5px solid transparent;
+  color: transparent;
+  transition: border-color 100ms ease, background 100ms ease, color 100ms ease;
+}
+
+.nitpick-dropdown-option:hover .nitpick-tag-checkbox:not(.nitpick-tag-checkbox--checked) {
+  border-color: var(--fg-neutral-subtle);
+}
+
+.nitpick-tag-checkbox--checked {
+  background: var(--fg-neutral-prominent);
+  border-color: var(--fg-neutral-prominent);
+  color: white;
+}
+
+/* Divider between selected and unselected in tag dropdown */
+.nitpick-dropdown-divider {
+  height: 1px;
+  background: var(--stroke-neutral-subtle);
+  margin: 4px 12px;
 }
 
 /* Chips — matches Arcade Tag (tinted neutral) */
 .nitpick-chip {
   display: flex;
   align-items: center;
-  gap: 4px;
-  height: var(--control-size-small);
-  padding: 0 8px;
+  gap: 6px;
+  height: var(--control-size-default);
+  padding: 0 10px;
   border: none;
   border-radius: var(--corner-square);
-  background: var(--bg-neutral-subtle);
+  background: var(--bg-neutral-soft);
   color: var(--fg-neutral-prominent);
-  /* Arcade: system-small */
-  font-size: var(--typography-system-small-font-size);
-  font-weight: var(--typography-system-small-font-weight);
-  letter-spacing: var(--typography-system-small-letter-spacing);
-  line-height: var(--typography-system-small-line-height);
+  /* Arcade: system */
+  font-size: var(--typography-system-font-size);
+  font-weight: var(--typography-system-font-weight);
+  letter-spacing: var(--typography-system-letter-spacing);
+  line-height: var(--typography-system-line-height);
   font-family: inherit;
   cursor: pointer;
-  max-width: 140px;
+  max-width: 180px;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
+
+
+.nitpick-chip-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.nitpick-chip svg {
+  flex-shrink: 0;
+}
+
+.nitpick-chip-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.nitpick-chip-priority-label {
+  padding: 1px 6px;
+  border-radius: var(--corner-square);
+  font-weight: var(--typography-system-medium-font-weight);
+  white-space: nowrap;
+}
+
 .nitpick-chip:hover {
-  background: var(--control-bg-neutral-medium-idle);
+  background: var(--bg-neutral-subtle);
 }
 
 /* Create Issue button — matches Arcade Button primary (lg) */

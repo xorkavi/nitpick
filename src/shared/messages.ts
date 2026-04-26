@@ -50,6 +50,9 @@ export type Message =
   // Phase 3: Tags search
   | { action: 'SEARCH_TAGS'; query: string; limit?: number }
   | { action: 'SEARCH_TAGS_RESULT'; tags: DevRevTag[] }
+  // Authenticated thumbnail fetch
+  | { action: 'FETCH_THUMBNAIL'; url: string }
+  | { action: 'THUMBNAIL_RESULT'; dataUrl: string | null }
   // Phase 2: Issue creation
   | { action: 'CREATE_ISSUE'; issueData: CreateIssuePayload }
   | {

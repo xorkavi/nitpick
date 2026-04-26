@@ -194,8 +194,8 @@ export function SettingsPage() {
   const isSetup = useComputed(() => !pat.value && !openaiKey.value);
   const bothSaved = useComputed(() => patStatus.value === 'saved' && openaiKeyStatus.value === 'saved');
 
-  const handleStartCommenting = async () => {
-    await chrome.runtime.sendMessage({ action: 'TOGGLE_COMMENT_MODE' });
+  const handleStartCommenting = () => {
+    chrome.runtime.sendMessage({ action: 'TOGGLE_COMMENT_MODE' });
     window.close();
   };
 
@@ -255,7 +255,7 @@ export function SettingsPage() {
             variant={patStatus.value === 'error' ? 'destructive' : 'primary'}
             size="md"
             onClick={handleSavePAT}
-            disabled={!pat.value.trim() || patStatus.value === 'saving'}
+            disabled={!pat.value.trim() || patStatus.value === 'saving' || patStatus.value === 'saved'}
             loading={patStatus.value === 'saving'}
             style={{ marginTop: '20px', minWidth: '80px' }}
           >
@@ -295,11 +295,11 @@ export function SettingsPage() {
             variant={openaiKeyStatus.value === 'error' ? 'destructive' : 'primary'}
             size="md"
             onClick={handleSaveOpenAIKey}
-            disabled={!openaiKey.value.trim() || openaiKeyStatus.value === 'saving'}
+            disabled={!openaiKey.value.trim() || openaiKeyStatus.value === 'saving' || openaiKeyStatus.value === 'saved'}
             loading={openaiKeyStatus.value === 'saving'}
-            style={{ marginTop: '20px' }}
+            style={{ marginTop: '20px', minWidth: '80px' }}
           >
-            {openaiKeyStatus.value === 'saving' ? 'Verifying...' : openaiKeyStatus.value === 'saved' ? 'Saved' : 'Save'}
+            {openaiKeyStatus.value === 'saving' ? '' : openaiKeyStatus.value === 'saved' ? 'Saved' : 'Save'}
           </Button>
         </div>
       </div>

@@ -247,13 +247,15 @@ function activateCommentMode(): void {
   // Prefetch DevRev data for dropdowns (D-14)
   chrome.runtime.sendMessage(
     { action: 'PREFETCH_DEVREV_DATA' },
-    (response: { action?: string; parts?: unknown[]; users?: unknown[]; self?: unknown; message?: string } | undefined) => {
+    (response: { action?: string; parts?: unknown[]; users?: unknown[]; self?: unknown; orgName?: string; message?: string } | undefined) => {
       if (chrome.runtime.lastError) {
         console.warn('[Nitpick] DevRev prefetch failed:', chrome.runtime.lastError.message);
         return;
       }
       if (response && response.action === 'DEVREV_DATA_READY') {
-        devrevSelf.value = (response.self || null) as import('../shared/types').DevRevUser | null;
+        const self = (response.self || null) as import('../shared/types').DevRevUser | null;
+        if (self && response.orgName) self.org_name = response.orgName;
+        devrevSelf.value = self;
         devrevDataLoaded.value = true;
       } else if (response && response.action === 'ERROR') {
         console.warn('[Nitpick] DevRev prefetch error:', response.message);

@@ -170,6 +170,7 @@ export async function searchParts(
       name: r.part!.name,
       description: r.part!.description,
       owned_by: r.part!.owned_by,
+      part_type: r.part!.type,
     }));
 }
 
@@ -251,31 +252,46 @@ async function fetchSelf(config: DevRevConfig): Promise<DevRevUser> {
   return response.dev_user;
 }
 
+async function fetchOrgName(config: DevRevConfig): Promise<string | null> {
+  try {
+    const response = await devrevFetch<{
+      dev_org: { display_name?: string };
+    }>(config, '/dev-orgs.get', { method: 'GET' });
+    return response.dev_org?.display_name ?? null;
+  } catch {
+    return null;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Module-level cache (self + tag only)
 // ---------------------------------------------------------------------------
 
 let selfCache: DevRevUser | null = null;
 let nitpickedTagId: string | null = null;
+let orgNameCache: string | null = null;
 
 // ---------------------------------------------------------------------------
-// Prefetch (self + tag only — parts and users use live search)
+// Prefetch (self + org + tag — parts and users use live search)
 // ---------------------------------------------------------------------------
 
 export async function prefetchDevRevData(): Promise<{
   self: DevRevUser | null;
+  orgName: string | null;
 }> {
   const config = await getDevRevConfig();
 
-  const [selfResult, tagResult] = await Promise.allSettled([
+  const [selfResult, tagResult, orgResult] = await Promise.allSettled([
     fetchSelf(config),
     findNitpickedTag(config),
+    fetchOrgName(config),
   ]);
 
   if (selfResult.status === 'fulfilled') selfCache = selfResult.value;
   if (tagResult.status === 'fulfilled') nitpickedTagId = tagResult.value;
+  if (orgResult.status === 'fulfilled') orgNameCache = orgResult.value;
 
-  return { self: selfCache };
+  return { self: selfCache, orgName: orgNameCache };
 }
 
 async function findNitpickedTag(config: DevRevConfig): Promise<string | null> {
@@ -312,6 +328,39 @@ export function clearCache(): void {
   selfCache = null;
   baseUrlCache = null;
   nitpickedTagId = null;
+  thumbnailCache.clear();
+}
+
+// ---------------------------------------------------------------------------
+// Authenticated thumbnail fetch (returns data URL)
+// ---------------------------------------------------------------------------
+
+const thumbnailCache = new Map<string, string>();
+
+export async function fetchThumbnail(url: string): Promise<string | null> {
+  if (!url) return null;
+  if (thumbnailCache.has(url)) return thumbnailCache.get(url)!;
+
+  try {
+    const config = await getDevRevConfig();
+    const response = await fetch(url, {
+      headers: { Authorization: config.pat },
+    });
+    if (!response.ok) return null;
+    const blob = await response.blob();
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const dataUrl = reader.result as string;
+        thumbnailCache.set(url, dataUrl);
+        resolve(dataUrl);
+      };
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
 }
 
 // ---------------------------------------------------------------------------

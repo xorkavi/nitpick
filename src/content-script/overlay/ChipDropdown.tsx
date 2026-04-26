@@ -1,13 +1,17 @@
 import { useSignal } from '@preact/signals';
 import { useRef, useEffect } from 'preact/hooks';
+import type { ComponentChildren } from 'preact';
 
-interface ChipDropdownOption {
+export interface ChipDropdownOption {
   id: string;
   label: string;
   description?: string;
   initials?: string;
   avatarUrl?: string;
   searchText?: string;
+  icon?: ComponentChildren;
+  colorBg?: string;
+  colorText?: string;
 }
 
 interface ChipDropdownProps {
@@ -19,9 +23,12 @@ interface ChipDropdownProps {
   suggested?: string;
   disabled?: boolean;
   loading?: boolean;
+  selectedIcon?: ComponentChildren;
+  selectedColorBg?: string;
+  selectedColorText?: string;
 }
 
-export function ChipDropdown({ label, value, options, onSelect, onSearch, suggested, disabled, loading }: ChipDropdownProps) {
+export function ChipDropdown({ label, value, options, onSelect, onSearch, suggested, disabled, loading, selectedIcon, selectedColorBg, selectedColorText }: ChipDropdownProps) {
   const isOpen = useSignal(false);
   const flipUp = useSignal(false);
   const alignRight = useSignal(false);
@@ -145,7 +152,12 @@ export function ChipDropdown({ label, value, options, onSelect, onSearch, sugges
         aria-haspopup="listbox"
         disabled={disabled}
       >
-        {value || label}
+        {selectedIcon && value && <span class="nitpick-chip-icon">{selectedIcon}</span>}
+        {value && selectedColorBg ? (
+          <span class="nitpick-chip-priority-label" style={{ background: selectedColorBg, color: selectedColorText }}>{value}</span>
+        ) : (
+          <span class="nitpick-chip-label">{value || label}</span>
+        )}
         <svg width="12" height="12" viewBox="0 0 32 32" fill="currentColor">
           <path d="M16.71 20.295h-1.42l-7-7 1.59-1.59a49 49 0 0 1 5.715 6.845h.81a49 49 0 0 1 5.715-6.845l1.59 1.59z"/>
         </svg>
@@ -181,6 +193,7 @@ export function ChipDropdown({ label, value, options, onSelect, onSearch, sugges
                   onMouseDown={handleSearchClick}
                   onMouseEnter={() => { highlightIndex.value = i; }}
                 >
+                  {opt.icon && <span class="nitpick-chip-icon">{opt.icon}</span>}
                   {(opt.initials || opt.avatarUrl) && (
                     <span class="nitpick-avatar">
                       {opt.avatarUrl
@@ -188,12 +201,18 @@ export function ChipDropdown({ label, value, options, onSelect, onSearch, sugges
                         : opt.initials}
                     </span>
                   )}
-                  <span class="nitpick-dropdown-option-label">
-                    {opt.label}
-                    {opt.description && (
-                      <span class="nitpick-dropdown-option-desc">{opt.description}</span>
-                    )}
-                  </span>
+                  {opt.colorBg ? (
+                    <span class="nitpick-chip-priority-label" style={{ background: opt.colorBg, color: opt.colorText }}>
+                      {opt.label}
+                    </span>
+                  ) : (
+                    <span class="nitpick-dropdown-option-label">
+                      {opt.label}
+                      {opt.description && (
+                        <span class="nitpick-dropdown-option-desc">{opt.description}</span>
+                      )}
+                    </span>
+                  )}
                   {opt.id === suggested && <span class="nitpick-ai-badge">AI</span>}
                 </button>
               ))}

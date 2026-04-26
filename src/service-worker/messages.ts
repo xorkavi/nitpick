@@ -17,6 +17,7 @@ import {
   searchParts,
   searchUsers,
   searchTags,
+  fetchThumbnail,
 } from './devrev-api';
 
 export function setupMessageHandler(): void {
@@ -84,8 +85,8 @@ export function setupMessageHandler(): void {
 
         case 'PREFETCH_DEVREV_DATA': {
           prefetchDevRevData()
-            .then(({ self }) => {
-              sendResponse({ action: 'DEVREV_DATA_READY', self });
+            .then(({ self, orgName }) => {
+              sendResponse({ action: 'DEVREV_DATA_READY', self, orgName });
             })
             .catch((err) => {
               console.error('[Nitpick] DevRev prefetch failed:', err);
@@ -202,6 +203,13 @@ export function setupMessageHandler(): void {
             }
           })();
           return true; // async
+        }
+
+        case 'FETCH_THUMBNAIL': {
+          fetchThumbnail(msg.url ?? '').then((dataUrl) => {
+            sendResponse({ action: 'THUMBNAIL_RESULT', dataUrl });
+          });
+          return true;
         }
 
         default:
