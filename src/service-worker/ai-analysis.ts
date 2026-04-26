@@ -256,6 +256,7 @@ RULES:
   - Children: their computed styles (max-width, min-width, overflow, white-space, text-overflow) and Tailwind classes often contain the actual constraint.
   - Siblings: absolutely-positioned siblings are often visual overlays, backgrounds, or decorators (e.g., active-tab highlight pills, selection indicators). When you see a sibling with position: absolute, its width/height mismatching the parent's inner dimensions is a common root cause for alignment bugs. Report THAT element's properties.
   - When a positioned sibling's height/width doesn't fit inside the parent's content area (parent size minus padding), flag the mismatch explicitly.
+- If a React component name suggests a design system component (e.g., TabItem, Button, IconButton, MenuV2, Tabs), note in the diagnosis that the relevant CSS classes may come from a DS theme config rather than the component JSX. This helps the fixer know to trace into the theme.
 - Do NOT include a "Code identifiers" section — that is auto-appended separately. Focus only on the human-readable analysis.
 
 OUTPUT FORMAT (use exactly these section markers on their own line):
