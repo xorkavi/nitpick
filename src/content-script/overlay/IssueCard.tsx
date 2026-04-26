@@ -209,8 +209,8 @@ export function IssueCard() {
         <span class="nitpick-issue-badge">New Issue</span>
         <div class="nitpick-issue-header-actions">
           <button class="nitpick-icon-btn" onClick={handleRefresh} aria-label="Reset form">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M1.5 7C1.5 3.96 3.96 1.5 7 1.5C10.04 1.5 12.5 3.96 12.5 7C12.5 10.04 10.04 12.5 7 12.5C5.18 12.5 3.58 11.59 2.6 10.2M1.5 3V7H5.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+            <svg width="16" height="16" viewBox="0 0 256 256" fill="currentColor">
+              <path d="M224,128a96,96,0,0,1-94.71,96H128A95.38,95.38,0,0,1,62.1,197.8a8,8,0,0,1,11-11.63A80,80,0,1,0,71.43,71.39a3.07,3.07,0,0,1-.26.25L44.59,96H72a8,8,0,0,1,0,16H24a8,8,0,0,1-8-8V56a8,8,0,0,1,16,0V85.8L60.25,60A96,96,0,0,1,224,128Z"/>
             </svg>
           </button>
           <button class="nitpick-icon-btn" onClick={handleClose} aria-label="Close issue form">

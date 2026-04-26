@@ -155,7 +155,7 @@
   border: 1px solid var(--stroke-neutral-subtle);
   border-radius: var(--corner-square-x2);
   box-shadow: var(--elevation-03);
-  padding: 16px;
+  padding: 10px 12px;
   font-family: var(--core-font-text), sans-serif;
   font-size: 13px;
   letter-spacing: -0.13px;
@@ -533,7 +533,7 @@
   background: var(--component-toast-success-bg);
   border: 1px solid var(--component-toast-success-stroke);
   border-radius: var(--corner-square-x2);
-  padding: 16px;
+  padding: 10px 16px;
   box-shadow: var(--elevation-03);
   display: flex;
   align-items: center;
