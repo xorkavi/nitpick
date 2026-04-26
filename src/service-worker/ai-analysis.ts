@@ -91,13 +91,19 @@ function buildRawIdentifiersBlock(metadata: ElementMetadata | AreaMetadata): str
     searchIds.push(`React components: ${reactNames.join(' → ')}`);
   }
 
-  // 3. Constraining Tailwind classes (directly greppable)
+  // 3. Specific Tailwind classes (directly greppable, ultra-common ones filtered out)
+  const TOO_COMMON = new Set(['overflow-hidden', 'overflow-auto', 'overflow-scroll', 'overflow-visible', 'truncate', 'whitespace-nowrap', 'whitespace-normal']);
+  const isUsefulConstraint = (cls: string) =>
+    /^(max-w-|max-h-|min-w-|min-h-|truncate|line-clamp-|overflow-|whitespace-|text-ellipsis|px-|py-|p-|pt-|pr-|pb-|pl-)/.test(cls)
+    && !TOO_COMMON.has(cls);
   const constrainingTw = metadata.childContext
     .flatMap((c) => c.classList)
-    .filter((cls) => /^(max-w-|max-h-|min-w-|min-h-|truncate|line-clamp-|overflow-|whitespace-|text-ellipsis)/.test(cls));
-  const elementTw = metadata.classList
-    .filter((cls) => /^(max-w-|max-h-|min-w-|min-h-|truncate|line-clamp-|overflow-|whitespace-|text-ellipsis)/.test(cls));
-  const allConstrainingTw = [...new Set([...elementTw, ...constrainingTw])];
+    .filter(isUsefulConstraint);
+  const elementTw = metadata.classList.filter(isUsefulConstraint);
+  const ancestorTw = metadata.ancestorChain
+    .flatMap((a) => a.classList)
+    .filter(isUsefulConstraint);
+  const allConstrainingTw = [...new Set([...elementTw, ...ancestorTw, ...constrainingTw])];
   if (allConstrainingTw.length > 0) {
     searchIds.push(`Tailwind (constraining): ${allConstrainingTw.join(', ')}`);
   }
@@ -121,6 +127,29 @@ function buildRawIdentifiersBlock(metadata: ElementMetadata | AreaMetadata): str
 
   // --- DOM path ---
   sections.push(`**DOM path:** \`${metadata.domPath}\``);
+
+  // --- Ancestor layout context (spacing, dimensions, overflow) ---
+  const ancestorsWithLayout = metadata.ancestorChain.filter((a) => {
+    const styles = a.computedStyles;
+    return styles['padding-top'] || styles['padding-right'] || styles['padding-bottom'] || styles['padding-left']
+      || styles['margin-top'] || styles['margin-right'] || styles['margin-bottom'] || styles['margin-left']
+      || styles['gap'] || styles['overflow'] || styles['max-width'] || styles['max-height'];
+  });
+  if (ancestorsWithLayout.length > 0) {
+    const ancestorLines = ancestorsWithLayout.map((a) => {
+      const parts = [`<${a.tagName}>`];
+      if (a.reactComponentName) parts.push(`React: ${a.reactComponentName}`);
+      const layoutClasses = a.classList.filter((cls) =>
+        /^(p-|px-|py-|pt-|pr-|pb-|pl-|m-|mx-|my-|mt-|mr-|mb-|ml-|gap-|overflow-|max-w-|max-h-)/.test(cls));
+      if (layoutClasses.length > 0) parts.push(`classes: ${layoutClasses.join(' ')}`);
+      const styles = Object.entries(a.computedStyles)
+        .filter(([, v]) => v && v !== '0px' && v !== 'visible' && v !== 'none' && v !== 'auto')
+        .map(([k, v]) => `${k}: ${v}`);
+      if (styles.length > 0) parts.push(styles.join('; '));
+      return `- ${parts.join(' | ')}`;
+    });
+    sections.push(`**Ancestors with layout styles (parent → up):**\n${ancestorLines.join('\n')}`);
+  }
 
   // --- Child element summary (with constraining styles) ---
   const constrainingChildren = metadata.childContext.filter((c) => {

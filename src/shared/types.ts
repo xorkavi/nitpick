@@ -3,6 +3,7 @@ export interface AncestorInfo {
   classList: string[];
   dataAttributes: Record<string, string>;
   reactComponentName: string | null;
+  computedStyles: Record<string, string>;
 }
 
 export interface SiblingInfo {

@@ -125,13 +125,26 @@ find /Users -maxdepth 5 -type d -name "*devrev-web*" 2>/dev/null
 
 **Always confirm with the developer before searching in a different repo.** Don't silently switch repos.
 
-## 7. Fast-path: check for strong identifiers
+## 7. Resolve runtime identifiers
+
+Before grepping any `data-drid` values, check if they are **runtime-generated**. Many repos construct drids from utility functions like `proxyDrids()`, `joinDrids()`, or similar builders.
+
+**How to tell:** If the drid looks segmented (e.g. `computer--left-nav--container`), it's likely built at runtime from a constant. Grepping the full literal will return 0 results.
+
+**What to do instead:**
+1. Search for a drid utility: `grep -r "proxyDrid\|joinDrid\|buildDrid" <target-repo-path>`
+2. If found, grep for the **last segment** (e.g. `container`) scoped to files near the utility
+3. Use the constant name to find usage in the component
+
+Only grep the literal drid value if no builder utility exists in the repo.
+
+## 8. Fast-path: check for strong identifiers
 
 Before doing any broad search, check if the description contains any of these one-grep-to-source identifiers:
 
-1. **data-drid** or **data-testid** value
-2. **React component name** — on the element OR any ancestor (ancestor names like `ChatMembersTitle` are equally valuable)
-3. **Constraining Tailwind class** — e.g. `max-w-32`, `truncate`, `line-clamp-2`
+1. **React component name** — on the element OR any ancestor (ancestor names like `ChatMembersTitle` are equally valuable). This is the single most valuable identifier.
+2. **data-drid** or **data-testid** value (after resolving per step 7)
+3. **Constraining Tailwind class** — e.g. `max-w-32`, `px-core-base`, `line-clamp-2` (ignore ultra-common ones like `overflow-hidden`)
 
 **If any of these exist → skip to the fast path:**
 ```
@@ -142,24 +155,35 @@ For React component names, also try: `glob "**/<ComponentName>*"` in the target 
 
 For Tailwind classes, grep in the directory narrowed by the page URL route.
 
-Only continue to step 8 if NO strong identifiers are found in the description.
+Only continue to step 9 if NO strong identifiers are found in the description.
 
-## 8. Full search (fallback)
+## 9. Full search (fallback)
 
 If no strong identifiers exist, search in **strict priority order** — stop as soon as you get a match:
 
-1. **data-drid / data-testid** — from element AND ancestors. One grep finds the exact component.
-2. **React component name** — from element AND ancestors. Ancestor names (e.g. `ChatMembersTitle`, `RecipientDisplay`) often map more directly to filenames than the clicked element's generic `<div>`.
-3. **Tailwind utility classes** — constraining classes like `max-w-32`, `truncate` are directly greppable in source. Grep within the route directory.
-4. **Custom/semantic class names** — Non-utility classes (skip `flex`, `items-center`, etc.).
-5. **Page URL → route mapping** — Narrows search to a directory.
-6. **CSS property values** — Last resort, most ambiguous.
+1. **React component name** — from element AND ancestors. Ancestor names (e.g. `ChatMembersTitle`, `RecipientDisplay`) often map more directly to filenames than the clicked element's generic `<div>`.
+2. **data-drid / data-testid** — from element AND ancestors. Resolve runtime drids first (step 7).
+3. **Tailwind utility classes** — specific classes like `px-core-base`, `max-w-32` are directly greppable in source. Skip ultra-common ones (`overflow-hidden`, `truncate`). Grep within the route directory.
+4. **Ancestor layout styles** — If the bug is about spacing/padding, check the "Ancestors with layout styles" section. The parent's padding/margin classes (e.g. `p-2`, `px-core-base`) are often the fix target, not the element itself.
+5. **Custom/semantic class names** — Non-utility classes (skip `flex`, `items-center`, etc.).
+6. **Page URL → route mapping** — Narrows search to a directory.
+7. **CSS property values** — Last resort, most ambiguous.
 
 Use Grep and Glob aggressively. Spawn an Explore agent if the search space is large.
 
 **Design system defaults**: If the description mentions a size/variant mismatch, check the component's default props in the design system — the element may not have an explicit prop and is relying on a default.
 
-## 9. Fix the bug
+## 10. Identify the styling system
+
+Before applying a fix, check how the target component gets its styles:
+
+1. **Direct Tailwind classes** — classes are in the JSX/TSX source. Fix by adding/removing/overriding classes.
+2. **Design system theme** — many DS components compose classes from theme configs (e.g. `variants`, `sizes`, `defaultProps`). If the CSS class you need to change (like `p-2`) comes from a theme config and not the component JSX, the fix might be a theme override (`!px-0`) or editing the theme config.
+3. **CSS-in-JS / styled-components** — styles are in template literals or style objects.
+
+Check if the component imports a theme, uses `cva()`, `tv()`, or similar variant utilities. If it does, the class you see in the DOM may not appear literally in the component file.
+
+## 11. Fix the bug
 
 Once the source is located:
 1. Read the relevant file(s)
@@ -167,7 +191,7 @@ Once the source is located:
 3. Apply the fix based on the description
 4. Verify the fix makes sense (type-check if applicable)
 
-## 10. Report
+## 12. Report
 
 Summarize:
 - What the issue described

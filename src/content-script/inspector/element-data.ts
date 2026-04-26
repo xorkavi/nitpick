@@ -206,15 +206,30 @@ function getReactComponentName(el: Element): string | null {
   return null;
 }
 
+const ANCESTOR_STYLE_PROPERTIES = [
+  'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
+  'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
+  'display', 'flex-direction', 'gap', 'align-items', 'justify-content',
+  'overflow', 'max-width', 'max-height', 'min-width', 'min-height',
+  'width', 'height',
+] as const;
+
 function buildAncestorChain(el: Element, depth: number = 4): AncestorInfo[] {
   const chain: AncestorInfo[] = [];
   let current = el.parentElement;
   for (let i = 0; i < depth && current && current !== document.documentElement; i++) {
+    const cs = window.getComputedStyle(current);
+    const styles: Record<string, string> = {};
+    for (const prop of ANCESTOR_STYLE_PROPERTIES) {
+      const val = cs.getPropertyValue(prop);
+      if (val) styles[prop] = val;
+    }
     chain.push({
       tagName: current.tagName.toLowerCase(),
       classList: Array.from(current.classList),
       dataAttributes: extractDataAttributes(current),
       reactComponentName: getReactComponentName(current),
+      computedStyles: styles,
     });
     current = current.parentElement;
   }
