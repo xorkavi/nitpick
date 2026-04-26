@@ -99,11 +99,14 @@ function buildRawIdentifiersBlock(metadata: ElementMetadata | AreaMetadata): str
   const constrainingTw = metadata.childContext
     .flatMap((c) => c.classList)
     .filter(isUsefulConstraint);
+  const siblingTw = metadata.siblingContext
+    .flatMap((s) => s.classList)
+    .filter(isUsefulConstraint);
   const elementTw = metadata.classList.filter(isUsefulConstraint);
   const ancestorTw = metadata.ancestorChain
     .flatMap((a) => a.classList)
     .filter(isUsefulConstraint);
-  const allConstrainingTw = [...new Set([...elementTw, ...ancestorTw, ...constrainingTw])];
+  const allConstrainingTw = [...new Set([...elementTw, ...ancestorTw, ...constrainingTw, ...siblingTw])];
   if (allConstrainingTw.length > 0) {
     searchIds.push(`Tailwind (constraining): ${allConstrainingTw.join(', ')}`);
   }
@@ -128,10 +131,12 @@ function buildRawIdentifiersBlock(metadata: ElementMetadata | AreaMetadata): str
   // --- DOM path ---
   sections.push(`**DOM path:** \`${metadata.domPath}\``);
 
-  // --- Ancestor layout context (spacing, dimensions, overflow) ---
+  // --- Ancestor layout context (spacing, dimensions, overflow, positioning) ---
   const ancestorsWithLayout = metadata.ancestorChain.filter((a) => {
     const styles = a.computedStyles;
-    return styles['padding-top'] || styles['padding-right'] || styles['padding-bottom'] || styles['padding-left']
+    const isPositioned = styles['position'] === 'relative' || styles['position'] === 'absolute' || styles['position'] === 'fixed';
+    return isPositioned
+      || styles['padding-top'] || styles['padding-right'] || styles['padding-bottom'] || styles['padding-left']
       || styles['margin-top'] || styles['margin-right'] || styles['margin-bottom'] || styles['margin-left']
       || styles['gap'] || styles['overflow'] || styles['max-width'] || styles['max-height'];
   });
@@ -151,26 +156,52 @@ function buildRawIdentifiersBlock(metadata: ElementMetadata | AreaMetadata): str
     sections.push(`**Ancestors with layout styles (parent → up):**\n${ancestorLines.join('\n')}`);
   }
 
-  // --- Child element summary (with constraining styles) ---
+  // --- Child element summary (with constraining styles or positioned overlays) ---
   const constrainingChildren = metadata.childContext.filter((c) => {
     const hasConstraint = Object.entries(c.computedStyles).some(([k]) =>
       ['max-width', 'max-height', 'min-width', 'min-height', 'overflow', 'text-overflow', 'white-space'].includes(k)
     );
-    return hasConstraint || c.classList.some((cls) => /^(max-w-|truncate|line-clamp-|overflow-|whitespace-)/.test(cls));
+    const isPositioned = c.computedStyles['position'] === 'absolute' || c.computedStyles['position'] === 'fixed';
+    return hasConstraint || isPositioned || c.classList.some((cls) => /^(max-w-|truncate|line-clamp-|overflow-|whitespace-)/.test(cls));
   });
   if (constrainingChildren.length > 0) {
     const childLines = constrainingChildren.map((c) => {
       const parts = [`<${c.tagName}>`];
       if (c.reactComponentName) parts.push(`React: ${c.reactComponentName}`);
-      const tw = c.classList.filter((cls) => /^(max-w-|max-h-|min-w-|min-h-|truncate|line-clamp-|overflow-|whitespace-)/.test(cls));
+      const tw = c.classList.filter((cls) => /^(max-w-|max-h-|min-w-|min-h-|truncate|line-clamp-|overflow-|whitespace-|absolute|fixed|h-|w-)/.test(cls));
       if (tw.length > 0) parts.push(`classes: ${tw.join(' ')}`);
       const styles = Object.entries(c.computedStyles)
-        .filter(([k]) => ['max-width', 'max-height', 'min-width', 'min-height', 'overflow', 'text-overflow', 'white-space'].includes(k))
+        .filter(([k]) => ['width', 'height', 'max-width', 'max-height', 'min-width', 'min-height', 'position', 'overflow', 'text-overflow', 'white-space'].includes(k))
+        .filter(([, v]) => v && v !== 'auto' && v !== 'none' && v !== 'visible' && v !== 'static' && v !== 'normal')
         .map(([k, v]) => `${k}: ${v}`);
       if (styles.length > 0) parts.push(styles.join('; '));
       return `- ${parts.join(' | ')}`;
     });
     sections.push(`**Children with constraints:**\n${childLines.join('\n')}`);
+  }
+
+  // --- Sibling elements with layout significance (positioned overlays, decorators) ---
+  const layoutSiblings = metadata.siblingContext.filter((s) => {
+    const isPositioned = s.computedStyles['position'] === 'absolute' || s.computedStyles['position'] === 'fixed';
+    const hasConstraint = Object.entries(s.computedStyles).some(([k]) =>
+      ['max-width', 'max-height', 'min-width', 'min-height', 'overflow', 'text-overflow', 'white-space'].includes(k)
+    );
+    return isPositioned || hasConstraint;
+  });
+  if (layoutSiblings.length > 0) {
+    const sibLines = layoutSiblings.map((s) => {
+      const parts = [`<${s.tagName}>`];
+      if (s.reactComponentName) parts.push(`React: ${s.reactComponentName}`);
+      const tw = s.classList.filter((cls) => /^(max-w-|max-h-|min-w-|min-h-|h-|w-|absolute|fixed|overflow-|whitespace-)/.test(cls));
+      if (tw.length > 0) parts.push(`classes: ${tw.join(' ')}`);
+      const styles = Object.entries(s.computedStyles)
+        .filter(([k]) => ['width', 'height', 'max-width', 'max-height', 'min-width', 'min-height', 'position', 'overflow'].includes(k))
+        .filter(([, v]) => v && v !== 'auto' && v !== 'none' && v !== 'visible' && v !== 'static' && v !== 'normal')
+        .map(([k, v]) => `${k}: ${v}`);
+      if (styles.length > 0) parts.push(styles.join('; '));
+      return `- ${parts.join(' | ')}`;
+    });
+    sections.push(`**Siblings with layout significance (positioned overlays, decorators):**\n${sibLines.join('\n')}`);
   }
 
   if (sections.length <= 1) return '';
@@ -206,22 +237,25 @@ TASK: Given a user's plain-language bug description, an element's CSS/DOM metada
    - "[Button] Primary CTA color does not match design system token"
    The title MUST immediately convey what is wrong and where.
 2. A description with:
-   - One summary paragraph (2-3 sentences) explaining the visual defect
+   - A 1-2 sentence diagnosis explaining WHY the problem occurs based on the DOM data (don't just restate the complaint)
    - 3-5 bullet points listing ONLY the CSS/DOM properties relevant to the user's complaint, with actual computed values
 3. A suggested Part (from the list below) — match by page URL or component area
 4. A suggested Owner (from the list below)
 
 RULES:
-- FILTER first: identify which properties relate to the user's complaint
-- Reference ONLY relevant properties with their actual values
-- Do NOT dump all CSS properties
+- FILTER first: read the user's complaint, then identify which properties from the metadata explain that specific problem. You receive extensive DOM data — most of it is irrelevant to any given bug. Your job is triage, not transcription.
+- Reference ONLY the properties that explain or contribute to the user's complaint. Ignore everything else, even if it looks unusual.
+- Do NOT dump all CSS properties — 3-5 targeted bullets is the goal
 - Format property values clearly: "font-size: 12px"
 - If you can infer expected values from context, note them: "font-size: 12px (expected: 14px based on sibling elements)"
 - Keep the description under 200 words
 - If a screenshot is provided, use visual context to be more precise about the problem
 - When reporting affected properties, include BOTH computed CSS values AND the raw HTML/component attribute values that likely control them. For example, if a button's size comes from a size="M" attribute, report that alongside the computed CSS.
 - If a Tailwind class like \`max-w-32\` or \`truncate\` is the likely cause, include it alongside the computed value — Tailwind classes are directly greppable in source code.
-- IMPORTANT: The root cause is often on a CHILD element, not the selected element itself. Check the child elements data carefully — their computed styles (especially max-width, min-width, overflow, white-space, text-overflow) and Tailwind classes often contain the actual constraint causing the bug. Report THAT child's properties, not just the parent's.
+- IMPORTANT: The root cause is often on a CHILD or SIBLING element, not the selected element itself. Check children AND siblings carefully:
+  - Children: their computed styles (max-width, min-width, overflow, white-space, text-overflow) and Tailwind classes often contain the actual constraint.
+  - Siblings: absolutely-positioned siblings are often visual overlays, backgrounds, or decorators (e.g., active-tab highlight pills, selection indicators). When you see a sibling with position: absolute, its width/height mismatching the parent's inner dimensions is a common root cause for alignment bugs. Report THAT element's properties.
+  - When a positioned sibling's height/width doesn't fit inside the parent's content area (parent size minus padding), flag the mismatch explicitly.
 - Do NOT include a "Code identifiers" section — that is auto-appended separately. Focus only on the human-readable analysis.
 
 OUTPUT FORMAT (use exactly these section markers on their own line):
@@ -229,11 +263,14 @@ TITLE: [title here]
 DESCRIPTION:
 [Write in Markdown format. Use **bold** for property names, \`code\` for values.]
 
-[summary paragraph]
+[1-2 sentence diagnosis: combine the user's complaint with the DOM data to explain WHY the problem occurs. Don't restate what the user said — add what the data reveals. If you can identify the specific mismatch or conflict causing the issue, state it here.]
 
-**Affected properties:**
-- **property-name:** \`actual-value\` (expected: \`expected-value\`)
-- (If the root cause is on a child element, say which child and list ITS properties)
+**What's wrong:**
+- [element] **property:** \`actual-value\` — expected \`expected-value\` [reason]
+- (3-5 bullets max, each naming which element the property is on: "selected element", "child <button>", "sibling <span>", "parent <div>")
+
+**Root cause element:** [which element — selected / child / sibling / ancestor] with [its key class or identifier]
+(Skip this line if the root cause IS the selected element itself)
 
 **Environment:**
 | Property | Value |
@@ -356,8 +393,15 @@ ${topElements
     ? `Sibling elements in same container:\n${metadata.siblingContext.map((s) => {
         const parts = [`  - <${s.tagName}> "${s.textContent.slice(0, 50)}"`];
         if (s.reactComponentName) parts.push(`React: ${s.reactComponentName}`);
+        if (s.classList.length > 0) parts.push(`classes: ${s.classList.join(' ')}`);
         const dAttrs = Object.entries(s.dataAttributes);
         if (dAttrs.length > 0) parts.push(dAttrs.map(([k, v]) => `${k}="${v}"`).join(' '));
+        const hAttrs = Object.entries(s.htmlAttributes);
+        if (hAttrs.length > 0) parts.push(hAttrs.map(([k, v]) => `${k}="${v}"`).join(' '));
+        const styles = Object.entries(s.computedStyles)
+          .filter(([, v]) => v && v !== '0px' && v !== 'auto' && v !== 'none' && v !== 'visible' && v !== 'static' && v !== 'normal')
+          .map(([k, v]) => `${k}: ${v}`);
+        if (styles.length > 0) parts.push(`styles: ${styles.join('; ')}`);
         return parts.join(' | ');
       }).join('\n')}`
     : '';
@@ -371,10 +415,10 @@ ${topElements
         if (dAttrs.length > 0) parts.push(dAttrs.map(([k, v]) => `${k}="${v}"`).join(' '));
         const hAttrs = Object.entries(c.htmlAttributes);
         if (hAttrs.length > 0) parts.push(hAttrs.map(([k, v]) => `${k}="${v}"`).join(' '));
-        const keyStyles = Object.entries(c.computedStyles)
-          .filter(([k]) => ['max-width','min-width','max-height','min-height','overflow','white-space','text-overflow','font-size','font-weight'].includes(k))
+        const styles = Object.entries(c.computedStyles)
+          .filter(([, v]) => v && v !== '0px' && v !== 'auto' && v !== 'none' && v !== 'visible' && v !== 'static' && v !== 'normal')
           .map(([k, v]) => `${k}: ${v}`);
-        if (keyStyles.length > 0) parts.push(`styles: ${keyStyles.join('; ')}`);
+        if (styles.length > 0) parts.push(`styles: ${styles.join('; ')}`);
         return parts.join(' | ');
       }).join('\n')}`
     : '';

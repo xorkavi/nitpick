@@ -209,7 +209,7 @@ function getReactComponentName(el: Element): string | null {
 const ANCESTOR_STYLE_PROPERTIES = [
   'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
   'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
-  'display', 'flex-direction', 'gap', 'align-items', 'justify-content',
+  'display', 'position', 'flex-direction', 'gap', 'align-items', 'justify-content',
   'overflow', 'max-width', 'max-height', 'min-width', 'min-height',
   'width', 'height',
 ] as const;
@@ -245,24 +245,33 @@ function buildSiblingContext(el: Element, max: number = 5): SiblingInfo[] {
     if (siblings.length >= max) break;
     const childRect = child.getBoundingClientRect();
     if (childRect.width === 0 || childRect.height === 0) continue;
+    const cs = window.getComputedStyle(child);
+    const styles: Record<string, string> = {};
+    for (const prop of CHILD_SIBLING_STYLE_PROPERTIES) {
+      const val = cs.getPropertyValue(prop);
+      if (val) styles[prop] = val;
+    }
     siblings.push({
       tagName: child.tagName.toLowerCase(),
       textContent: (child.textContent || '').trim().slice(0, 80),
       classList: Array.from(child.classList),
       dataAttributes: extractDataAttributes(child),
+      htmlAttributes: extractHtmlAttributes(child),
       reactComponentName: getReactComponentName(child),
+      computedStyles: styles,
     });
   }
   return siblings;
 }
 
-const CHILD_STYLE_PROPERTIES = [
+const CHILD_SIBLING_STYLE_PROPERTIES = [
   'width', 'height', 'min-width', 'min-height', 'max-width', 'max-height',
   'font-size', 'font-weight', 'line-height', 'color', 'background-color',
+  'opacity', 'z-index', 'border-radius',
   'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
   'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
-  'display', 'overflow', 'white-space', 'text-overflow', 'flex-direction',
-  'gap', 'align-items', 'justify-content',
+  'display', 'position', 'overflow', 'white-space', 'text-overflow',
+  'flex-direction', 'gap', 'align-items', 'justify-content',
 ] as const;
 
 function buildChildContext(el: Element, max: number = 8): ChildInfo[] {
@@ -273,7 +282,7 @@ function buildChildContext(el: Element, max: number = 8): ChildInfo[] {
     if (childRect.width === 0 || childRect.height === 0) continue;
     const cs = window.getComputedStyle(child);
     const styles: Record<string, string> = {};
-    for (const prop of CHILD_STYLE_PROPERTIES) {
+    for (const prop of CHILD_SIBLING_STYLE_PROPERTIES) {
       const val = cs.getPropertyValue(prop);
       if (val) styles[prop] = val;
     }

@@ -11,7 +11,9 @@ export interface SiblingInfo {
   textContent: string;
   classList: string[];
   dataAttributes: Record<string, string>;
+  htmlAttributes: Record<string, string>;
   reactComponentName: string | null;
+  computedStyles: Record<string, string>;
 }
 
 export interface ChildInfo {
