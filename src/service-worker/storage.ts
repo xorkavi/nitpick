@@ -27,6 +27,6 @@ export async function saveSettings(
 }
 
 export async function hasCredentials(): Promise<boolean> {
-  const { pat, openaiKey } = await getSettings();
-  return Boolean(pat && openaiKey);
+  const { pat } = await getSettings();
+  return Boolean(pat);
 }

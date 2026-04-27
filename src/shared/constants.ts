@@ -1,6 +1,6 @@
 export const STORAGE_KEYS = {
   pat: 'nitpick_pat',
-  openaiKey: 'nitpick_openai_key',
+  openaiKey: 'nitpick_openai_key', // kept for migration cleanup
   domains: 'nitpick_domains',
 } as const;
 
@@ -52,3 +52,5 @@ export const DEFAULT_PRIORITY: PriorityLevel = 'p2';
 
 export const DEVREV_API_BASE = 'https://api.devrev.ai';
 export const DEVREV_DEV_API_BASE = 'https://api.dev.devrev-eng.ai';
+
+export const NITPICK_PROXY_URL = 'https://nitpick-proxy.vercel.app/api/analyze';

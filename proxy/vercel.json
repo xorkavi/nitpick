@@ -1,0 +1,8 @@
+{
+  "functions": {
+    "api/*.ts": {
+      "runtime": "@vercel/node@latest",
+      "maxDuration": 60
+    }
+  }
+}

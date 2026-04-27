@@ -1,17 +1,21 @@
 /**
- * OpenAI streaming AI analysis module.
+ * AI analysis module.
  *
  * Implements the filter-then-describe prompt strategy (D-05):
  * AI receives user comment + element metadata, identifies relevant CSS
  * properties, and generates a concise issue title + description with
  * only the pertinent property values.
  *
+ * Calls the Nitpick proxy (Vercel Edge Function) which validates the
+ * user's DevRev PAT and forwards to OpenAI with a server-side key.
+ * The OpenAI API key never touches the browser.
+ *
  * Streaming relays chunks to the content script via port-based messaging
  * (AI_CHUNK / AI_DONE / AI_ERROR).
  */
 
-import OpenAI from 'openai';
 import type { ElementMetadata, AreaMetadata, BrowserMetadata, DevRevPart, DevRevUser } from '../shared/types';
+import { NITPICK_PROXY_URL } from '../shared/constants';
 import { getSettings } from './storage';
 import { getScreenshots } from './screenshot-store';
 
@@ -449,16 +453,6 @@ ${JSON.stringify(metadata.cssVariables, null, 2)}`;
 // Streaming analysis
 // ---------------------------------------------------------------------------
 
-/**
- * Stream AI analysis results to the content script via port-based messaging.
- *
- * Uses the OpenAI Responses API (required for GPT-5.5) with streaming.
- * Relays each text delta as an AI_CHUNK message. On completion, parses
- * the accumulated response and sends AI_DONE. On any error, sends AI_ERROR.
- *
- * Uses dangerouslyAllowBrowser: true because the service worker is an
- * extension context (not a web page) -- safe per Research Pitfall 4.
- */
 export async function streamAnalysis(
   port: chrome.runtime.Port,
   comment: string,
@@ -468,18 +462,13 @@ export async function streamAnalysis(
   try {
     const settings = await getSettings();
 
-    if (!settings.openaiKey) {
+    if (!settings.pat) {
       port.postMessage({
         action: 'AI_ERROR',
-        message: 'OpenAI API key not configured. Please set it in the extension settings.',
+        message: 'DevRev PAT not configured. Please set it in the extension settings.',
       });
       return;
     }
-
-    const client = new OpenAI({
-      apiKey: settings.openaiKey,
-      dangerouslyAllowBrowser: true,
-    });
 
     const parts: import('../shared/types').DevRevPart[] = [];
     const users: import('../shared/types').DevRevUser[] = [];
@@ -488,7 +477,7 @@ export async function streamAnalysis(
     const userMessage = buildUserMessage(comment, metadata, browserMetadata);
 
     const screenshots = getScreenshots();
-    const userContent: OpenAI.Responses.ResponseInputContent[] = [
+    const userContent: Array<{ type: string; text?: string; image_url?: string; detail?: string }> = [
       { type: 'input_text', text: userMessage },
     ];
 
@@ -500,28 +489,89 @@ export async function streamAnalysis(
       });
     }
 
-    const stream = client.responses.stream({
-      model: 'gpt-5.5',
-      instructions: systemPrompt,
-      input: [
-        { role: 'user', content: userContent },
-      ],
-      reasoning: { effort: 'low' },
-      max_output_tokens: 1200,
+    const response = await fetch(NITPICK_PROXY_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: settings.pat,
+      },
+      body: JSON.stringify({
+        instructions: systemPrompt,
+        input: [{ role: 'user', content: userContent }],
+      }),
     });
 
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ error: `HTTP ${response.status}` })) as { error?: string };
+      port.postMessage({
+        action: 'AI_ERROR',
+        message: err.error || `Proxy returned ${response.status}`,
+      });
+      return;
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) {
+      port.postMessage({ action: 'AI_ERROR', message: 'No response stream' });
+      return;
+    }
+
+    const decoder = new TextDecoder();
     let fullContent = '';
+    let buffer = '';
 
-    stream.on('response.output_text.delta', (event) => {
-      fullContent += event.delta;
-      try {
-        port.postMessage({ action: 'AI_CHUNK', delta: event.delta, snapshot: fullContent });
-      } catch {
-        // Port may have disconnected -- stream will end naturally
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() ?? '';
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const payload = line.slice(6);
+
+        if (payload === '[DONE]') {
+          const parsed = parseAIResponse(fullContent);
+          const rawBlock = buildRawIdentifiersBlock(metadata);
+          try {
+            port.postMessage({
+              action: 'AI_DONE',
+              title: parsed.title,
+              description: parsed.description + rawBlock,
+              suggestedPart: parsed.suggestedPart,
+              suggestedOwner: parsed.suggestedOwner,
+            });
+          } catch {
+            // Port disconnected
+          }
+          return;
+        }
+
+        try {
+          const data = JSON.parse(payload) as { delta?: string; error?: string };
+          if (data.error) {
+            port.postMessage({ action: 'AI_ERROR', message: data.error });
+            return;
+          }
+          if (data.delta) {
+            fullContent += data.delta;
+            try {
+              port.postMessage({ action: 'AI_CHUNK', delta: data.delta, snapshot: fullContent });
+            } catch {
+              // Port disconnected
+            }
+          }
+        } catch {
+          // Malformed SSE line -- skip
+        }
       }
-    });
+    }
 
-    stream.on('response.output_text.done', () => {
+    if (fullContent && !fullContent.includes('TITLE:')) {
+      port.postMessage({ action: 'AI_ERROR', message: 'Incomplete response from AI' });
+    } else if (fullContent) {
       const parsed = parseAIResponse(fullContent);
       const rawBlock = buildRawIdentifiersBlock(metadata);
       try {
@@ -533,22 +583,9 @@ export async function streamAnalysis(
           suggestedOwner: parsed.suggestedOwner,
         });
       } catch {
-        // Port may have disconnected
+        // Port disconnected
       }
-    });
-
-    stream.on('error', (error: unknown) => {
-      try {
-        port.postMessage({
-          action: 'AI_ERROR',
-          message: error instanceof Error ? error.message : 'AI analysis failed',
-        });
-      } catch {
-        // Port may have disconnected
-      }
-    });
-
-    await stream.finalResponse();
+    }
   } catch (error) {
     try {
       port.postMessage({
@@ -556,7 +593,7 @@ export async function streamAnalysis(
         message: error instanceof Error ? error.message : 'AI analysis failed',
       });
     } catch {
-      // Port may have disconnected
+      // Port disconnected
     }
   }
 }

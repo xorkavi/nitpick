@@ -13,7 +13,6 @@
     "@preact/signals": "^2.9.0",
     "@xorkavi/arcade-gen": "^1.0.0",
     "nanoid": "^5.1.9",
-    "openai": "^6.34.0",
     "preact": "^10.29.1",
     "react-day-picker": "^9.14.0",
     "zod": "^4.3.6"

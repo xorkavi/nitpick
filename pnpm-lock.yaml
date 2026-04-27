@@ -17,9 +17,6 @@ importers:
       nanoid:
         specifier: ^5.1.9
         version: 5.1.9
-      openai:
-        specifier: ^6.34.0
-        version: 6.34.0(zod@4.3.6)
       preact:
         specifier: ^10.29.1
         version: 10.29.1
@@ -1666,18 +1663,6 @@ packages:
 
   obug@2.1.1:
     resolution: {integrity: sha512-uTqF9MuPraAQ+IsnPf366RG4cP9RtUi7MLO1N3KEc+wb0a6yKpeL0lmk2IB1jY5KHPAlTc6T/JRdC/YqxHNwkQ==}
-
-  openai@6.34.0:
-    resolution: {integrity: sha512-yEr2jdGf4tVFYG6ohmr3pF6VJuveP0EA/sS8TBx+4Eq5NT10alu5zg2dmxMXMgqpihRDQlFGpRt2XwsGj+Fyxw==}
-    hasBin: true
-    peerDependencies:
-      ws: ^8.18.0
-      zod: ^3.25 || ^4.0
-    peerDependenciesMeta:
-      ws:
-        optional: true
-      zod:
-        optional: true
 
   pathe@2.0.3:
     resolution: {integrity: sha512-WUjGcAqP1gQacoQe+OBJsFA7Ld4DyXuUIjZ5cc75cLHvJ7dtNsTugphxIADwspS+AraAUePCKrSVtPLFj/F88w==}
@@ -3344,10 +3329,6 @@ snapshots:
       boolbase: 1.0.0
 
   obug@2.1.1: {}
-
-  openai@6.34.0(zod@4.3.6):
-    optionalDependencies:
-      zod: 4.3.6
 
   pathe@2.0.3: {}
 

@@ -35,20 +35,6 @@ async function validatePAT(pat: string): Promise<string | null> {
   }
 }
 
-async function validateOpenAIKey(key: string): Promise<string | null> {
-  try {
-    const resp = await fetch('https://api.openai.com/v1/models', {
-      method: 'GET',
-      headers: { Authorization: `Bearer ${key}` },
-    });
-    if (resp.ok) return null;
-    if (resp.status === 401) return 'Invalid API key — authentication failed';
-    return `Validation failed (HTTP ${resp.status})`;
-  } catch {
-    return 'Could not reach OpenAI API — key saved without validation';
-  }
-}
-
 function helperColor(status: FieldStatus): string {
   if (status === 'saved') return 'var(--feedback-fg-success-prominent)';
   if (status === 'error') return 'var(--feedback-fg-alert-prominent)';
@@ -83,46 +69,34 @@ function EyeCrossedIcon() {
 
 export function SettingsPage() {
   const pat = useSignal('');
-  const openaiKey = useSignal('');
   const domains = useSignal<string[]>([...DEFAULT_DOMAINS]);
   const newDomain = useSignal('');
 
   const patStatus = useSignal<FieldStatus>('idle');
-  const openaiKeyStatus = useSignal<FieldStatus>('idle');
   const patMessage = useSignal('');
-  const openaiKeyMessage = useSignal('');
 
   const domainError = useSignal('');
 
   const showPat = useSignal(false);
-  const showOpenaiKey = useSignal(false);
 
   const patTouched = useSignal(false);
-  const openaiKeyTouched = useSignal(false);
 
   const patEmpty = useComputed(() => patTouched.value && !pat.value);
-  const openaiKeyEmpty = useComputed(() => openaiKeyTouched.value && !openaiKey.value);
 
   useEffect(() => {
     chrome.storage.local
-      .get([STORAGE_KEYS.pat, STORAGE_KEYS.openaiKey, STORAGE_KEYS.domains])
+      .get([STORAGE_KEYS.pat, STORAGE_KEYS.domains])
       .then((result) => {
         if (result[STORAGE_KEYS.pat]) {
           pat.value = result[STORAGE_KEYS.pat] as string;
           patSavedValue.value = pat.value;
           patStatus.value = 'saved';
         }
-        if (result[STORAGE_KEYS.openaiKey]) {
-          openaiKey.value = result[STORAGE_KEYS.openaiKey] as string;
-          openaiKeySavedValue.value = openaiKey.value;
-          openaiKeyStatus.value = 'saved';
-        }
         if (result[STORAGE_KEYS.domains]) domains.value = result[STORAGE_KEYS.domains] as string[];
       });
   }, []);
 
   const patSavedValue = useSignal('');
-  const openaiKeySavedValue = useSignal('');
 
   const handleSavePAT = async () => {
     if (!pat.value.trim()) return;
@@ -138,22 +112,6 @@ export function SettingsPage() {
       patStatus.value = 'saved';
       patMessage.value = 'Token verified and saved';
       chrome.runtime.sendMessage({ action: 'PREFETCH_DEVREV_DATA' });
-    }
-  };
-
-  const handleSaveOpenAIKey = async () => {
-    if (!openaiKey.value.trim()) return;
-    openaiKeyStatus.value = 'saving';
-    openaiKeyMessage.value = '';
-    const error = await validateOpenAIKey(openaiKey.value.trim());
-    await chrome.storage.local.set({ [STORAGE_KEYS.openaiKey]: openaiKey.value.trim() });
-    openaiKeySavedValue.value = openaiKey.value.trim();
-    if (error) {
-      openaiKeyStatus.value = 'error';
-      openaiKeyMessage.value = error;
-    } else {
-      openaiKeyStatus.value = 'saved';
-      openaiKeyMessage.value = 'API key verified and saved';
     }
   };
 
@@ -191,8 +149,8 @@ export function SettingsPage() {
     }
   };
 
-  const isSetup = useComputed(() => !pat.value && !openaiKey.value);
-  const bothSaved = useComputed(() => patStatus.value === 'saved' && openaiKeyStatus.value === 'saved');
+  const isSetup = useComputed(() => !pat.value);
+  const bothSaved = useComputed(() => patStatus.value === 'saved');
 
   const handleStartCommenting = () => {
     chrome.runtime.sendMessage({ action: 'TOGGLE_COMMENT_MODE' });
@@ -200,7 +158,6 @@ export function SettingsPage() {
   };
 
   const patHelperText = !patEmpty.value ? (patMessage.value || 'Find this in DevRev > Settings > Account > Developer') : undefined;
-  const openaiHelperText = !openaiKeyEmpty.value ? (openaiKeyMessage.value || 'Used for AI-powered issue descriptions') : undefined;
 
   return (
     <div
@@ -260,46 +217,6 @@ export function SettingsPage() {
             style={{ marginTop: '20px', minWidth: '80px' }}
           >
             {patStatus.value === 'saving' ? '' : patStatus.value === 'saved' ? 'Saved' : 'Save'}
-          </Button>
-        </div>
-      </div>
-
-      {/* OpenAI API Key */}
-      <div style={{ marginBottom: '16px' }}>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-          <div style={{ flex: 1 }}>
-            <Input
-              label="OpenAI API Key"
-              type={showOpenaiKey.value ? 'text' : 'password'}
-              size="md"
-              placeholder="sk-..."
-              value={openaiKey.value}
-              iconRight={
-                <span style={{ pointerEvents: 'auto', cursor: 'pointer' }} onClick={() => { showOpenaiKey.value = !showOpenaiKey.value; }}>
-                  {showOpenaiKey.value ? <EyeCrossedIcon /> : <EyeIcon />}
-                </span>
-              }
-              onInput={(e: any) => {
-                openaiKey.value = (e.target as HTMLInputElement).value;
-                if (openaiKey.value !== openaiKeySavedValue.value) {
-                  openaiKeyStatus.value = 'idle';
-                  openaiKeyMessage.value = '';
-                }
-              }}
-              onBlur={() => { openaiKeyTouched.value = true; }}
-              error={openaiKeyEmpty.value ? 'A valid API key is required' : undefined}
-              helperText={!openaiKeyEmpty.value ? openaiHelperText : undefined}
-            />
-          </div>
-          <Button
-            variant={openaiKeyStatus.value === 'error' ? 'destructive' : 'primary'}
-            size="md"
-            onClick={handleSaveOpenAIKey}
-            disabled={!openaiKey.value.trim() || openaiKeyStatus.value === 'saving' || openaiKeyStatus.value === 'saved'}
-            loading={openaiKeyStatus.value === 'saving'}
-            style={{ marginTop: '20px', minWidth: '80px' }}
-          >
-            {openaiKeyStatus.value === 'saving' ? '' : openaiKeyStatus.value === 'saved' ? 'Saved' : 'Save'}
           </Button>
         </div>
       </div>
