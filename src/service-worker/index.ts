@@ -16,6 +16,21 @@ async function updatePopupMode(): Promise<void> {
   }
 }
 
+async function ensureContentScript(tabId: number): Promise<void> {
+  try {
+    await chrome.tabs.sendMessage(tabId, { action: 'PING' });
+  } catch {
+    const manifest = chrome.runtime.getManifest();
+    const files = manifest.content_scripts?.[0]?.js ?? [];
+    if (files.length > 0) {
+      await chrome.scripting.executeScript({
+        target: { tabId },
+        files,
+      });
+    }
+  }
+}
+
 export async function toggleCommentMode(tabId: number): Promise<void> {
   const mode = await getMode();
   const activeTab = await getActiveTabId();
@@ -28,12 +43,12 @@ export async function toggleCommentMode(tabId: number): Promise<void> {
     clearCache();
     chrome.alarms.clear('keepalive');
   } else {
+    await ensureContentScript(tabId);
     await chrome.tabs.sendMessage(tabId, { action: 'TOGGLE_COMMENT_MODE' });
     await setMode('inspecting');
     await setActiveTabId(tabId);
     chrome.alarms.create('keepalive', { periodInMinutes: 0.4 });
 
-    // D-14: Prefetch parts and users on comment mode activate
     prefetchDevRevData().catch((err) => {
       console.error('[Nitpick] DevRev prefetch failed:', err);
     });

@@ -14,19 +14,33 @@ const manifest = defineManifest({
     '128': 'src/assets/icons/icon-128.png',
   },
   action: {},
+  commands: {
+    _execute_action: {
+      suggested_key: {
+        default: 'Ctrl+Semicolon',
+        mac: 'Command+Semicolon',
+      },
+      description: 'Activate comment mode',
+    },
+  },
   background: {
     service_worker: 'src/service-worker/index.ts',
   },
   content_scripts: [
     {
-      matches: ['<all_urls>'],
+      matches: [
+        '*://*.devrev.ai/*',
+        '*://*.devrev-eng.ai/*',
+      ],
       js: ['src/content-script/index.ts'],
       run_at: 'document_idle',
     },
   ],
   permissions: ['activeTab', 'storage', 'scripting', 'alarms', 'offscreen'] as const,
   host_permissions: [
-    '<all_urls>',
+    'https://api.devrev.ai/*',
+    'https://api.dev.devrev-eng.ai/*',
+    'https://api.openai.com/*',
   ],
 });
 
