@@ -223,26 +223,36 @@ export async function searchTags(
   limit: number = 20,
 ): Promise<import('../shared/types').DevRevTag[]> {
   const config = await getDevRevConfig();
-  const body: Record<string, unknown> = { limit };
-  if (query) body.name = [query];
 
   const response = await devrevFetch<{
-    tags: Array<{
-      id: string;
-      name: string;
-      description?: string;
-      allowed_values?: string[];
-      style_new?: { color?: string };
+    results: Array<{
+      type: string;
+      tag?: {
+        id: string;
+        name: string;
+        description?: string;
+        allowed_values?: string[];
+        style_new?: { color?: string };
+      };
     }>;
-  }>(config, '/tags.list', { body });
+  }>(config, '/internal/search.typeahead', {
+    body: {
+      query,
+      fields: ['name'],
+      namespaces: ['tag'],
+      limit,
+    },
+  });
 
-  return response.tags.map(t => ({
-    id: t.id,
-    name: t.name,
-    color: t.style_new?.color,
-    description: t.description,
-    allowed_values: t.allowed_values,
-  }));
+  return response.results
+    .filter(r => r.tag)
+    .map(r => ({
+      id: r.tag!.id,
+      name: r.tag!.name,
+      color: r.tag!.style_new?.color,
+      description: r.tag!.description,
+      allowed_values: r.tag!.allowed_values,
+    }));
 }
 
 // ---------------------------------------------------------------------------
