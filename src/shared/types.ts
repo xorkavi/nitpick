@@ -76,7 +76,7 @@ export type NitpickMode = 'idle' | 'inspecting';
 
 // Phase 2: DevRev entities
 
-export type PartType = 'product' | 'feature' | 'capability' | 'enhancement' | 'component' | string;
+export type PartType = 'product' | 'feature' | 'capability' | 'enhancement' | 'component' | 'custom_part' | 'linkable' | 'runnable' | 'microservice' | string;
 
 export interface DevRevPart {
   id: string;
@@ -94,6 +94,7 @@ export interface DevRevUser {
   email?: string;
   full_name?: string;
   thumbnail?: string;
+  display_picture_id?: string;
   org_name?: string;
 }
 

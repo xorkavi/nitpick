@@ -40,6 +40,22 @@ function getInitials(name: string): string {
   return name.split(/[\s-]+/).map(w => w[0]?.toUpperCase() || '').slice(0, 2).join('');
 }
 
+const AVATAR_COLORS = [
+  '67, 120, 60', '71, 158, 96', '69, 160, 143', '78, 153, 184',
+  '103, 124, 175', '126, 116, 191', '113, 86, 166', '155, 121, 181',
+  '169, 55, 55', '195, 92, 92', '179, 111, 89', '189, 157, 57',
+  '207, 102, 67', '249, 138, 102', '208, 119, 146', '199, 86, 107',
+];
+
+function getAvatarColor(name: string): string {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = (hash << 5) - hash + name.charCodeAt(i);
+    hash |= 0;
+  }
+  return `rgba(${AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length]}, 1)`;
+}
+
 const PRIORITY_COLORS: Record<string, { bg: string; text: string }> = {
   p0: { bg: 'var(--core-chili-red-200)', text: 'var(--core-chili-red-700)' },
   p1: { bg: 'var(--core-marmalade-orange-200)', text: 'var(--core-marmalade-orange-700)' },
@@ -51,27 +67,44 @@ function PartTypeIcon({ type }: { type?: PartType }): ComponentChildren {
   const size = 14;
   switch (type) {
     case 'product':
-      return h('svg', { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'var(--core-matcha-green-600)', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
-        h('path', { d: 'M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z' }),
-        h('polyline', { points: '3.27 6.96 12 12.01 20.73 6.96' }),
-        h('line', { x1: '12', y1: '22.08', x2: '12', y2: '12' }),
+      return h('svg', { width: size, height: size, viewBox: '0 0 16 17', fill: 'none', xmlns: 'http://www.w3.org/2000/svg' },
+        h('path', { 'fill-rule': 'evenodd', 'clip-rule': 'evenodd', d: 'M2.17489 7.98619L7.50222 13.8455C7.76889 14.1389 8.22955 14.1389 8.49622 13.8455C9.70555 12.5162 12.7776 9.13686 13.8249 7.98553C14.0336 7.75619 14.0576 7.41286 13.8829 7.15686L11.5249 3.69419C11.4009 3.51219 11.1956 3.40353 10.9762 3.40353H5.02555C4.80622 3.40353 4.60089 3.51219 4.47689 3.69419L2.11689 7.15553C1.94155 7.41219 1.96555 7.75619 2.17489 7.98619Z', stroke: 'var(--core-matcha-green-600)', 'stroke-width': '1.25', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
       );
     case 'feature':
-      return h('svg', { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'var(--core-blueberry-blue-500)', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
-        h('polygon', { points: '12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2' }),
+      return h('svg', { width: size, height: size, viewBox: '0 0 16 16', fill: 'none', xmlns: 'http://www.w3.org/2000/svg' },
+        h('path', { d: 'M6.21879 9.44774C7.26019 10.4891 7.26019 12.1776 6.21879 13.219C5.17739 14.2604 3.48895 14.2604 2.44755 13.219C1.40615 12.1776 1.40615 10.4891 2.44755 9.44774C3.48895 8.40634 5.17739 8.40634 6.21879 9.44774', stroke: 'var(--core-blueberry-blue-500)', 'stroke-width': '1.25', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+        h('path', { d: 'M13.5523 9.44774C14.5937 10.4891 14.5937 12.1776 13.5523 13.219C12.5109 14.2604 10.8224 14.2604 9.78105 13.219C8.73965 12.1776 8.73965 10.4891 9.78105 9.44774C10.8224 8.40634 12.5109 8.40634 13.5523 9.44774', stroke: 'var(--core-blueberry-blue-500)', 'stroke-width': '1.25', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+        h('path', { d: 'M9.88529 2.78105C10.9267 3.82245 10.9267 5.51089 9.88529 6.55228C8.84389 7.59368 7.15545 7.59368 6.11406 6.55228C5.07266 5.51088 5.07266 3.82244 6.11406 2.78105C7.15546 1.73965 8.8439 1.73965 9.88529 2.78105', stroke: 'var(--core-blueberry-blue-500)', 'stroke-width': '1.25', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
       );
     case 'capability':
-      return h('svg', { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'var(--core-plum-purple-500)', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
-        h('circle', { cx: '12', cy: '12', r: '10' }),
-        h('circle', { cx: '12', cy: '12', r: '6' }),
-        h('circle', { cx: '12', cy: '12', r: '2' }),
+      return h('svg', { width: size, height: size, viewBox: '0 0 16 16', fill: 'none', xmlns: 'http://www.w3.org/2000/svg' },
+        h('path', { d: 'M2.66699 5.33333L8.00033 2L13.3337 5.33333V10.6667L8.00033 14L2.66699 10.6667V5.33333L8.00033 8.25V14V8.25L13.3337 5.33333', stroke: 'var(--core-plum-purple-500)', 'stroke-width': '1.25', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
       );
     case 'enhancement':
-      return h('svg', { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'var(--core-marmalade-orange-500)', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
-        h('polygon', { points: '13 2 3 14 12 14 11 22 21 10 12 10 13 2' }),
+      return h('svg', { width: size, height: size, viewBox: '0 0 16 16', fill: 'none', xmlns: 'http://www.w3.org/2000/svg' },
+        h('rect', { x: '2', y: '4', width: '12', height: '10', rx: '3', stroke: 'var(--core-marmalade-orange-500)', 'stroke-width': '1.25', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+        h('path', { d: 'M3.66675 1.99996H12.3334', stroke: 'var(--core-marmalade-orange-500)', 'stroke-width': '1.25', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+        h('path', { 'fill-rule': 'evenodd', 'clip-rule': 'evenodd', d: 'M7.47695 6.99197C7.57521 6.79283 7.77801 6.66675 8.00007 6.66675C8.22213 6.66675 8.42493 6.79283 8.52319 6.99197L8.81999 7.59362C8.90493 7.76582 9.06919 7.88519 9.25921 7.91281L9.92312 8.00931C10.1428 8.04126 10.3253 8.19512 10.3939 8.40623C10.4625 8.61734 10.4054 8.8491 10.2465 9.00411L9.7659 9.47289C9.62851 9.6069 9.56583 9.79992 9.59827 9.98908L9.71168 10.6502C9.74919 10.869 9.65924 11.0901 9.47964 11.2206C9.30004 11.3511 9.06193 11.3684 8.8654 11.2651L8.27145 10.9529C8.10155 10.8637 7.8986 10.8637 7.7287 10.9529L7.13475 11.2651C6.93822 11.3684 6.7001 11.3511 6.5205 11.2206C6.3409 11.0901 6.25095 10.869 6.28847 10.6502L6.40187 9.98908C6.43432 9.79992 6.37164 9.6069 6.23425 9.47289L5.75364 9.00411C5.59474 8.8491 5.5376 8.61734 5.60623 8.40623C5.67486 8.19512 5.85735 8.04126 6.07703 8.00931L6.74094 7.91281C6.93096 7.88519 7.09521 7.76582 7.18016 7.59362L7.47695 6.99197Z', stroke: 'var(--core-marmalade-orange-500)', 'stroke-width': '1.25', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+      );
+    case 'component':
+    case 'custom_part':
+    case 'linkable':
+      return h('svg', { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', xmlns: 'http://www.w3.org/2000/svg' },
+        h('rect', { x: '8.294', y: '8.294', width: '12.706', height: '12.706', rx: '2.118', fill: 'none', stroke: 'var(--core-neutrals-600)', 'stroke-miterlimit': '10', 'stroke-width': '1.25' }),
+        h('circle', { cx: '9.353', cy: '9.353', r: '6.353', fill: 'none', stroke: 'var(--core-neutrals-600)', 'stroke-miterlimit': '10', 'stroke-width': '1.25' }),
+      );
+    case 'runnable':
+    case 'microservice':
+      return h('svg', { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', xmlns: 'http://www.w3.org/2000/svg' },
+        h('path', { d: 'M13.78 4L10.22 20', stroke: 'var(--core-neutrals-600)', 'stroke-width': '1.25', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+        h('path', { d: 'M18 8L22 12L18 16', stroke: 'var(--core-neutrals-600)', 'stroke-width': '1.25', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+        h('path', { d: 'M6 16L2 12L6 8', stroke: 'var(--core-neutrals-600)', 'stroke-width': '1.25', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
       );
     default:
-      return null;
+      return h('svg', { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', xmlns: 'http://www.w3.org/2000/svg' },
+        h('rect', { x: '8.294', y: '8.294', width: '12.706', height: '12.706', rx: '2.118', fill: 'none', stroke: 'var(--core-neutrals-600)', 'stroke-miterlimit': '10', 'stroke-width': '1.25' }),
+        h('circle', { cx: '9.353', cy: '9.353', r: '6.353', fill: 'none', stroke: 'var(--core-neutrals-600)', 'stroke-miterlimit': '10', 'stroke-width': '1.25' }),
+      );
   }
 }
 
@@ -271,7 +304,27 @@ export function IssueCard() {
   useSignalEffect(() => {
     const users = userSearchResults.value;
     users.forEach((u) => {
-      if (u.thumbnail && !thumbnailCache.value[u.id]) {
+      if (thumbnailCache.value[u.id]) return;
+
+      if (u.display_picture_id) {
+        chrome.runtime.sendMessage(
+          { action: 'LOCATE_ARTIFACT', artifactId: u.display_picture_id },
+          (response: { dataUrl?: string | null } | undefined) => {
+            if (response?.dataUrl) {
+              thumbnailCache.value = { ...thumbnailCache.value, [u.id]: response.dataUrl };
+            } else if (u.thumbnail) {
+              chrome.runtime.sendMessage(
+                { action: 'FETCH_THUMBNAIL', url: u.thumbnail },
+                (fallback: { dataUrl?: string | null } | undefined) => {
+                  if (fallback?.dataUrl) {
+                    thumbnailCache.value = { ...thumbnailCache.value, [u.id]: fallback.dataUrl };
+                  }
+                },
+              );
+            }
+          },
+        );
+      } else if (u.thumbnail) {
         chrome.runtime.sendMessage(
           { action: 'FETCH_THUMBNAIL', url: u.thumbnail },
           (response: { dataUrl?: string | null } | undefined) => {
@@ -291,6 +344,7 @@ export function IssueCard() {
       label: name,
       initials: getInitials(name),
       avatarUrl: thumbnailCache.value[u.id] || undefined,
+      avatarBg: getAvatarColor(name),
     };
   });
 
