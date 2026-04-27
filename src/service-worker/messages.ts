@@ -54,9 +54,9 @@ export function setupMessageHandler(): void {
             highlightRect,
             dpr,
           )
-            .then(({ viewport, cropped }) => {
-              storeScreenshots(viewport, cropped);
-              storeBrowserMetadata(browserMetadata);
+            .then(async ({ viewport, cropped }) => {
+              await storeScreenshots(viewport, cropped);
+              await storeBrowserMetadata(browserMetadata);
               sendResponse({
                 action: 'SCREENSHOTS_READY',
                 hasScreenshots: true,

@@ -1,6 +1,5 @@
 export const STORAGE_KEYS = {
   pat: 'nitpick_pat',
-  openaiKey: 'nitpick_openai_key', // kept for migration cleanup
   domains: 'nitpick_domains',
 } as const;
 

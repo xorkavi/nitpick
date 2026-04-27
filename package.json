@@ -20,7 +20,6 @@
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.4.0",
     "@preact/preset-vite": "^2.10.5",
-    "@resvg/resvg-js": "^2.6.2",
     "@types/chrome": "^0.1.40",
     "tailwindcss": "^4.2.4",
     "typescript": "^5.9.3",

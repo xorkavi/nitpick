@@ -1,7 +1,7 @@
 import { hasCredentials } from './storage';
 import { getMode, setMode, getActiveTabId, setActiveTabId } from './state';
 import { setupMessageHandler } from './messages';
-import { clearScreenshots, getBrowserMetadata } from './screenshot-store';
+import { clearScreenshots, getBrowserMetadata, restoreFromDB } from './screenshot-store';
 import { prefetchDevRevData, clearCache } from './devrev-api';
 import { streamAnalysis } from './ai-analysis';
 
@@ -61,8 +61,9 @@ chrome.runtime.onInstalled.addListener(async () => {
   await updatePopupMode();
 });
 
-// Re-check popup mode on service worker startup
+// Re-check popup mode and restore screenshots on service worker startup
 updatePopupMode();
+restoreFromDB();
 
 // Toggle comment mode when icon clicked (only fires when popup is '')
 chrome.action.onClicked.addListener(async (tab) => {
@@ -73,7 +74,7 @@ chrome.action.onClicked.addListener(async (tab) => {
 // Watch for credential changes to toggle popup mode
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'local') {
-    const relevantKeys = ['nitpick_pat', 'nitpick_openai_key'];
+    const relevantKeys = ['nitpick_pat'];
     const hasRelevantChange = relevantKeys.some((key) => key in changes);
     if (hasRelevantChange) {
       updatePopupMode();

@@ -1,5 +1,12 @@
 {
   "name": "nitpick-proxy",
   "version": "0.1.0",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.37.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0"
+  }
 }

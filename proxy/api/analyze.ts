@@ -1,9 +1,28 @@
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
+
 const DEVREV_API_BASES = [
   'https://api.devrev.ai',
   'https://api.dev.devrev-eng.ai',
 ];
 
 const MAX_BODY_SIZE = 200_000;
+
+let ratelimit: Ratelimit | null = null;
+
+function getRateLimiter(): Ratelimit | null {
+  if (ratelimit) return ratelimit;
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return null;
+
+  ratelimit = new Ratelimit({
+    redis: new Redis({ url, token }),
+    limiter: Ratelimit.slidingWindow(10, '60 s'),
+    prefix: 'nitpick',
+  });
+  return ratelimit;
+}
 
 async function validatePAT(pat: string): Promise<boolean> {
   for (const base of DEVREV_API_BASES) {
@@ -50,6 +69,17 @@ export default async function handler(req: any, res: any) {
   const pat = req.headers.authorization;
   if (!pat) {
     return res.status(401).json({ error: 'Missing Authorization header' });
+  }
+
+  const limiter = getRateLimiter();
+  if (limiter) {
+    const identifier = pat.slice(-16);
+    const { success, remaining, reset } = await limiter.limit(identifier);
+    res.setHeader('X-RateLimit-Remaining', remaining.toString());
+    res.setHeader('X-RateLimit-Reset', reset.toString());
+    if (!success) {
+      return res.status(429).json({ error: 'Rate limit exceeded — max 10 requests per minute' });
+    }
   }
 
   const valid = await validatePAT(pat);

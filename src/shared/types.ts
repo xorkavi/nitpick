@@ -69,7 +69,6 @@ export interface AreaMetadata {
 
 export interface NitpickSettings {
   pat: string;
-  openaiKey: string;
   domains: string[];
 }
 

@@ -174,12 +174,38 @@ export function SettingsPage() {
           fontSize: 'var(--typography-body-font-size)',
           fontWeight: 'var(--font-weight-bold)',
           color: 'var(--fg-neutral-prominent)',
-          margin: '0 0 16px 0',
+          margin: '0 0 12px 0',
           lineHeight: '1.3',
         }}
       >
-        {isSetup.value ? 'Setup Required' : 'Nitpick Settings'}
+        {isSetup.value ? 'Welcome to Nitpick' : 'Nitpick Settings'}
       </h1>
+
+      {isSetup.value && (
+        <div
+          style={{
+            fontSize: 'var(--typography-system-small-font-size)',
+            color: 'var(--fg-neutral-subtle)',
+            lineHeight: '1.5',
+            marginBottom: '16px',
+            padding: '10px 12px',
+            backgroundColor: 'var(--input-bg-idle)',
+            borderRadius: 'var(--corner-square)',
+          }}
+        >
+          <p style={{ margin: '0 0 6px 0' }}>
+            Nitpick lets you report UI bugs by clicking on elements. When you report a bug, Nitpick captures:
+          </p>
+          <ul style={{ margin: '0 0 6px 0', paddingLeft: '18px' }}>
+            <li>A screenshot of the selected area</li>
+            <li>CSS styles and layout data of the element</li>
+            <li>The page URL and browser info</li>
+          </ul>
+          <p style={{ margin: '0' }}>
+            This data is sent to DevRev (for issue creation) and OpenAI (for AI-powered descriptions) only when you submit a report. Nothing is collected in the background.
+          </p>
+        </div>
+      )}
 
       {/* DevRev PAT */}
       <div style={{ marginBottom: '16px' }}>
