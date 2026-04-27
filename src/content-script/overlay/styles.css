@@ -424,6 +424,28 @@
   flex-shrink: 0;
 }
 
+.nitpick-chip-avatar {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--core-neutrals-600);
+  color: var(--surface-overlay);
+  font-size: 8px;
+  font-weight: var(--font-weight-medium);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.nitpick-chip-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
 .nitpick-chip-priority-label {
   padding: 1px 6px;
   border-radius: var(--corner-square);
