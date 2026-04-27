@@ -40,7 +40,7 @@ const manifest = defineManifest({
   host_permissions: [
     'https://api.devrev.ai/*',
     'https://api.dev.devrev-eng.ai/*',
-    'https://nitpick-proxy.vercel.app/*',
+    'https://nitpick-fix.vercel.app/*',
   ],
 });
 
