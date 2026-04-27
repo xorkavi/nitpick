@@ -3,6 +3,8 @@ const DEVREV_API_BASES = [
   'https://api.dev.devrev-eng.ai',
 ];
 
+const MAX_BODY_SIZE = 200_000;
+
 async function validatePAT(pat: string): Promise<boolean> {
   for (const base of DEVREV_API_BASES) {
     try {
@@ -18,8 +20,17 @@ async function validatePAT(pat: string): Promise<boolean> {
   return false;
 }
 
+function isAllowedOrigin(origin: string | undefined): boolean {
+  if (!origin) return false;
+  return origin.startsWith('chrome-extension://') || origin.startsWith('moz-extension://');
+}
+
 export default async function handler(req: any, res: any) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const origin = req.headers.origin;
+
+  if (isAllowedOrigin(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
@@ -51,6 +62,11 @@ export default async function handler(req: any, res: any) {
     return res.status(400).json({ error: 'Missing instructions or input' });
   }
 
+  const rawSize = JSON.stringify(body).length;
+  if (rawSize > MAX_BODY_SIZE) {
+    return res.status(413).json({ error: 'Request too large' });
+  }
+
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
@@ -73,13 +89,12 @@ export default async function handler(req: any, res: any) {
     });
 
     if (!openaiRes.ok) {
-      const err = await openaiRes.text();
-      return res.status(openaiRes.status).json({ error: err });
+      return res.status(502).json({ error: 'AI service unavailable' });
     }
 
     const reader = openaiRes.body?.getReader();
     if (!reader) {
-      return res.status(500).json({ error: 'No stream from OpenAI' });
+      return res.status(500).json({ error: 'No stream from AI service' });
     }
 
     const decoder = new TextDecoder();
