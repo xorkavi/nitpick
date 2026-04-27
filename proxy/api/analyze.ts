@@ -1,4 +1,3 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
 import OpenAI from 'openai';
 
 const DEVREV_API_BASES = [
@@ -21,38 +20,37 @@ async function validatePAT(pat: string): Promise<boolean> {
   return false;
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: any, res: any) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
+  }
+
   if (req.method !== 'POST') {
-    res.status(405).json({ error: 'Method not allowed' });
-    return;
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    res.status(500).json({ error: 'Server misconfigured' });
-    return;
+    return res.status(500).json({ error: 'Server misconfigured' });
   }
 
   const pat = req.headers.authorization;
   if (!pat) {
-    res.status(401).json({ error: 'Missing Authorization header' });
-    return;
+    return res.status(401).json({ error: 'Missing Authorization header' });
   }
 
   const valid = await validatePAT(pat);
   if (!valid) {
-    res.status(403).json({ error: 'Invalid DevRev PAT' });
-    return;
+    return res.status(403).json({ error: 'Invalid DevRev PAT' });
   }
 
-  const body = req.body as {
-    instructions: string;
-    input: Array<{ role: string; content: unknown }>;
-  };
-
+  const body = req.body;
   if (!body?.instructions || !body?.input) {
-    res.status(400).json({ error: 'Missing instructions or input' });
-    return;
+    return res.status(400).json({ error: 'Missing instructions or input' });
   }
 
   const client = new OpenAI({ apiKey });
@@ -65,12 +63,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const stream = client.responses.stream({
       model: 'gpt-5.5',
       instructions: body.instructions,
-      input: body.input as OpenAI.Responses.ResponseInput,
+      input: body.input,
       reasoning: { effort: 'low' },
       max_output_tokens: 1200,
     });
 
-    stream.on('response.output_text.delta', (event) => {
+    stream.on('response.output_text.delta', (event: any) => {
       res.write(`data: ${JSON.stringify({ delta: event.delta })}\n\n`);
     });
 
@@ -79,14 +77,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       res.end();
     });
 
-    stream.on('error', (error: unknown) => {
+    stream.on('error', (error: any) => {
       const message = error instanceof Error ? error.message : 'AI analysis failed';
       res.write(`data: ${JSON.stringify({ error: message })}\n\n`);
       res.end();
     });
 
     await stream.finalResponse();
-  } catch (error) {
+  } catch (error: any) {
     const message = error instanceof Error ? error.message : 'AI analysis failed';
     if (!res.headersSent) {
       res.status(500).json({ error: message });
