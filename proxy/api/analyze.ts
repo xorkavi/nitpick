@@ -1,3 +1,4 @@
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import OpenAI from 'openai';
 
 const DEVREV_API_BASES = [
@@ -20,92 +21,78 @@ async function validatePAT(pat: string): Promise<boolean> {
   return false;
 }
 
-export async function POST(request: Request): Promise<Response> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    return new Response(JSON.stringify({ error: 'Server misconfigured' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'POST') {
+    res.status(405).json({ error: 'Method not allowed' });
+    return;
   }
 
-  const pat = request.headers.get('Authorization');
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    res.status(500).json({ error: 'Server misconfigured' });
+    return;
+  }
+
+  const pat = req.headers.authorization;
   if (!pat) {
-    return new Response(JSON.stringify({ error: 'Missing Authorization header' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    res.status(401).json({ error: 'Missing Authorization header' });
+    return;
   }
 
   const valid = await validatePAT(pat);
   if (!valid) {
-    return new Response(JSON.stringify({ error: 'Invalid DevRev PAT' }), {
-      status: 403,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    res.status(403).json({ error: 'Invalid DevRev PAT' });
+    return;
   }
 
-  let body: {
+  const body = req.body as {
     instructions: string;
     input: Array<{ role: string; content: unknown }>;
-    imageUrl?: string;
   };
-  try {
-    body = await request.json();
-  } catch {
-    return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
+
+  if (!body?.instructions || !body?.input) {
+    res.status(400).json({ error: 'Missing instructions or input' });
+    return;
   }
 
   const client = new OpenAI({ apiKey });
 
-  const stream = client.responses.stream({
-    model: 'gpt-5.5',
-    instructions: body.instructions,
-    input: body.input as OpenAI.Responses.ResponseInput,
-    reasoning: { effort: 'low' },
-    max_output_tokens: 1200,
-  });
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
 
-  const encoder = new TextEncoder();
-  const readable = new ReadableStream({
-    async start(controller) {
-      stream.on('response.output_text.delta', (event) => {
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ delta: event.delta })}\n\n`));
-      });
+  try {
+    const stream = client.responses.stream({
+      model: 'gpt-5.5',
+      instructions: body.instructions,
+      input: body.input as OpenAI.Responses.ResponseInput,
+      reasoning: { effort: 'low' },
+      max_output_tokens: 1200,
+    });
 
-      stream.on('response.output_text.done', () => {
-        controller.enqueue(encoder.encode('data: [DONE]\n\n'));
-        controller.close();
-      });
+    stream.on('response.output_text.delta', (event) => {
+      res.write(`data: ${JSON.stringify({ delta: event.delta })}\n\n`);
+    });
 
-      stream.on('error', (error: unknown) => {
-        const message = error instanceof Error ? error.message : 'AI analysis failed';
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: message })}\n\n`));
-        controller.close();
-      });
+    stream.on('response.output_text.done', () => {
+      res.write('data: [DONE]\n\n');
+      res.end();
+    });
 
-      try {
-        await stream.finalResponse();
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'AI analysis failed';
-        try {
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: message })}\n\n`));
-          controller.close();
-        } catch {
-          // Stream already closed
-        }
-      }
-    },
-  });
+    stream.on('error', (error: unknown) => {
+      const message = error instanceof Error ? error.message : 'AI analysis failed';
+      res.write(`data: ${JSON.stringify({ error: message })}\n\n`);
+      res.end();
+    });
 
-  return new Response(readable, {
-    headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
-    },
-  });
+    await stream.finalResponse();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'AI analysis failed';
+    if (!res.headersSent) {
+      res.status(500).json({ error: message });
+    } else {
+      res.write(`data: ${JSON.stringify({ error: message })}\n\n`);
+      res.end();
+    }
+  }
 }
