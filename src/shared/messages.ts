@@ -26,12 +26,6 @@ export type Message =
   | {
       action: 'CAPTURE_SCREENSHOTS';
       boundingRect: { x: number; y: number; width: number; height: number };
-      highlightRect?: {
-        left: number;
-        top: number;
-        width: number;
-        height: number;
-      };
       dpr: number;
       browserMetadata: BrowserMetadata;
     }

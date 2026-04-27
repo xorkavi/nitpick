@@ -142,7 +142,7 @@ export function generateDOMPath(el: Element): string {
       }
     }
 
-    // Add nth-child if ambiguous (siblings of same tag type exist)
+    // Add nth-of-type if ambiguous (siblings of same tag type exist)
     const parent = current.parentElement;
     if (parent) {
       const siblings = Array.from(parent.children).filter(
@@ -150,7 +150,7 @@ export function generateDOMPath(el: Element): string {
       );
       if (siblings.length > 1) {
         const index = siblings.indexOf(current) + 1;
-        selector += `:nth-child(${index})`;
+        selector += `:nth-of-type(${index})`;
       }
     }
 

@@ -20,7 +20,7 @@ import { IssueCard } from './IssueCard';
 const POPOVER_WIDTH = 320;
 const EDGE_MARGIN = 12;
 const GAP = 8;
-const BOTTOM_THRESHOLD = 200;
+const BOTTOM_THRESHOLD = 480;
 
 export function CommentBubble() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);

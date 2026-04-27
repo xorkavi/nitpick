@@ -159,7 +159,6 @@ function handleMouseUp(e: MouseEvent): void {
         width: rect.width,
         height: rect.height,
       },
-      highlightRect: rect,
       dpr: window.devicePixelRatio,
       browserMetadata: {
         url: window.location.href,

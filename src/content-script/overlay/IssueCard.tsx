@@ -161,7 +161,6 @@ export function IssueCard() {
     aiSuggestedPart.value = undefined;
     aiSuggestedOwner.value = undefined;
     selectedTags.value = [];
-    const self = devrevSelf.value;
     issueFormData.value = {
       title: '', description: '',
       part: '', partId: '',
@@ -171,7 +170,6 @@ export function IssueCard() {
   }
 
   function handleRefresh(): void {
-    const self = devrevSelf.value;
     issueFormData.value = {
       title: '', description: '',
       part: '', partId: '',
