@@ -319,6 +319,75 @@ nitpick/
 
 ---
 
+## Auto-Fix with AI Coding Agents
+
+Nitpick doesn't just file bugs. It can fix them too.
+
+The repo includes a `nitpick-fix` skill that works with AI coding agents like [Claude Code](https://claude.ai/claude-code) and [Cursor](https://cursor.com). Give it an issue ID, and it reads the Nitpick-captured metadata, traces the bug to the exact component, and applies the fix.
+
+### How It Works
+
+```
+> /nitpick-fix ISS-1234
+```
+
+That's it. The skill:
+
+1. Fetches the issue from DevRev (title, AI description, screenshots, metadata)
+2. Downloads and views the screenshots for visual context
+3. Uses the captured React component names, data-testid values, and Tailwind classes to grep straight to the source
+4. Traces through the design system theme if the styles come from a DS config
+5. Applies the minimal fix and presents it for your review
+
+### What It Knows
+
+Every Nitpick issue comes packed with machine-readable context that the skill uses:
+
+- **React component names** from the element and its ancestors
+- **data-drid / data-testid** values for one-grep-to-source lookup
+- **Constraining Tailwind classes** (e.g. `max-w-32`, `truncate`, `px-core-base`)
+- **Computed CSS values** with expected vs. actual comparisons
+- **DOM path and ancestor layout context** for tracing spacing/overflow bugs
+- **Cropped + viewport screenshots** so the agent can see what you saw
+
+### Setup
+
+1. Make sure your DevRev PAT is in `.env` at the repo root:
+   ```
+   DEVREV_PAT=your-pat-here
+   ```
+2. The skill file lives at `.claude/skills/nitpick-fix/SKILL.md` — Claude Code and Cursor pick it up automatically.
+
+### Example
+
+```
+You: /nitpick-fix ISS-69076
+
+Agent: Fetching ISS-69076 from DevRev...
+
+  Title: [Tabs] Selected tab indicator height mismatches parent padding
+  Priority: P2
+  Description: The tab indicator <span> has h-6 (24px) but the parent
+  TabList has p-1 (4px padding), leaving only 20px of available height.
+  The indicator overflows by 4px.
+
+  Downloading screenshots... ✓
+  Searching for TabItem theme config...
+  Found: libs/design-system/shared/themes/devrev-app-theme/src/components/tab-item.ts
+
+  Fix: Changed itemBackground slot from h-6 to h-5 (20px fits within
+  the 28px parent minus 8px total padding).
+
+  Files changed:
+  - libs/design-system/.../tab-item.ts (line 34: "h-6" → "h-5")
+
+  Ready for review. Want me to commit?
+```
+
+The whole loop — from bug report to code fix — without leaving your terminal.
+
+---
+
 ## Permissions
 
 Nitpick requests only what it needs:
