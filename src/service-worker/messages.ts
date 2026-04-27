@@ -18,6 +18,7 @@ import {
   searchUsers,
   searchTags,
   fetchThumbnail,
+  locateArtifact,
 } from './devrev-api';
 
 export function setupMessageHandler(): void {
@@ -208,6 +209,13 @@ export function setupMessageHandler(): void {
         case 'FETCH_THUMBNAIL': {
           fetchThumbnail(msg.url ?? '').then((dataUrl) => {
             sendResponse({ action: 'THUMBNAIL_RESULT', dataUrl });
+          });
+          return true;
+        }
+
+        case 'LOCATE_ARTIFACT': {
+          locateArtifact(msg.artifactId ?? '').then((dataUrl) => {
+            sendResponse({ action: 'LOCATE_ARTIFACT_RESULT', dataUrl });
           });
           return true;
         }

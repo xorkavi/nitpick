@@ -53,6 +53,9 @@ export type Message =
   // Authenticated thumbnail fetch
   | { action: 'FETCH_THUMBNAIL'; url: string }
   | { action: 'THUMBNAIL_RESULT'; dataUrl: string | null }
+  // Artifact-based profile picture
+  | { action: 'LOCATE_ARTIFACT'; artifactId: string }
+  | { action: 'LOCATE_ARTIFACT_RESULT'; dataUrl: string | null }
   // Phase 2: Issue creation
   | { action: 'CREATE_ISSUE'; issueData: CreateIssuePayload }
   | {

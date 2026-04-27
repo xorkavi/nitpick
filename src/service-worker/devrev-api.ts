@@ -157,7 +157,7 @@ export async function searchParts(
     body: {
       query,
       fields: ['name'],
-      namespaces: ['enhancement', 'feature', 'capability', 'product'],
+      namespaces: ['enhancement', 'feature', 'capability', 'product', 'component', 'custom_part', 'linkable', 'runnable', 'microservice'],
       limit,
     },
   });
@@ -186,7 +186,11 @@ export async function searchUsers(
   const response = await devrevFetch<{
     results: Array<{
       type: string;
-      user?: DevRevUser & { type?: string };
+      user?: DevRevUser & {
+        type?: string;
+        state?: string;
+        display_picture?: { id?: string };
+      };
     }>;
   }>(config, '/internal/search.typeahead', {
     body: {
@@ -198,7 +202,7 @@ export async function searchUsers(
   });
 
   return response.results
-    .filter(r => r.user)
+    .filter(r => r.user && r.user.state === 'active')
     .map(r => ({
       id: r.user!.id,
       display_id: r.user!.display_id,
@@ -206,6 +210,7 @@ export async function searchUsers(
       email: r.user!.email,
       full_name: r.user!.full_name,
       thumbnail: r.user!.thumbnail,
+      display_picture_id: r.user!.display_picture?.id,
     }));
 }
 
@@ -337,15 +342,49 @@ export function clearCache(): void {
 
 const thumbnailCache = new Map<string, string>();
 
+export async function locateArtifact(artifactId: string): Promise<string | null> {
+  if (!artifactId) return null;
+  if (thumbnailCache.has(artifactId)) return thumbnailCache.get(artifactId)!;
+
+  try {
+    const config = await getDevRevConfig();
+    const response = await devrevFetch<{ url?: string }>(
+      config,
+      `/internal/artifacts.locate?id=${encodeURIComponent(artifactId)}`,
+      { method: 'GET' },
+    );
+    if (!response.url) return null;
+
+    const imgResponse = await fetch(response.url);
+    if (!imgResponse.ok) return null;
+    const blob = await imgResponse.blob();
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const dataUrl = reader.result as string;
+        thumbnailCache.set(artifactId, dataUrl);
+        resolve(dataUrl);
+      };
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchThumbnail(url: string): Promise<string | null> {
   if (!url) return null;
   if (thumbnailCache.has(url)) return thumbnailCache.get(url)!;
 
   try {
-    const config = await getDevRevConfig();
-    const response = await fetch(url, {
-      headers: { Authorization: config.pat },
-    });
+    const needsAuth = url.includes('api.devrev.ai') || url.includes('devrev-eng.ai');
+    const headers: Record<string, string> = {};
+    if (needsAuth) {
+      const config = await getDevRevConfig();
+      headers.Authorization = config.pat;
+    }
+    const response = await fetch(url, { headers });
     if (!response.ok) return null;
     const blob = await response.blob();
     return new Promise((resolve) => {

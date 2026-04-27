@@ -8,6 +8,7 @@ export interface ChipDropdownOption {
   description?: string;
   initials?: string;
   avatarUrl?: string;
+  avatarBg?: string;
   searchText?: string;
   icon?: ComponentChildren;
   colorBg?: string;
@@ -195,7 +196,7 @@ export function ChipDropdown({ label, value, options, onSelect, onSearch, sugges
                 >
                   {opt.icon && <span class="nitpick-chip-icon">{opt.icon}</span>}
                   {(opt.initials || opt.avatarUrl) && (
-                    <span class="nitpick-avatar">
+                    <span class="nitpick-avatar" style={!opt.avatarUrl && opt.avatarBg ? { background: opt.avatarBg } : undefined}>
                       {opt.avatarUrl
                         ? <img src={opt.avatarUrl} alt={opt.label} />
                         : opt.initials}
