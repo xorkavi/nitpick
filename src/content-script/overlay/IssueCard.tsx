@@ -64,18 +64,18 @@ const PRIORITY_COLORS: Record<string, { bg: string; text: string }> = {
 };
 
 const PART_COLORS: Record<string, string> = {
-  product: 'var(--core-plum-purple-400)',
-  feature: 'var(--core-blueberry-blue-400)',
-  capability: 'var(--core-blueberry-blue-500)',
-  enhancement: 'var(--core-wasabi-teal-500)',
-  runnable: 'var(--core-yuzu-yellow-600)',
-  microservice: 'var(--core-marmalade-orange-500)',
-  linkable: 'var(--core-marmalade-orange-500)',
+  product: 'var(--core-plum-purple-600)',
+  feature: 'var(--core-blueberry-blue-600)',
+  capability: 'var(--core-blueberry-blue-700)',
+  enhancement: 'var(--core-wasabi-teal-700)',
+  runnable: 'var(--core-yuzu-yellow-700)',
+  microservice: 'var(--core-marmalade-orange-700)',
+  linkable: 'var(--core-marmalade-orange-700)',
 };
 
 function PartTypeIcon({ type }: { type?: PartType }): ComponentChildren {
   const size = 14;
-  const color = (type && PART_COLORS[type]) || 'var(--core-neutrals-600)';
+  const color = (type && PART_COLORS[type]) || 'var(--core-neutrals-800)';
   switch (type) {
     case 'product':
       return h('svg', { width: size, height: size, viewBox: '0 0 16 17', fill: 'none', xmlns: 'http://www.w3.org/2000/svg' },
