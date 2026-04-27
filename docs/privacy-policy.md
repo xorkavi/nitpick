@@ -1,76 +1,262 @@
-# Nitpick Privacy Policy
+# Privacy Policy for Nitpick
 
-**Last updated:** April 27, 2026
+**Effective Date:** April 27, 2026
+**Last Updated:** April 27, 2026
 
-Nitpick is a Chrome extension that enables UI bug reporting for DevRev. This policy explains what data Nitpick accesses, how it is handled, and where it is sent.
+Nitpick is a Chrome extension that enables users to report UI bugs on web applications directly to DevRev. This Privacy Policy describes what data Nitpick collects, how it is used, where it is sent, and your rights regarding that data.
 
-## Data Collected
+By installing and using Nitpick, you consent to the data practices described in this policy.
 
-Nitpick stores the following data locally on your device using Chrome's built-in storage (`chrome.storage.local`):
+---
 
-- **DevRev Personal Access Token (PAT):** Used to authenticate API requests to DevRev on your behalf.
-- **OpenAI API Key:** Used to generate AI-powered issue descriptions.
-- **Active Domains list:** The list of domains where Nitpick is enabled (defaults to DevRev application domains).
+## 1. Data Controller
 
-This data never leaves your device except as described below under "Data Sent to External Services."
+Nitpick is developed and maintained by the Arcade Design System team at DevRev, Inc. For privacy inquiries, contact us at the address provided in Section 11 of this policy.
 
-## Data Processed Temporarily
+---
 
-When you select an element or area on a page to report a bug, Nitpick temporarily captures:
+## 2. Information We Collect
 
-- A screenshot of the visible browser tab (cropped to the selected region)
-- CSS computed styles, DOM structure, and layout metadata of the selected element
-- Page URL, viewport dimensions, browser version, and operating system
+Nitpick collects data only when you actively use the bug reporting feature. No data is collected passively or in the background.
 
-This data is held in the extension's service worker memory only for the duration of the bug report. It is not persisted to disk, is not sent anywhere until you explicitly click "Create Issue," and is cleared after submission or when you exit comment mode.
+### 2.1 Information You Provide
 
-## Data Sent to External Services
+| Data | Purpose | Stored Where |
+|------|---------|--------------|
+| **DevRev Personal Access Token (PAT)** | Authenticates API requests to DevRev on your behalf | Locally on your device in `chrome.storage.local` (encrypted at rest by the browser) |
+| **Active domains list** | Determines which websites Nitpick is enabled on | Locally on your device in `chrome.storage.local` |
+| **Bug description text** | Your plain-language description of the UI issue | Held in memory during the reporting session; not persisted after submission or cancellation |
 
-Nitpick sends data to two external services, **only when you explicitly initiate an action:**
+### 2.2 Information Collected Automatically During Bug Reporting
 
-### DevRev API (`api.devrev.ai`)
-When you create an issue, Nitpick sends:
-- Issue title and description (including any AI-generated content you approved)
-- Screenshots (uploaded as DevRev artifacts)
-- Selected part, owner, priority, and tags
+When you select an element or area on a page to report a bug, Nitpick collects the following data about the selected element and its immediate context:
 
-All requests are authenticated with your personal DevRev PAT. Nitpick uses the same API and permissions as your DevRev account.
+- **Visual properties:** Computed CSS styles (colors, typography, spacing, layout, borders, dimensions, positioning) of the selected element and up to 4 ancestor elements, 5 sibling elements, and 8 child elements
+- **DOM structure:** HTML tag names, CSS class names, `data-*` attributes, and the element's path in the DOM tree
+- **Text content:** Visible text content of the selected element (truncated to 200 characters)
+- **Component metadata:** React component names (detected from the page's React fiber tree, if present)
+- **HTML attributes:** Standard attributes such as `role`, `aria-label`, `type`, `href`, `src`, `alt`, `placeholder`, `disabled`, `size`, and `variant`
+- **CSS custom properties:** CSS variables applied to the selected element
+- **Contrast ratio:** WCAG color contrast ratio between the element's text color and background color
+- **Page context:** The page URL and document title
+- **Browser environment:** Browser name and version, operating system, viewport dimensions, and device pixel ratio (derived from the user agent string)
 
-### OpenAI API (`api.openai.com`)
-When you click "Analyze," Nitpick sends:
-- Your comment describing the bug
-- Element metadata (CSS styles, DOM path, dimensions)
-- The cropped screenshot of the selected element
-- Page URL and browser metadata
+### 2.3 Screenshots
 
-This data is sent to generate an AI-powered issue description. OpenAI's data usage is governed by [OpenAI's API data usage policy](https://openai.com/policies/api-data-usage-policies).
+When you select an element or area, Nitpick captures:
 
-## Data Not Collected
+- A **full viewport screenshot** of the visible browser tab using Chrome's built-in `captureVisibleTab` API
+- A **cropped screenshot** of the selected element or area, generated by cropping the viewport screenshot to the selection bounds
 
-Nitpick does **not**:
-- Collect analytics or telemetry
-- Track browsing history or behavior
-- Send data to any server operated by the Nitpick developers
-- Store data outside your local device (other than issues you explicitly create in DevRev)
-- Use cookies or any tracking mechanism
-- Access page content on domains where it is not activated
+Screenshots are captured only when you click on an element or complete a drag selection. Screenshots are held in the extension's service worker memory and are never written to disk. They are cleared after you submit a bug report or exit bug reporting mode.
 
-## Data Storage and Security
+### 2.4 Information We Do NOT Collect
 
-- API credentials are stored in `chrome.storage.local`, which is encrypted at rest by the Chrome browser.
-- Credentials are never included in content scripts or exposed to web pages.
-- No data is stored on external servers controlled by Nitpick.
+Nitpick does **not** collect, access, or transmit:
 
-## Your Control
+- Browser cookies or session tokens
+- localStorage or sessionStorage contents
+- Form input values, passwords, or autofill data
+- Browsing history or navigation events
+- Keystrokes or keyboard input (beyond your typed bug description)
+- Data from pages where Nitpick is not activated
+- Any data when the bug reporting feature is not in use
+- Analytics, telemetry, or usage metrics of any kind
 
-- You can view, change, or delete your stored credentials at any time through the extension's settings popup.
-- Uninstalling the extension removes all locally stored data.
-- You control which domains Nitpick is active on through the settings.
+---
 
-## Changes to This Policy
+## 3. How We Use Your Information
 
-Updates to this policy will be reflected in this document with an updated date. Continued use of the extension after changes constitutes acceptance.
+All data collected by Nitpick is used solely for the purpose of creating a UI bug report in DevRev. Specifically:
 
-## Contact
+| Data | Use |
+|------|-----|
+| DevRev PAT | Authenticates requests to the DevRev API (issue creation, part/user/tag search, artifact upload) and validates your identity with the AI analysis proxy |
+| Element metadata and CSS properties | Sent to the AI analysis service to generate a technical bug description identifying the relevant CSS properties and root cause |
+| Screenshots | Displayed to you in the bug report form for review; uploaded to DevRev as issue attachments when you submit the report |
+| Bug description text | Sent to the AI analysis service along with element metadata to generate a structured bug report |
+| Browser environment | Included in the generated bug report so the development team can reproduce the issue |
 
-For questions about this privacy policy, contact the Nitpick maintainers through the project's GitHub repository.
+Your data is **not** used for:
+
+- Advertising or marketing
+- User profiling or behavioral analysis
+- Sale or transfer to third parties for purposes unrelated to bug reporting
+- Training AI models (see Section 4.2 for OpenAI's data handling)
+- Creditworthiness assessment or lending decisions
+
+---
+
+## 4. Third-Party Services
+
+Nitpick transmits data to the following third-party services when you submit a bug report. Data is transmitted only over HTTPS.
+
+### 4.1 DevRev API (`api.devrev.ai`, `api.dev.devrev-eng.ai`)
+
+**Data sent:**
+- Issue title, description, priority, assigned part, owner, and tags
+- Screenshots (uploaded as DevRev artifacts via the DevRev Artifacts API)
+- Search queries when you search for parts, users, or tags in the bug report form
+
+**Authentication:** Your DevRev PAT, sent in the `Authorization` header.
+
+**Purpose:** Issue creation and related entity lookups (parts, users, tags) within your DevRev organization.
+
+**Data handling:** DevRev processes this data in accordance with [DevRev's Privacy Policy](https://devrev.ai/privacy). Data is stored within your DevRev organization and is subject to your organization's data retention policies.
+
+### 4.2 AI Analysis Proxy (`nitpick-fix.vercel.app`)
+
+Nitpick uses a proxy server hosted on Vercel to generate AI-powered bug descriptions. The proxy exists to keep the AI service API key secure on the server side, rather than embedding it in the extension.
+
+**Data sent to the proxy:**
+- Your DevRev PAT (used only to verify your identity; not stored or logged by the proxy)
+- Your bug description text
+- Element metadata (CSS properties, DOM path, class names, attributes, text content)
+- A cropped screenshot of the selected element (low-resolution)
+- Page URL, viewport dimensions, and browser environment metadata
+
+**What the proxy does:**
+1. Validates your DevRev PAT against the DevRev API to confirm you are an authenticated user
+2. Forwards the bug report data to OpenAI's API using a server-side API key
+3. Streams the AI-generated response back to the extension
+
+**What the proxy does NOT do:**
+- Store, log, or retain any request data
+- Store or log your DevRev PAT
+- Send data to any service other than OpenAI
+
+**Proxy hosting:** The proxy runs as a serverless function on Vercel's infrastructure (AWS US East). Source code is available in the project repository.
+
+### 4.3 OpenAI API (`api.openai.com`)
+
+The proxy forwards your bug report data to OpenAI's GPT model to generate a structured technical description of the UI issue.
+
+**Data sent to OpenAI (via the proxy):**
+- Your bug description text
+- Element metadata (CSS properties, DOM structure, class names, attributes)
+- Cropped screenshot of the selected element
+- Page URL and browser environment
+
+**Data NOT sent to OpenAI:**
+- Your DevRev PAT or any authentication credentials
+- Cookies, localStorage, or session data
+- Full page screenshots (only the cropped selection area)
+
+**OpenAI's data handling:** OpenAI processes API requests in accordance with [OpenAI's API Data Usage Policy](https://openai.com/policies/api-data-usage-policies). As of the effective date of this policy, OpenAI states that data submitted through the API is not used to train their models.
+
+---
+
+## 5. Data Storage and Security
+
+### 5.1 Local Storage
+
+Your DevRev PAT and domain list are stored in `chrome.storage.local`, which is encrypted at rest by the Chrome browser and is accessible only to the Nitpick extension. These values are never included in content scripts or exposed to web pages.
+
+### 5.2 Temporary In-Memory Storage
+
+Screenshots, element metadata, and form data are held in the extension's service worker memory during an active bug reporting session. This data is:
+
+- Never written to disk or to `chrome.storage`
+- Cleared when you submit a bug report, cancel the report, or exit bug reporting mode
+- Lost if the browser restarts or the service worker is suspended by Chrome
+
+### 5.3 Network Security
+
+All data transmitted to DevRev, the AI proxy, and OpenAI is sent over HTTPS (TLS-encrypted connections). The AI proxy restricts cross-origin requests to browser extensions only; requests from websites are blocked.
+
+### 5.4 API Key Security
+
+The OpenAI API key used for AI analysis is stored as an encrypted environment variable on the proxy server (Vercel). It is never present in the extension code, build output, or browser storage.
+
+---
+
+## 6. Data Retention
+
+| Data | Retention |
+|------|-----------|
+| DevRev PAT | Stored locally until you uninstall the extension or clear extension data |
+| Domain list | Stored locally until you uninstall the extension or modify it in settings |
+| Screenshots | Held in memory during the reporting session only; cleared on submission or cancellation |
+| Element metadata | Held in memory during the reporting session only; cleared on submission or cancellation |
+| Bug report text | Held in memory during the reporting session only; cleared on submission or cancellation |
+| Created DevRev issues | Retained by DevRev in accordance with your organization's policies; Nitpick does not retain copies |
+
+Nitpick does not operate any servers that retain user data. The AI proxy processes requests statelessly and does not log or store request contents.
+
+---
+
+## 7. Your Rights
+
+### 7.1 General Rights
+
+You may at any time:
+
+- **View** your stored PAT and domain list in the Nitpick settings popup
+- **Modify** your PAT or domain list through the settings popup
+- **Delete** all locally stored data by uninstalling the extension
+- **Disable** Nitpick on specific domains by removing them from the domain list
+- **Stop** data collection entirely by not activating the bug reporting feature
+
+### 7.2 Rights Under GDPR (European Economic Area Residents)
+
+If you are located in the European Economic Area (EEA), you have the following rights under the General Data Protection Regulation (GDPR):
+
+- **Right of access** (Article 15): You may request confirmation of whether your personal data is being processed and obtain a copy of that data.
+- **Right to rectification** (Article 16): You may request correction of inaccurate personal data.
+- **Right to erasure** (Article 17): You may request deletion of your personal data. Uninstalling the extension deletes all locally stored data.
+- **Right to restriction of processing** (Article 18): You may request that processing of your data be restricted.
+- **Right to data portability** (Article 20): You may request your data in a structured, machine-readable format.
+- **Right to object** (Article 21): You may object to processing of your personal data.
+
+**Legal basis for processing:** We process your data based on your explicit consent, which you provide by installing the extension, configuring your credentials, and activating the bug reporting feature. You may withdraw consent at any time by disabling or uninstalling the extension.
+
+**Data transfers:** When you submit a bug report, data is transferred to servers located in the United States (DevRev API, Vercel proxy, OpenAI API). These transfers are necessary to provide the service you have requested.
+
+To exercise any of these rights, contact us using the information in Section 11.
+
+### 7.3 Rights Under CCPA (California Residents)
+
+If you are a California resident, you have the right to:
+
+- Know what personal information is collected and how it is used
+- Request deletion of personal information
+- Opt out of the sale of personal information (Nitpick does not sell personal information)
+
+---
+
+## 8. Children's Privacy
+
+Nitpick is not directed at children under the age of 13. We do not knowingly collect personal information from children under 13. If you believe a child under 13 has provided personal information through Nitpick, please contact us and we will take steps to delete such information.
+
+---
+
+## 9. Permissions Justification
+
+Nitpick requests the following browser permissions, each necessary for its core bug reporting functionality:
+
+| Permission | Justification |
+|------------|---------------|
+| `activeTab` | Grants temporary access to the current tab when you activate bug reporting, enabling screenshot capture and content script injection |
+| `storage` | Stores your DevRev PAT and domain list locally |
+| `scripting` | Injects the bug reporting overlay into pages outside the default domain list when you click the extension icon |
+| `offscreen` | Creates an offscreen document to crop screenshots using the Canvas API (required because service workers cannot access Canvas) |
+| `alarms` | Keeps the service worker active during a bug reporting session to prevent Chrome from suspending it and losing your in-progress report |
+
+---
+
+## 10. Changes to This Policy
+
+We may update this Privacy Policy to reflect changes in our data practices or applicable law. The "Last Updated" date at the top of this policy indicates when the most recent changes were made. Continued use of Nitpick after changes constitutes acceptance of the updated policy.
+
+---
+
+## 11. Contact Us
+
+For questions, concerns, or requests related to this Privacy Policy or your personal data, contact:
+
+**Arcade Design System Team, DevRev, Inc.**
+Email: kavinash@devrev.ai
+
+---
+
+*This privacy policy applies to the Nitpick Chrome extension (version 0.1.0 and later).*
