@@ -6,3 +6,4 @@ dist/
 .npmrc
 .DS_Store
 *.bak
+.planning/
