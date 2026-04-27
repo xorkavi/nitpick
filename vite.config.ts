@@ -14,6 +14,10 @@ const manifest = defineManifest({
     '128': 'src/assets/icons/icon-128.png',
   },
   action: {},
+  options_ui: {
+    page: 'src/popup/index.html',
+    open_in_tab: true,
+  },
   background: {
     service_worker: 'src/service-worker/index.ts',
   },
