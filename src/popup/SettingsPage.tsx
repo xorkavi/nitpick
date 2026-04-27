@@ -190,7 +190,7 @@ export function SettingsPage() {
             margin: '0 0 16px 0',
           }}
         >
-          Report UI bugs by clicking on elements. Nitpick captures a screenshot, CSS styles, and page context — sent to DevRev and OpenAI only when you submit. Nothing runs in the background.
+          See something off? Click it, say what's wrong, and Nitpick turns it into a ready-to-ship DevRev issue. Screenshots, context, and all.
         </p>
       )}
 
