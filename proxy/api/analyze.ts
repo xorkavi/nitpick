@@ -6,7 +6,7 @@ const DEVREV_API_BASES = [
   'https://api.dev.devrev-eng.ai',
 ];
 
-const MAX_BODY_SIZE = 200_000;
+const MAX_BODY_SIZE = 1_500_000;
 
 let ratelimit: Ratelimit | null = null;
 

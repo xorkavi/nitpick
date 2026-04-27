@@ -1,9 +1,6 @@
-import { COLORS } from '../shared/constants';
-
 export async function captureScreenshots(
   tabId: number,
   boundingRect: { x: number; y: number; width: number; height: number },
-  highlightRect?: { left: number; top: number; width: number; height: number },
   dpr: number = 1,
 ): Promise<{ viewport: string; cropped: string }> {
   const viewportDataUrl = await chrome.tabs.captureVisibleTab({ format: 'png' });
@@ -17,8 +14,6 @@ export async function captureScreenshots(
         action: 'CROP_SCREENSHOT',
         viewportDataUrl,
         cropRect: boundingRect,
-        highlightRect: null,
-        highlightColor: COLORS.selectionBlue,
         dpr,
       },
       (response: { croppedDataUrl?: string } | undefined) => {

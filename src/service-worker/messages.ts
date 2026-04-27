@@ -48,11 +48,10 @@ export function setupMessageHandler(): void {
           return true; // async response
 
         case 'CAPTURE_SCREENSHOTS': {
-          const { boundingRect, highlightRect, dpr, browserMetadata } = msg;
+          const { boundingRect, dpr, browserMetadata } = msg;
           captureScreenshots(
             _sender.tab!.id!,
             boundingRect,
-            highlightRect,
             dpr,
           )
             .then(async ({ viewport, cropped }) => {
