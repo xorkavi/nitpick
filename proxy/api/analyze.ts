@@ -1,5 +1,3 @@
-import OpenAI from 'openai';
-
 const DEVREV_API_BASES = [
   'https://api.devrev.ai',
   'https://api.dev.devrev-eng.ai',
@@ -53,37 +51,73 @@ export default async function handler(req: any, res: any) {
     return res.status(400).json({ error: 'Missing instructions or input' });
   }
 
-  const client = new OpenAI({ apiKey });
-
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
 
   try {
-    const stream = client.responses.stream({
-      model: 'gpt-5.5',
-      instructions: body.instructions,
-      input: body.input,
-      reasoning: { effort: 'low' },
-      max_output_tokens: 1200,
+    const openaiRes = await fetch('https://api.openai.com/v1/responses', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-5.5',
+        instructions: body.instructions,
+        input: body.input,
+        reasoning: { effort: 'low' },
+        max_output_tokens: 1200,
+        stream: true,
+      }),
     });
 
-    stream.on('response.output_text.delta', (event: any) => {
-      res.write(`data: ${JSON.stringify({ delta: event.delta })}\n\n`);
-    });
+    if (!openaiRes.ok) {
+      const err = await openaiRes.text();
+      return res.status(openaiRes.status).json({ error: err });
+    }
 
-    stream.on('response.output_text.done', () => {
-      res.write('data: [DONE]\n\n');
-      res.end();
-    });
+    const reader = openaiRes.body?.getReader();
+    if (!reader) {
+      return res.status(500).json({ error: 'No stream from OpenAI' });
+    }
 
-    stream.on('error', (error: any) => {
-      const message = error instanceof Error ? error.message : 'AI analysis failed';
-      res.write(`data: ${JSON.stringify({ error: message })}\n\n`);
-      res.end();
-    });
+    const decoder = new TextDecoder();
+    let buffer = '';
 
-    await stream.finalResponse();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() ?? '';
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const payload = line.slice(6).trim();
+
+        if (payload === '[DONE]') {
+          res.write('data: [DONE]\n\n');
+          return res.end();
+        }
+
+        try {
+          const event = JSON.parse(payload);
+          if (event.type === 'response.output_text.delta') {
+            res.write(`data: ${JSON.stringify({ delta: event.delta })}\n\n`);
+          } else if (event.type === 'response.completed' || event.type === 'response.done') {
+            res.write('data: [DONE]\n\n');
+            return res.end();
+          }
+        } catch {
+          // Skip malformed lines
+        }
+      }
+    }
+
+    res.write('data: [DONE]\n\n');
+    res.end();
   } catch (error: any) {
     const message = error instanceof Error ? error.message : 'AI analysis failed';
     if (!res.headersSent) {
