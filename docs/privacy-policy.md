@@ -255,7 +255,7 @@ We may update this Privacy Policy to reflect changes in our data practices or ap
 For questions, concerns, or requests related to this Privacy Policy or your personal data, contact:
 
 **Arcade Design System Team, DevRev, Inc.**
-Email: kavinash@devrev.ai
+Email: kavinas.sundaramurthy@devrev.ai
 
 ---
 
