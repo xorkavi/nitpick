@@ -27,9 +27,12 @@ interface ChipDropdownProps {
   selectedIcon?: ComponentChildren;
   selectedColorBg?: string;
   selectedColorText?: string;
+  selectedAvatarUrl?: string;
+  selectedAvatarBg?: string;
+  selectedInitials?: string;
 }
 
-export function ChipDropdown({ label, value, options, onSelect, onSearch, suggested, disabled, loading, selectedIcon, selectedColorBg, selectedColorText }: ChipDropdownProps) {
+export function ChipDropdown({ label, value, options, onSelect, onSearch, suggested, disabled, loading, selectedIcon, selectedColorBg, selectedColorText, selectedAvatarUrl, selectedAvatarBg, selectedInitials }: ChipDropdownProps) {
   const isOpen = useSignal(false);
   const flipUp = useSignal(false);
   const alignRight = useSignal(false);
@@ -154,6 +157,13 @@ export function ChipDropdown({ label, value, options, onSelect, onSearch, sugges
         disabled={disabled}
       >
         {selectedIcon && value && <span class="nitpick-chip-icon">{selectedIcon}</span>}
+        {(selectedAvatarUrl || selectedInitials) && value && (
+          <span class="nitpick-chip-avatar" style={!selectedAvatarUrl && selectedAvatarBg ? { background: selectedAvatarBg } : undefined}>
+            {selectedAvatarUrl
+              ? <img src={selectedAvatarUrl} alt={value} />
+              : selectedInitials}
+          </span>
+        )}
         {value && selectedColorBg ? (
           <span class="nitpick-chip-priority-label" style={{ background: selectedColorBg, color: selectedColorText }}>{value}</span>
         ) : (
