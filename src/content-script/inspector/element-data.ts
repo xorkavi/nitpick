@@ -182,28 +182,52 @@ function extractHtmlAttributes(el: Element): Record<string, string> {
   return attrs;
 }
 
-function getReactComponentName(el: Element): string | null {
+function getReactFiber(el: Element): Record<string, unknown> | null {
   try {
     const keys = Object.keys(el);
     const fiberKey = keys.find((k) => k.startsWith('__reactFiber$') || k.startsWith('__reactInternalInstance$'));
     if (!fiberKey) return null;
-    let fiber = (el as unknown as Record<string, unknown>)[fiberKey] as Record<string, unknown> | null;
-    for (let i = 0; i < 10 && fiber; i++) {
-      const type = fiber.type as ((...args: unknown[]) => unknown) | { displayName?: string; name?: string } | null;
-      if (typeof type === 'function' || (typeof type === 'object' && type !== null)) {
-        const name = (type as { displayName?: string }).displayName
-          || (type as { name?: string }).name
-          || null;
-        if (name && name.length > 1 && name[0] === name[0].toUpperCase()) {
-          return name;
-        }
+    return (el as unknown as Record<string, unknown>)[fiberKey] as Record<string, unknown> | null;
+  } catch {
+    return null;
+  }
+}
+
+function extractFiberComponentName(fiber: Record<string, unknown>): string | null {
+  const type = fiber.type as ((...args: unknown[]) => unknown) | { displayName?: string; name?: string } | null;
+  if (typeof type === 'function' || (typeof type === 'object' && type !== null)) {
+    const name = (type as { displayName?: string }).displayName
+      || (type as { name?: string }).name
+      || null;
+    if (name && name.length > 1 && name[0] === name[0].toUpperCase()) {
+      return name;
+    }
+  }
+  return null;
+}
+
+function getReactComponentChain(el: Element, maxDepth: number = 15): string[] {
+  try {
+    let fiber = getReactFiber(el);
+    const chain: string[] = [];
+    const seen = new Set<string>();
+    for (let i = 0; i < maxDepth && fiber; i++) {
+      const name = extractFiberComponentName(fiber);
+      if (name && !seen.has(name)) {
+        seen.add(name);
+        chain.push(name);
       }
       fiber = fiber.return as Record<string, unknown> | null;
     }
+    return chain;
   } catch {
-    // Fiber access can fail — best-effort only
+    return [];
   }
-  return null;
+}
+
+function getReactComponentName(el: Element): string | null {
+  const chain = getReactComponentChain(el);
+  return chain[0] || null;
 }
 
 const ANCESTOR_STYLE_PROPERTIES = [
@@ -316,6 +340,8 @@ export function inspectElement(el: Element): ElementMetadata {
     computedStyle.getPropertyValue('background-color')
   );
 
+  const reactChain = getReactComponentChain(el);
+
   return {
     tagName: el.tagName.toLowerCase(),
     id: el.id,
@@ -332,7 +358,8 @@ export function inspectElement(el: Element): ElementMetadata {
     cssVariables,
     dataAttributes: extractDataAttributes(el),
     htmlAttributes: extractHtmlAttributes(el),
-    reactComponentName: getReactComponentName(el),
+    reactComponentName: reactChain[0] || null,
+    reactComponentChain: reactChain,
     ancestorChain: buildAncestorChain(el),
     siblingContext: buildSiblingContext(el),
     childContext: buildChildContext(el),
