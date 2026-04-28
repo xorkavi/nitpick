@@ -43,6 +43,7 @@ export interface ElementMetadata {
   dataAttributes: Record<string, string>;
   htmlAttributes: Record<string, string>;
   reactComponentName: string | null;
+  reactComponentChain: string[]; // Full fiber chain: closest → outermost
   ancestorChain: AncestorInfo[];
   siblingContext: SiblingInfo[];
   childContext: ChildInfo[];

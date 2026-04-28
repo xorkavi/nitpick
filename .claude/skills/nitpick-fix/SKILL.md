@@ -31,7 +31,7 @@ Check for the PAT in this order:
 2. `.env` file in the project root — read it with: `source .env 2>/dev/null`
 3. If not found, ask the user to set it in `.env`: `DEVREV_PAT=your-pat-here`
 
-**IMPORTANT**: This PAT is for the **dev** environment (`api.dev.devrev-eng.ai`), not prod. Always use the dev base URL.
+**IMPORTANT**: This PAT is for the **prod** environment (`api.devrev.ai`). Always use the prod base URL.
 
 ## 3. Fetch the issue
 
@@ -39,7 +39,7 @@ Use `GET /works.get` with the display ID directly — no need to search or list:
 
 ```bash
 source .env 2>/dev/null
-curl -s -X GET "https://api.dev.devrev-eng.ai/works.get?id=<DISPLAY_ID>" \
+curl -s -X GET "https://api.devrev.ai/works.get?id=<DISPLAY_ID>" \
   -H "Authorization: $DEVREV_PAT" \
   | jq '{work: .work | {title, body, display_id, priority, priority_v2, tags, artifacts, applies_to_part, owned_by, reported_by}}'
 ```
@@ -57,6 +57,14 @@ Extract these fields from `response.work`:
 - **applies_to_part** — the part/enhancement the issue is filed against
 - **owned_by** / **reported_by** — user assignments
 
+## 4b. Cross-check captured element vs. bug description
+
+Before searching code, verify that the captured DOM element matches what the bug description is actually about:
+
+1. Compare the element's CSS classes/state with the title and description. Example: if the title says "inline edit" but the element class says "not-inline-editing", the capture likely hit the wrong element.
+2. Compare the detail screenshot with the viewport screenshot. Is the highlighted element actually the one exhibiting the bug?
+3. If there's a mismatch, don't trust the DOM path. Use the React component chain, visible text content, or page URL route to search more broadly for the actual target component.
+
 ## 5. Extract screenshots
 
 Screenshots can appear in **two places** depending on the Nitpick version:
@@ -64,8 +72,8 @@ Screenshots can appear in **two places** depending on the Nitpick version:
 ### Inline images (current format)
 The `body` field contains markdown images with authenticated download URLs:
 ```
-![viewport-screenshot.png](https://api.dev.devrev-eng.ai/internal/artifacts.download?id=...&key=...)
-![detail-screenshot.png](https://api.dev.devrev-eng.ai/internal/artifacts.download?id=...&key=...)
+![viewport-screenshot.png](https://api.devrev.ai/internal/artifacts.download?id=...&key=...)
+![detail-screenshot.png](https://api.devrev.ai/internal/artifacts.download?id=...&key=...)
 ```
 
 Parse these with a regex like `!\[([^\]]*)\]\((https?://[^)]+)\)` to extract image name and URL.
@@ -86,7 +94,7 @@ file /tmp/viewport-screenshot.png
 ### Artifacts array (older format)
 Older issues store screenshots in the `artifacts` array with `file.name` like `viewport-screenshot.png` and `detail-screenshot.png`. The artifact ID can be used to construct a download URL:
 ```
-https://api.dev.devrev-eng.ai/internal/artifacts.download?id=<artifact_id>
+https://api.devrev.ai/internal/artifacts.download?id=<artifact_id>
 ```
 
 **Always check both locations.** Download the screenshots to `/tmp/` so you can view them for context. **Always use `-L` flag** — all artifact download URLs 303-redirect to S3.
@@ -144,7 +152,7 @@ Only grep the literal drid value if no builder utility exists in the repo.
 
 Before doing any broad search, check if the description contains any of these one-grep-to-source identifiers:
 
-1. **React component name** — on the element OR any ancestor (ancestor names like `ChatMembersTitle` are equally valuable). This is the single most valuable identifier.
+1. **React component chain** — the description may contain a full fiber chain like `Input → EditableInput → AddNewTask`. This is the single most valuable identifier. Prioritize names from the **selected element's chain** over ancestor/child context names. Each name in the chain maps to a source file.
 2. **data-drid** or **data-testid** value (after resolving per step 7)
 3. **Constraining Tailwind class** — e.g. `max-w-32`, `px-core-base`, `line-clamp-2` (ignore ultra-common ones like `overflow-hidden`)
 
@@ -153,7 +161,7 @@ Before doing any broad search, check if the description contains any of these on
 grep -r "identifier" <target-repo-path> → read the file → fix → done
 ```
 
-For React component names, also try: `glob "**/<ComponentName>*"` in the target repo.
+For React component names, also try: `glob "**/<ComponentName>*"` in the target repo. Work outward through the chain — the first name is closest to the DOM element, the last is the outermost wrapper.
 
 For Tailwind classes, grep in the directory narrowed by the page URL route.
 
@@ -163,7 +171,7 @@ Only continue to step 9 if NO strong identifiers are found in the description.
 
 If no strong identifiers exist, search in **strict priority order** — stop as soon as you get a match:
 
-1. **React component name** — from element AND ancestors. Ancestor names (e.g. `ChatMembersTitle`, `RecipientDisplay`) often map more directly to filenames than the clicked element's generic `<div>`.
+1. **React component chain** — from the selected element's chain first, then ancestor/child context. Names from the selected element's own fiber chain (e.g. `Input → EditableInput → AddNewTask`) are more reliable than names from sibling or child elements.
 2. **data-drid / data-testid** — from element AND ancestors. Resolve runtime drids first (step 7).
 3. **Tailwind utility classes** — specific classes like `px-core-base`, `max-w-32` are directly greppable in source. Skip ultra-common ones (`overflow-hidden`, `truncate`). Grep within the route directory.
 4. **Ancestor layout styles** — If the bug is about spacing/padding, check the "Ancestors with layout styles" section. The parent's padding/margin classes (e.g. `p-2`, `px-core-base`) are often the fix target, not the element itself.

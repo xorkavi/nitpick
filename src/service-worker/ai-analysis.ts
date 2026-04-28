@@ -82,17 +82,23 @@ function buildRawIdentifiersBlock(metadata: ElementMetadata | AreaMetadata): str
   if (drid) searchIds.push(`data-drid: ${drid}`);
   if (testid) searchIds.push(`data-testid: ${testid}`);
 
-  // 2. React component names (element + ancestors — map to filenames)
-  const reactNames: string[] = [];
-  if (metadata.reactComponentName) reactNames.push(metadata.reactComponentName);
+  // 2. React component chain (from fiber tree — maps directly to filenames)
+  const hasChain = 'reactComponentChain' in metadata && (metadata as ElementMetadata).reactComponentChain.length > 0;
+  if (hasChain) {
+    searchIds.push(`React component chain (selected element): ${(metadata as ElementMetadata).reactComponentChain.join(' → ')}`);
+  } else if (metadata.reactComponentName) {
+    searchIds.push(`React component (selected element): ${metadata.reactComponentName}`);
+  }
+
+  const contextReactNames: string[] = [];
   for (const a of metadata.ancestorChain) {
-    if (a.reactComponentName) reactNames.push(a.reactComponentName);
+    if (a.reactComponentName) contextReactNames.push(`${a.reactComponentName} (ancestor)`);
   }
   for (const c of metadata.childContext) {
-    if (c.reactComponentName) reactNames.push(`${c.reactComponentName} (child)`);
+    if (c.reactComponentName) contextReactNames.push(`${c.reactComponentName} (child)`);
   }
-  if (reactNames.length > 0) {
-    searchIds.push(`React components: ${reactNames.join(' → ')}`);
+  if (contextReactNames.length > 0) {
+    searchIds.push(`React components (context): ${contextReactNames.join(', ')}`);
   }
 
   // 3. Specific Tailwind classes (directly greppable, ultra-common ones filtered out)
@@ -256,10 +262,11 @@ RULES:
 - If a screenshot is provided, use visual context to be more precise about the problem
 - When reporting affected properties, include BOTH computed CSS values AND the raw HTML/component attribute values that likely control them. For example, if a button's size comes from a size="M" attribute, report that alongside the computed CSS.
 - If a Tailwind class like \`max-w-32\` or \`truncate\` is the likely cause, include it alongside the computed value — Tailwind classes are directly greppable in source code.
-- IMPORTANT: The root cause is often on a CHILD or SIBLING element, not the selected element itself. Check children AND siblings carefully:
-  - Children: their computed styles (max-width, min-width, overflow, white-space, text-overflow) and Tailwind classes often contain the actual constraint.
-  - Siblings: absolutely-positioned siblings are often visual overlays, backgrounds, or decorators (e.g., active-tab highlight pills, selection indicators). When you see a sibling with position: absolute, its width/height mismatching the parent's inner dimensions is a common root cause for alignment bugs. Report THAT element's properties.
-  - When a positioned sibling's height/width doesn't fit inside the parent's content area (parent size minus padding), flag the mismatch explicitly.
+- PRIORITY: Start your analysis with the SELECTED ELEMENT — it is the primary target the user clicked. Its properties, classes, and React component chain are the most likely to contain the root cause. Only look to children/siblings/ancestors if the selected element's own properties don't explain the bug.
+- SECONDARY: If the selected element looks correct, check context elements:
+  - Children: their computed styles (max-width, min-width, overflow, white-space, text-overflow) and Tailwind classes may contain the actual constraint.
+  - Siblings: absolutely-positioned siblings are often visual overlays, backgrounds, or decorators (e.g., active-tab highlight pills, selection indicators). When a positioned sibling's height/width doesn't fit inside the parent's content area (parent size minus padding), flag the mismatch explicitly.
+  - Ancestors: padding/margin on parent elements can cause spacing bugs on the selected element.
 - If a React component name suggests a design system component (e.g., TabItem, Button, IconButton, MenuV2, Tabs), note in the diagnosis that the relevant CSS classes may come from a DS theme config rather than the component JSX. This helps the fixer know to trace into the theme.
 - Do NOT include a "Code identifiers" section — that is auto-appended separately. Focus only on the human-readable analysis.
 
@@ -379,9 +386,11 @@ ${topElements
     ? `HTML attributes:\n${Object.entries(metadata.htmlAttributes).map(([k, v]) => `  ${k}="${v}"`).join('\n')}`
     : '';
 
-  const reactBlock = metadata.reactComponentName
-    ? `React component: ${metadata.reactComponentName}`
-    : 'React component: (not detected)';
+  const reactBlock = ('reactComponentChain' in metadata && (metadata as ElementMetadata).reactComponentChain.length > 0)
+    ? `React component chain: ${(metadata as ElementMetadata).reactComponentChain.join(' → ')}`
+    : metadata.reactComponentName
+      ? `React component: ${metadata.reactComponentName}`
+      : 'React component: (not detected)';
 
   const ancestorBlock = metadata.ancestorChain.length > 0
     ? `Ancestor chain (parent → great-grandparent):\n${metadata.ancestorChain.map((a, i) => {
@@ -432,6 +441,7 @@ ${topElements
 
 ${envBlock}
 
+--- SELECTED ELEMENT (primary target — this is what the user clicked) ---
 Element: <${metadata.tagName}> "${metadata.textContent.slice(0, 100)}"
 ${reactBlock}
 Path: ${metadata.domPath}
@@ -439,14 +449,17 @@ Classes: ${metadata.classList.join(' ')}
 ${dataAttrsBlock}
 ${htmlAttrsBlock ? htmlAttrsBlock + '\n' : ''}Dimensions: ${metadata.boundingRect.width}x${metadata.boundingRect.height}px at (${metadata.boundingRect.x}, ${metadata.boundingRect.y})
 Contrast ratio: ${metadata.contrastRatio ?? 'N/A'}
-${childBlock ? '\n' + childBlock : ''}
-${ancestorBlock ? '\n' + ancestorBlock : ''}
-${siblingBlock ? '\n' + siblingBlock : ''}
+
 Computed styles:
 ${JSON.stringify(metadata.computedStyles, null, 2)}
 
 CSS variables:
-${JSON.stringify(metadata.cssVariables, null, 2)}`;
+${JSON.stringify(metadata.cssVariables, null, 2)}
+
+--- CONTEXT (ancestors, then children, then siblings — secondary info) ---
+${ancestorBlock || 'Ancestor chain: (none)'}
+${childBlock ? '\n' + childBlock : ''}
+${siblingBlock ? '\n' + siblingBlock : ''}`;
 }
 
 // ---------------------------------------------------------------------------
