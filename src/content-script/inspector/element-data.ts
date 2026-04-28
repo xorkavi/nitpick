@@ -18,9 +18,9 @@
  *           ARIA roles, labels, alt text, or keyboard focus data.
  */
 
-import type { ElementMetadata, AncestorInfo, SiblingInfo, ChildInfo } from '../../shared/types';
+import type { ElementMetadata, AncestorInfo, SiblingInfo, ChildInfo, CSSSourceInfo } from '../../shared/types';
 import { calculateContrastRatio } from './contrast';
-import { extractCSSVariables } from './css-variables';
+import { extractCSSVariables, findSourceRule } from './css-variables';
 
 /**
  * Curated CSS properties relevant to visual bug reporting.
@@ -161,7 +161,7 @@ export function generateDOMPath(el: Element): string {
   return parts.join(' > ');
 }
 
-const INTERESTING_HTML_ATTRS = ['role', 'aria-label', 'aria-expanded', 'type', 'name', 'href', 'src', 'alt', 'title', 'placeholder', 'value', 'disabled', 'size', 'variant'];
+const INTERESTING_HTML_ATTRS = ['role', 'aria-label', 'aria-expanded', 'aria-checked', 'aria-selected', 'aria-invalid', 'aria-disabled', 'type', 'name', 'href', 'src', 'alt', 'title', 'placeholder', 'value', 'disabled', 'size', 'variant'];
 
 function extractDataAttributes(el: Element): Record<string, string> {
   const attrs: Record<string, string> = {};
@@ -335,6 +335,20 @@ export function inspectElement(el: Element): ElementMetadata {
 
   const cssVariables = extractCSSVariables(el, computedStyle);
 
+  const SOURCE_TRACED_PROPERTIES = [
+    'background-color', 'color', 'border-color', 'outline-color',
+    'font-size', 'font-weight', 'font-family',
+    'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
+    'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
+    'width', 'height', 'max-width', 'max-height', 'min-width', 'min-height',
+    'border-radius', 'box-shadow', 'gap',
+  ];
+  const cssSourceRules: CSSSourceInfo[] = [];
+  for (const prop of SOURCE_TRACED_PROPERTIES) {
+    const rule = findSourceRule(el, prop);
+    if (rule) cssSourceRules.push(rule);
+  }
+
   const contrastRatio = calculateContrastRatio(
     computedStyle.getPropertyValue('color'),
     computedStyle.getPropertyValue('background-color')
@@ -356,6 +370,7 @@ export function inspectElement(el: Element): ElementMetadata {
     },
     computedStyles,
     cssVariables,
+    cssSourceRules,
     dataAttributes: extractDataAttributes(el),
     htmlAttributes: extractHtmlAttributes(el),
     reactComponentName: reactChain[0] || null,
