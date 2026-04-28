@@ -121,6 +121,16 @@ function buildRawIdentifiersBlock(metadata: ElementMetadata | AreaMetadata): str
     searchIds.push(`Tailwind (constraining): ${allConstrainingTw.join(', ')}`);
   }
 
+  // 4. CSS source classes (which class applied visual properties — greppable)
+  if ('cssSourceRules' in metadata && metadata.cssSourceRules.length > 0) {
+    const sourceClasses = metadata.cssSourceRules
+      .filter((r) => r.className)
+      .map((r) => `${r.property}: class \`${r.className}\` (selector: \`${r.selector}\`, value: \`${r.value}\`)`);
+    if (sourceClasses.length > 0) {
+      searchIds.push(`CSS source classes: ${sourceClasses.join('; ')}`);
+    }
+  }
+
   if (searchIds.length > 0) {
     sections.push(`**Search identifiers** (grep these in order):\n${searchIds.map((s) => `1. \`${s}\``).join('\n')}`);
   }
@@ -263,11 +273,15 @@ RULES:
 - When reporting affected properties, include BOTH computed CSS values AND the raw HTML/component attribute values that likely control them. For example, if a button's size comes from a size="M" attribute, report that alongside the computed CSS.
 - If a Tailwind class like \`max-w-32\` or \`truncate\` is the likely cause, include it alongside the computed value — Tailwind classes are directly greppable in source code.
 - PRIORITY: Start your analysis with the SELECTED ELEMENT — it is the primary target the user clicked. Its properties, classes, and React component chain are the most likely to contain the root cause. Only look to children/siblings/ancestors if the selected element's own properties don't explain the bug.
+- CSS SOURCE RULES: When "CSS source rules" are provided, they show which CSS class/selector applied key visual properties. This is critical for background-color/color bugs — the class name (e.g. \`input-bg-idle\`) is the greppable identifier that leads to the source code. Always include the source class name in the diagnosis when available.
+- THEMING BUGS: For background-color, color, or font bugs where the property value references a CSS variable or design token, note that the same token likely affects OTHER elements on the page too. The bug may be a shared style problem, not specific to the selected element. Recommend checking sibling components that use the same input/surface pattern.
 - SECONDARY: If the selected element looks correct, check context elements:
   - Children: their computed styles (max-width, min-width, overflow, white-space, text-overflow) and Tailwind classes may contain the actual constraint.
   - Siblings: absolutely-positioned siblings are often visual overlays, backgrounds, or decorators (e.g., active-tab highlight pills, selection indicators). When a positioned sibling's height/width doesn't fit inside the parent's content area (parent size minus padding), flag the mismatch explicitly.
   - Ancestors: padding/margin on parent elements can cause spacing bugs on the selected element.
 - If a React component name suggests a design system component (e.g., TabItem, Button, IconButton, MenuV2, Tabs), note in the diagnosis that the relevant CSS classes may come from a DS theme config rather than the component JSX. This helps the fixer know to trace into the theme.
+- DATA-STATE ATTRIBUTES: If the element has \`data-state\`, \`data-feedback\`, \`data-readonly\`, or \`data-direction\` attributes, include them in the diagnosis — these indicate the component's interactive state (e.g. \`data-state="checked"\`, \`data-feedback="error"\`) and are essential for reproducing the bug.
+- SEMANTIC TOKEN CLASSES: Classes like \`control-bg-prominent-idle\`, \`fg-neutral-prominent\`, \`feedback-bg-success-prominent\` are semantic design tokens mapped to CSS variables. Include the full class name — it's the primary greppable identifier for finding the theme config where the style is defined.
 - Do NOT include a "Code identifiers" section — that is auto-appended separately. Focus only on the human-readable analysis.
 
 OUTPUT FORMAT (use exactly these section markers on their own line):
@@ -291,6 +305,7 @@ DESCRIPTION:
 | OS | [e.g. macOS 10.15.7, Windows 11, etc — extract from user agent] |
 | Viewport | [e.g. 1723x994] |
 | DPR | [device pixel ratio if available] |
+| Theme | [e.g. arcade (dark), devrev (light) — from ENVIRONMENT table, or omit if not available] |
 | Page | [clickable markdown link: [page title](url)]  |
 
 PART: [part_id or "none"]
@@ -343,6 +358,7 @@ function parseUserAgent(ua: string): { browser: string; os: string } {
 
 function buildEnvironmentBlock(bm: BrowserMetadata): string {
   const { browser, os } = parseUserAgent(bm.userAgent || '');
+  const themeRow = bm.activeTheme ? `\n| Theme | ${bm.activeTheme} (${bm.colorScheme || 'dark'}) |` : '';
   return `ENVIRONMENT (copy this table verbatim into the description):
 | Property | Value |
 |----------|-------|
@@ -350,7 +366,7 @@ function buildEnvironmentBlock(bm: BrowserMetadata): string {
 | OS | ${os} |
 | Viewport | ${bm.viewportWidth}x${bm.viewportHeight} |
 | DPR | ${bm.devicePixelRatio || 1} |
-| Page | [${bm.title || 'Page'}](${bm.url}) |`;
+| Page | [${bm.title || 'Page'}](${bm.url}) |${themeRow}`;
 }
 
 function buildUserMessage(
@@ -456,7 +472,11 @@ ${JSON.stringify(metadata.computedStyles, null, 2)}
 CSS variables:
 ${JSON.stringify(metadata.cssVariables, null, 2)}
 
---- CONTEXT (ancestors, then children, then siblings — secondary info) ---
+${metadata.cssSourceRules && metadata.cssSourceRules.length > 0
+    ? `CSS source rules (which class applied key properties):
+${metadata.cssSourceRules.map((r) => `  ${r.property}: ${r.value} — applied by selector \`${r.selector}\`${r.className ? ` (class: ${r.className})` : ''}`).join('\n')}
+`
+    : ''}--- CONTEXT (ancestors, then children, then siblings — secondary info) ---
 ${ancestorBlock || 'Ancestor chain: (none)'}
 ${childBlock ? '\n' + childBlock : ''}
 ${siblingBlock ? '\n' + siblingBlock : ''}`;

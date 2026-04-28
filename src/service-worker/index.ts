@@ -106,6 +106,8 @@ chrome.runtime.onConnect.addListener((port) => {
           userAgent: '',
           devicePixelRatio: 1,
           platform: '',
+          activeTheme: null,
+          colorScheme: null,
         }) as import('../shared/types').BrowserMetadata;
 
         await streamAnalysis(

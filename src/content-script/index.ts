@@ -168,6 +168,8 @@ function handleMouseUp(e: MouseEvent): void {
         userAgent: navigator.userAgent,
         devicePixelRatio: window.devicePixelRatio,
         platform: navigator.platform,
+        activeTheme: document.documentElement.getAttribute('data-theme'),
+        colorScheme: document.documentElement.classList.contains('light') ? 'light' : 'dark',
       },
     });
   }
@@ -223,6 +225,8 @@ function handleClick(e: MouseEvent): void {
       userAgent: navigator.userAgent,
       devicePixelRatio: window.devicePixelRatio,
       platform: navigator.platform,
+      activeTheme: document.documentElement.getAttribute('data-theme'),
+      colorScheme: document.documentElement.classList.contains('light') ? 'light' : 'dark',
     },
   });
 }

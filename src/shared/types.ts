@@ -26,6 +26,13 @@ export interface ChildInfo {
   computedStyles: Record<string, string>;
 }
 
+export interface CSSSourceInfo {
+  property: string;
+  value: string;
+  selector: string;
+  className: string | null;
+}
+
 export interface ElementMetadata {
   tagName: string;
   id: string;
@@ -40,6 +47,7 @@ export interface ElementMetadata {
   };
   computedStyles: Record<string, string>;
   cssVariables: Record<string, string>;
+  cssSourceRules: CSSSourceInfo[]; // Which CSS class applied key visual properties
   dataAttributes: Record<string, string>;
   htmlAttributes: Record<string, string>;
   reactComponentName: string | null;
@@ -126,6 +134,8 @@ export interface BrowserMetadata {
   userAgent: string;
   devicePixelRatio: number;
   platform: string;
+  activeTheme: string | null;
+  colorScheme: string | null;
 }
 
 export type PriorityLevel = 'p0' | 'p1' | 'p2' | 'p3';
