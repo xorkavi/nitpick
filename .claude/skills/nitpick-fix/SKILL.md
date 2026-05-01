@@ -1,7 +1,7 @@
 ---
 name: nitpick-fix
 description: "Fetch a Nitpick-filed DevRev issue and fix it in the current repo using the captured metadata"
-argument-hint: "<issue-display-id> e.g. ISS-1234"
+argument-hint: "<issue-display-id or DevRev link> e.g. ISS-1234 or https://app.devrev.ai/foo/works/ISS-1234"
 allowed-tools:
   - Read
   - Write
@@ -11,17 +11,24 @@ allowed-tools:
   - Glob
   - Agent
   - WebFetch
+  - AskUserQuestion
 ---
 
 <objective>
-Fetch a DevRev issue by display ID, parse the Nitpick-captured metadata (title, AI-generated description, screenshots, element DOM path, CSS properties, page URL), and use it to locate and fix the bug in the current repository.
+Fetch a DevRev issue by display ID or work item link, parse the Nitpick-captured metadata (title, AI-generated description, screenshots, element DOM path, CSS properties, page URL), and use it to locate and fix the bug in the current repository.
 </objective>
 
 <process>
 
 ## 1. Validate input
 
-The user must provide an issue display ID (e.g. `ISS-1234`). If missing, ask for it.
+The user must provide either:
+- An issue display ID (e.g. `ISS-1234`)
+- A DevRev work item link (e.g. `https://app.devrev.ai/org-slug/works/ISS-1234`)
+
+If a link is provided, extract the display ID from the last path segment (the part matching `[A-Z]+-\d+`).
+
+If neither is provided, ask for it.
 
 ## 2. Resolve DevRev PAT
 
@@ -118,20 +125,57 @@ Determine where the bug lives before fixing:
 - Bug on multiple pages? → DS layer. One page only? → consumer.
 - Check consumer count for DS fixes: `grep -r "<ComponentName" libs/ apps/ --include="*.tsx" -l | wc -l` — if >10, flag to user.
 
-## 12. Fix the bug
+## 12. Present fix options to the user
+
+After completing your analysis (steps 6–11) but BEFORE editing any source file, you MUST pause and present your findings to the user using `AskUserQuestion`. This is not optional.
+
+### What to present
+
+Summarize your analysis as context in the question text:
+1. **What the problem is** — one sentence restating the bug in terms of the code you found (not just the issue title).
+2. **Where it lives** — the file(s), line(s), and the current value/class/token causing the issue.
+3. **The candidate fixes** — each option as a concrete code change the user can evaluate.
+
+### How to build the options
+
+Gather candidate values/approaches from the codebase:
+- Grep for design system tokens, CSS variables, Tailwind config values, or theme config entries that are plausible replacements.
+- Check what sibling or related elements use for the same property (for consistency).
+- If the fix could go in different files (theme config vs component vs consumer), each location is a separate option.
+
+Present 2–4 options using `AskUserQuestion`. Use the `preview` field to show the actual code diff for each option so the user can compare at a glance.
+
+### Example
+
+Issue says: "spacing between items is too tight in the sidebar nav"
+
+After analysis you find the gap is set to `gap-1` in `SidebarNav.tsx:42` and the design system has `gap-1.5`, `gap-2`, and `gap-3` as tokens used elsewhere in similar nav components.
+
+→ Ask with question text:
+"The sidebar nav items in `SidebarNav.tsx:42` use `gap-1` (4px). Similar nav components in the app use `gap-2`. Which spacing should we use?"
+
+→ Options with previews showing the line change for `gap-1.5`, `gap-2` (Recommended), `gap-3`.
+
+### When NOT to ask
+Only skip this step when ALL of these are true:
+- The issue explicitly states the exact target value (e.g. "change to 8px", "should use rounded-full")
+- There is exactly one file/location where the fix applies
+- The fix is a direct value swap with zero ambiguity
+
+## 13. Fix the bug
 
 1. Read the relevant file(s)
 2. If DS-layer fix, check consumer count and flag if broad
-3. Apply the fix
+3. Apply the fix the user chose (or the only reasonable fix)
 4. Type-check if applicable
 
 Do NOT commit unless the user asks.
 
-## 13. Report
+## 14. Report
 
 Summarize: what the issue described, which files changed, what the fix was, caveats to verify visually.
 
-## 14. Fix didn't work — retry protocol
+## 15. Fix didn't work — retry protocol
 
 If the user says the fix didn't work (possibly with a new screenshot):
 

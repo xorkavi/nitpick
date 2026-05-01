@@ -35,7 +35,23 @@ import {
   devrevDataLoaded,
 } from './signals';
 import { inspectElement } from './inspector/element-data';
-import { getElementsInRect } from './inspector/area-elements';
+import { getElementsInRect, getAreaElementRef, clearAreaElementRefs } from './inspector/area-elements';
+
+function detectActiveTheme(): string | null {
+  return document.documentElement.getAttribute('data-theme')
+    || document.body.getAttribute('data-theme')
+    || null;
+}
+
+function detectColorScheme(): string {
+  if (document.documentElement.classList.contains('light')) return 'light';
+  if (document.documentElement.classList.contains('dark')) return 'dark';
+  try {
+    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  } catch {
+    return 'dark';
+  }
+}
 
 let rafId: number | null = null;
 
@@ -168,8 +184,8 @@ function handleMouseUp(e: MouseEvent): void {
         userAgent: navigator.userAgent,
         devicePixelRatio: window.devicePixelRatio,
         platform: navigator.platform,
-        activeTheme: document.documentElement.getAttribute('data-theme'),
-        colorScheme: document.documentElement.classList.contains('light') ? 'light' : 'dark',
+        activeTheme: detectActiveTheme(),
+        colorScheme: detectColorScheme(),
       },
     });
   }
@@ -309,6 +325,7 @@ function deactivateCommentMode(): void {
 
   isMouseDown = false;
   mouseDownPos = null;
+  clearAreaElementRefs();
 
   document.removeEventListener('mousemove', handleMouseMove, { capture: true });
   document.removeEventListener('mousedown', handleMouseDown, { capture: true });
@@ -348,6 +365,16 @@ chrome.runtime.onMessage.addListener(
         viewportScreenshotUrl.value = msg.viewportScreenshotUrl;
       }
       return;
+    }
+    if (msg.action === 'INSPECT_AREA_ELEMENT') {
+      const index = (msg as unknown as { index: number }).index;
+      const el = getAreaElementRef(index);
+      if (el) {
+        sendResponse({ metadata: inspectElement(el) });
+      } else {
+        sendResponse({ metadata: null });
+      }
+      return true;
     }
     if (msg.action === 'HIDE_OVERLAY') {
       const host = document.querySelector('nitpick-overlay') as HTMLElement | null;

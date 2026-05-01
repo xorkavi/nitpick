@@ -224,6 +224,10 @@ export function IssueCard() {
           createdIssueDisplayId.value = response.displayId;
           showSuccessToast.value = true;
 
+          if (response.webUrl) {
+            navigator.clipboard.writeText(response.webUrl).catch(() => {});
+          }
+
           // Close the issue card and comment bubble
           showIssueCard.value = false;
           showCommentBubble.value = false;

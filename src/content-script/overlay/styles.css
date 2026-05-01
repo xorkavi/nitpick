@@ -63,7 +63,7 @@
 .nitpick-popover-container {
   position: fixed;
   width: 350px;
-  max-height: calc(100vh - 40px);
+  max-height: var(--available-height, calc(100vh - 40px));
   z-index: 5;
   opacity: 0;
   transform: translateY(8px);
@@ -104,6 +104,7 @@
   letter-spacing: var(--typography-system-letter-spacing);
   line-height: var(--typography-system-line-height);
   color: var(--fg-neutral-prominent);
+  flex-shrink: 0;
 }
 
 .nitpick-comment-input-row {

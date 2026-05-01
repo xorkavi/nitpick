@@ -90,9 +90,31 @@ export const VISUAL_PROPERTIES = [
   'grid-template-rows',
   'overflow',
   'z-index',
-  // Visual
+  // Clipping & masking
+  'mask-image',
+  '-webkit-mask-image',
+  'mask-size',
+  'mask-repeat',
+  'mask-position',
+  'clip-path',
+  // Image & media
+  'object-fit',
+  'object-position',
+  'aspect-ratio',
+  // Text handling
+  'text-overflow',
+  'direction',
+  '-webkit-line-clamp',
+  // Visual effects
   'box-shadow',
   'text-shadow',
+  'filter',
+  'backdrop-filter',
+  'mix-blend-mode',
+  // Stacking & compositing
+  'isolation',
+  'contain',
+  // Interaction
   'cursor',
   'visibility',
   'transform',
@@ -236,6 +258,8 @@ const ANCESTOR_STYLE_PROPERTIES = [
   'display', 'position', 'flex-direction', 'gap', 'align-items', 'justify-content',
   'overflow', 'max-width', 'max-height', 'min-width', 'min-height',
   'width', 'height',
+  'clip-path', 'mask-image', '-webkit-mask-image',
+  'isolation', 'contain',
 ] as const;
 
 function buildAncestorChain(el: Element, depth: number = 4): AncestorInfo[] {
@@ -296,6 +320,8 @@ const CHILD_SIBLING_STYLE_PROPERTIES = [
   'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
   'display', 'position', 'overflow', 'white-space', 'text-overflow',
   'flex-direction', 'gap', 'align-items', 'justify-content',
+  'mask-image', '-webkit-mask-image', 'clip-path',
+  'object-fit', 'aspect-ratio', '-webkit-line-clamp',
 ] as const;
 
 function buildChildContext(el: Element, max: number = 8): ChildInfo[] {
@@ -342,6 +368,8 @@ export function inspectElement(el: Element): ElementMetadata {
     'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
     'width', 'height', 'max-width', 'max-height', 'min-width', 'min-height',
     'border-radius', 'box-shadow', 'gap',
+    'mask-image', '-webkit-mask-image', 'clip-path',
+    'object-fit', 'text-overflow',
   ];
   const cssSourceRules: CSSSourceInfo[] = [];
   for (const prop of SOURCE_TRACED_PROPERTIES) {

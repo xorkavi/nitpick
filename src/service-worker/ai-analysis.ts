@@ -18,6 +18,7 @@ import type { ElementMetadata, AreaMetadata, BrowserMetadata, DevRevPart, DevRev
 import { NITPICK_PROXY_URL } from '../shared/constants';
 import { getSettings } from './storage';
 import { getScreenshots } from './screenshot-store';
+import { getActiveTabId } from './state';
 
 // ---------------------------------------------------------------------------
 // Response parser
@@ -57,8 +58,59 @@ export function parseAIResponse(content: string): ParsedAIResponse {
   };
 }
 
+function buildAreaIdentifiersBlock(metadata: AreaMetadata): string {
+  const sections: string[] = [];
+  const allDrids: string[] = [];
+  const allTestIds: string[] = [];
+  const allReactChains: string[] = [];
+  const allCssSourceClasses: string[] = [];
+
+  for (const el of metadata.elements) {
+    const drid = el.dataAttributes['data-drid'];
+    const testid = el.dataAttributes['data-testid'];
+    if (drid && !allDrids.includes(drid)) allDrids.push(drid);
+    if (testid && !allTestIds.includes(testid)) allTestIds.push(testid);
+
+    if (el.reactComponentChain.length > 0) {
+      const chain = el.reactComponentChain.join(' → ');
+      if (!allReactChains.includes(chain)) allReactChains.push(chain);
+    }
+
+    for (const ancestor of el.ancestorChain) {
+      const aDrid = ancestor.dataAttributes['data-drid'];
+      if (aDrid && !allDrids.includes(aDrid)) allDrids.push(aDrid);
+      if (ancestor.reactComponentName) {
+        const name = `${ancestor.reactComponentName} (ancestor of <${el.tagName}>)`;
+        if (!allReactChains.includes(name)) allReactChains.push(name);
+      }
+    }
+
+    if (el.cssSourceRules) {
+      for (const r of el.cssSourceRules) {
+        if (r.className) {
+          const entry = `${r.property}: class \`${r.className}\` (value: \`${r.value}\`)`;
+          if (!allCssSourceClasses.includes(entry)) allCssSourceClasses.push(entry);
+        }
+      }
+    }
+  }
+
+  const searchIds: string[] = [];
+  if (allDrids.length > 0) searchIds.push(`data-drid: ${allDrids.join(', ')}`);
+  if (allTestIds.length > 0) searchIds.push(`data-testid: ${allTestIds.join(', ')}`);
+  for (const chain of allReactChains.slice(0, 6)) searchIds.push(`React: ${chain}`);
+  if (allCssSourceClasses.length > 0) searchIds.push(`CSS source classes: ${allCssSourceClasses.slice(0, 8).join('; ')}`);
+
+  if (searchIds.length > 0) {
+    sections.push(`**Search identifiers** (aggregated from ${metadata.elements.length} elements in area):\n${searchIds.map((s) => `1. \`${s}\``).join('\n')}`);
+  }
+
+  if (sections.length === 0) return '';
+  return '\n\n---\n### Code identifiers (auto-captured from DOM — area selection)\n' + sections.join('\n\n');
+}
+
 function buildRawIdentifiersBlock(metadata: ElementMetadata | AreaMetadata): string {
-  if ('elements' in metadata) return '';
+  if ('elements' in metadata) return buildAreaIdentifiersBlock(metadata);
 
   const sections: string[] = [];
 
@@ -257,7 +309,7 @@ TASK: Given a user's plain-language bug description, an element's CSS/DOM metada
    - "[Button] Primary CTA color does not match design system token"
    The title MUST immediately convey what is wrong and where.
 2. A description with:
-   - A 1-2 sentence diagnosis explaining WHY the problem occurs based on the DOM data (don't just restate the complaint)
+   - A 1-2 sentence factual summary of the visual mismatch, citing the specific property values that conflict. Do NOT suggest how to fix it or which element "should" change — just describe the conflict. The fixer decides the fix direction.
    - 3-5 bullet points listing ONLY the CSS/DOM properties relevant to the user's complaint, with actual computed values
 3. A suggested Part (from the list below) — match by page URL or component area
 4. A suggested Owner (from the list below)
@@ -282,6 +334,8 @@ RULES:
 - If a React component name suggests a design system component (e.g., TabItem, Button, IconButton, MenuV2, Tabs), note in the diagnosis that the relevant CSS classes may come from a DS theme config rather than the component JSX. This helps the fixer know to trace into the theme.
 - DATA-STATE ATTRIBUTES: If the element has \`data-state\`, \`data-feedback\`, \`data-readonly\`, or \`data-direction\` attributes, include them in the diagnosis — these indicate the component's interactive state (e.g. \`data-state="checked"\`, \`data-feedback="error"\`) and are essential for reproducing the bug.
 - SEMANTIC TOKEN CLASSES: Classes like \`control-bg-prominent-idle\`, \`fg-neutral-prominent\`, \`feedback-bg-success-prominent\` are semantic design tokens mapped to CSS variables. Include the full class name — it's the primary greppable identifier for finding the theme config where the style is defined.
+- CROSS-ELEMENT RELATIONSHIPS: When the same CSS property (e.g. border-radius, font-size, color) appears on a parent and child, or on siblings, and the values conflict, report BOTH values together with the gap/padding between them. Example: "wrapper border-radius: 9999px, child border-radius: 4px, padding between: 2px". This gives the fixer the full picture to decide which side to change.
+- NEVER PRESCRIBE FIX DIRECTION: Describe what IS, not what SHOULD BE. Do not say "the button should use rounded-full" or "the wrapper needs to match". The fixer will decide the direction. Your job is to surface the conflicting values accurately.
 - Do NOT include a "Code identifiers" section — that is auto-appended separately. Focus only on the human-readable analysis.
 
 OUTPUT FORMAT (use exactly these section markers on their own line):
@@ -289,7 +343,7 @@ TITLE: [title here]
 DESCRIPTION:
 [Write in Markdown format. Use **bold** for property names, \`code\` for values.]
 
-[1-2 sentence diagnosis: combine the user's complaint with the DOM data to explain WHY the problem occurs. Don't restate what the user said — add what the data reveals. If you can identify the specific mismatch or conflict causing the issue, state it here.]
+[1-2 sentence factual description of the visual conflict. State which values on which elements clash — do NOT suggest which one should change. Example: "The wrapper uses border-radius 9999px while the child button uses 4px with 2px gap between them." NOT "The button should use rounded-full to match the wrapper."]
 
 **What's wrong:**
 - [element] **property:** \`actual-value\` — expected \`expected-value\` [reason]
@@ -358,7 +412,6 @@ function parseUserAgent(ua: string): { browser: string; os: string } {
 
 function buildEnvironmentBlock(bm: BrowserMetadata): string {
   const { browser, os } = parseUserAgent(bm.userAgent || '');
-  const themeRow = bm.activeTheme ? `\n| Theme | ${bm.activeTheme} (${bm.colorScheme || 'dark'}) |` : '';
   return `ENVIRONMENT (copy this table verbatim into the description):
 | Property | Value |
 |----------|-------|
@@ -366,7 +419,8 @@ function buildEnvironmentBlock(bm: BrowserMetadata): string {
 | OS | ${os} |
 | Viewport | ${bm.viewportWidth}x${bm.viewportHeight} |
 | DPR | ${bm.devicePixelRatio || 1} |
-| Page | [${bm.title || 'Page'}](${bm.url}) |${themeRow}`;
+| Theme | ${bm.activeTheme || 'unknown'} (${bm.colorScheme || 'dark'}) |
+| Page | [${bm.title || 'Page'}](${bm.url}) |`;
 }
 
 function buildUserMessage(
@@ -483,6 +537,151 @@ ${siblingBlock ? '\n' + siblingBlock : ''}`;
 }
 
 // ---------------------------------------------------------------------------
+// Two-pass area triage
+// ---------------------------------------------------------------------------
+
+function buildTriagePrompt(): string {
+  return `You are selecting which DOM element the user is reporting a bug about.
+
+Given the user's complaint, a screenshot of the selected area, and a list of elements within that area, identify the PRIMARY element that the bug is about.
+
+RULES:
+- Use the screenshot as your primary signal — the visual problem is visible there.
+- The user's complaint tells you WHAT is wrong; the element list tells you WHERE.
+- Pick the element whose properties, React component, or classes are most likely to contain or cause the visual issue described.
+- If the bug is about the RELATIONSHIP between elements (spacing, overlap, alignment), pick the element that is visually wrong — the one the user would point at.
+- If unsure between a parent container and a child, prefer the child (more specific).
+
+OUTPUT FORMAT (JSON only, no markdown):
+{"index": N, "reasoning": "one sentence explaining why this element"}`;
+}
+
+function buildTriageUserMessage(
+  comment: string,
+  metadata: AreaMetadata,
+  browserMetadata: BrowserMetadata,
+): string {
+  const topElements = metadata.elements.slice(0, 10);
+  return `User's complaint: "${comment}"
+
+Page: ${browserMetadata.url}
+
+Elements in selected area (${metadata.elements.length} total, showing ${topElements.length}):
+
+${topElements
+    .map(
+      (el, i) => {
+        const parts = [`${i}. <${el.tagName}>`];
+        if (el.reactComponentChain.length > 0) parts.push(`React: ${el.reactComponentChain.slice(0, 3).join(' → ')}`);
+        parts.push(`${Math.round(el.boundingRect.width)}x${Math.round(el.boundingRect.height)}px`);
+        if (el.classList.length > 0) {
+          const meaningful = el.classList.filter((c: string) => !c.startsWith('_') && c.length < 40).slice(0, 5);
+          if (meaningful.length > 0) parts.push(`classes: ${meaningful.join(' ')}`);
+        }
+        const drid = el.dataAttributes['data-drid'];
+        if (drid) parts.push(`drid: ${drid}`);
+        const keyStyles: string[] = [];
+        for (const prop of ['mask-image', '-webkit-mask-image', 'border-radius', 'overflow', 'clip-path', 'display', 'position']) {
+          const val = el.computedStyles[prop];
+          if (val && val !== 'none' && val !== 'visible' && val !== 'static' && val !== 'auto') {
+            keyStyles.push(`${prop}: ${val.length > 60 ? val.slice(0, 60) + '...' : val}`);
+          }
+        }
+        if (keyStyles.length > 0) parts.push(keyStyles.join('; '));
+        return parts.join(' | ');
+      },
+    )
+    .join('\n')}`;
+}
+
+async function triageAreaElement(
+  pat: string,
+  comment: string,
+  metadata: AreaMetadata,
+  browserMetadata: BrowserMetadata,
+): Promise<number | null> {
+  const screenshots = getScreenshots();
+  const userContent: Array<{ type: string; text?: string; image_url?: string; detail?: string }> = [
+    { type: 'input_text', text: buildTriageUserMessage(comment, metadata, browserMetadata) },
+  ];
+
+  if (screenshots.cropped) {
+    userContent.push({
+      type: 'input_image',
+      image_url: screenshots.cropped,
+      detail: 'low',
+    });
+  }
+
+  const response = await fetch(NITPICK_PROXY_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: pat,
+    },
+    body: JSON.stringify({
+      instructions: buildTriagePrompt(),
+      input: [{ role: 'user', content: userContent }],
+    }),
+  });
+
+  if (!response.ok) return null;
+
+  const reader = response.body?.getReader();
+  if (!reader) return null;
+
+  const decoder = new TextDecoder();
+  let fullContent = '';
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() ?? '';
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const payload = line.slice(6);
+      if (payload === '[DONE]') break;
+      try {
+        const data = JSON.parse(payload) as { delta?: string };
+        if (data.delta) fullContent += data.delta;
+      } catch {
+        // skip
+      }
+    }
+  }
+
+  try {
+    const cleaned = fullContent.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+    const parsed = JSON.parse(cleaned) as { index: number };
+    const idx = parsed.index;
+    if (typeof idx === 'number' && idx >= 0 && idx < metadata.elements.length) {
+      return idx;
+    }
+  } catch {
+    // Parse failed
+  }
+
+  return null;
+}
+
+async function requestFullInspection(tabId: number, index: number): Promise<ElementMetadata | null> {
+  return new Promise((resolve) => {
+    chrome.tabs.sendMessage(tabId, { action: 'INSPECT_AREA_ELEMENT', index }, (response) => {
+      if (chrome.runtime.lastError || !response?.metadata) {
+        resolve(null);
+      } else {
+        resolve(response.metadata as ElementMetadata);
+      }
+    });
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Streaming analysis
 // ---------------------------------------------------------------------------
 
@@ -503,11 +702,26 @@ export async function streamAnalysis(
       return;
     }
 
+    // Two-pass triage for area selections
+    let resolvedMetadata: ElementMetadata | AreaMetadata = metadata;
+    if ('elements' in metadata && metadata.elements.length > 0) {
+      const triageIndex = await triageAreaElement(settings.pat, comment, metadata, browserMetadata);
+      if (triageIndex !== null) {
+        const activeTabId = await getActiveTabId();
+        if (activeTabId) {
+          const fullMetadata = await requestFullInspection(activeTabId, triageIndex);
+          if (fullMetadata) {
+            resolvedMetadata = fullMetadata;
+          }
+        }
+      }
+    }
+
     const parts: import('../shared/types').DevRevPart[] = [];
     const users: import('../shared/types').DevRevUser[] = [];
 
     const systemPrompt = buildSystemPrompt(parts, users);
-    const userMessage = buildUserMessage(comment, metadata, browserMetadata);
+    const userMessage = buildUserMessage(comment, resolvedMetadata, browserMetadata);
 
     const screenshots = getScreenshots();
     const userContent: Array<{ type: string; text?: string; image_url?: string; detail?: string }> = [
@@ -567,7 +781,7 @@ export async function streamAnalysis(
 
         if (payload === '[DONE]') {
           const parsed = parseAIResponse(fullContent);
-          const rawBlock = buildRawIdentifiersBlock(metadata);
+          const rawBlock = buildRawIdentifiersBlock(resolvedMetadata);
           try {
             port.postMessage({
               action: 'AI_DONE',
@@ -606,7 +820,7 @@ export async function streamAnalysis(
       port.postMessage({ action: 'AI_ERROR', message: 'Incomplete response from AI' });
     } else if (fullContent) {
       const parsed = parseAIResponse(fullContent);
-      const rawBlock = buildRawIdentifiersBlock(metadata);
+      const rawBlock = buildRawIdentifiersBlock(resolvedMetadata);
       try {
         port.postMessage({
           action: 'AI_DONE',

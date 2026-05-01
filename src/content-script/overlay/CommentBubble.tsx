@@ -20,6 +20,7 @@ import { IssueCard } from './IssueCard';
 const POPOVER_WIDTH = 320;
 const EDGE_MARGIN = 12;
 const GAP = 8;
+const VIEWPORT_MARGIN = 16;
 const BOTTOM_THRESHOLD = 480;
 
 export function CommentBubble() {
@@ -49,11 +50,17 @@ export function CommentBubble() {
 
   const posStyle: Record<string, string> = { left: `${left}px`, pointerEvents: 'auto' };
 
+  let availableHeight: number;
   if (nearBottom) {
-    posStyle.bottom = `${vh - anchor.y + GAP}px`;
+    const bottomOffset = vh - anchor.y + GAP;
+    posStyle.bottom = `${bottomOffset}px`;
+    availableHeight = vh - bottomOffset - VIEWPORT_MARGIN;
   } else {
-    posStyle.top = `${anchor.y + GAP}px`;
+    const topOffset = anchor.y + GAP;
+    posStyle.top = `${topOffset}px`;
+    availableHeight = vh - topOffset - VIEWPORT_MARGIN;
   }
+  posStyle['--available-height'] = `${Math.max(availableHeight, 200)}px`;
 
   async function handleSend(): Promise<void> {
     const text = commentText.value.trim();

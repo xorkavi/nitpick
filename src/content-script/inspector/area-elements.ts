@@ -7,6 +7,10 @@
  * Strategy: Walk all elements in the document, check geometric
  * intersection with the selection rectangle, and include leaf-ish
  * elements (skip containers that have selected children).
+ *
+ * Two-pass triage: stores Element refs so the content script can
+ * run full inspectElement() on whichever element the AI picks as
+ * the primary target.
  */
 
 import type { ElementMetadata } from '../../shared/types';
@@ -19,6 +23,21 @@ interface SelectionRect {
   height: number;
 }
 
+let lastAreaElementRefs: Element[] = [];
+
+/**
+ * Return the stored Element refs from the last area selection.
+ * Used by the two-pass triage flow: AI picks an index, content script
+ * looks up the ref and runs inspectElement() on it.
+ */
+export function getAreaElementRef(index: number): Element | null {
+  return lastAreaElementRefs[index] ?? null;
+}
+
+export function clearAreaElementRefs(): void {
+  lastAreaElementRefs = [];
+}
+
 /**
  * Find all leaf-ish elements whose bounding boxes intersect the given
  * selection rectangle. Returns full ElementMetadata for each.
@@ -26,10 +45,13 @@ interface SelectionRect {
  * "Leaf-ish" means: if an element has children that also intersect
  * the rectangle, we skip the parent (it's a container) and include
  * the children instead. Elements with no children are always included.
+ *
+ * Also stores Element refs for two-pass triage via getAreaElementRef().
  */
 export function getElementsInRect(rect: SelectionRect): ElementMetadata[] {
   const all = document.querySelectorAll('*');
   const results: ElementMetadata[] = [];
+  const refs: Element[] = [];
 
   for (const el of all) {
     // Skip invisible elements
@@ -70,10 +92,12 @@ export function getElementsInRect(rect: SelectionRect): ElementMetadata[] {
       });
 
       if (!hasSelectedChild || el.children.length === 0) {
+        refs.push(el);
         results.push(inspectElement(el));
       }
     }
   }
 
+  lastAreaElementRefs = refs;
   return results;
 }

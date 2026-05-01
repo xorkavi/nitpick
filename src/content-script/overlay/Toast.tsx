@@ -47,7 +47,7 @@ export function Toast() {
         <path d="M23.735 9.825c-3.91 3.96-7.42 8.87-9.69 13.94h-1.6l-4.18-4.93 1.71-1.45a20.9 20.9 0 0 1 2.938 4.51l.45-.01c.728-1.924 3.43-8.283 8.782-13.65z"/>
       </svg>
       <span class="nitpick-toast-text">
-        {displayId ? `${displayId} created` : 'Issue created'}
+        {displayId ? `${displayId} created. Link copied to clipboard.` : 'Issue created'}
       </span>
       {url && (
         <a
