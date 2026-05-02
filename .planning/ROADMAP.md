@@ -20,7 +20,7 @@
 
 Architecture pivot: Claude Code CLI via Bedrock on CircleCI (following devrev/mobius prior art), NOT custom Claude API + GitHub Actions + Supabase. See [04-CONTEXT.md](phases/04-foundation-agent-core/04-CONTEXT.md).
 
-- [ ] **Phase 4: Agent Core & CircleCI Pipeline** - Claude Code CLI agent prompt, shell runner, CircleCI job with cron + manual dispatch, self-review loop, and draft PR creation
+- [x] **Phase 4: Agent Core & CircleCI Pipeline** - Claude Code CLI agent prompt, shell runner, CircleCI job with cron + manual dispatch, self-review loop, and draft PR creation (completed 2026-05-03)
 - [ ] **Phase 5: DevRev Webhook & Reply Loop** - Webhook subscription for issue comments, CircleCI re-trigger, agent reads user feedback, updates draft PR
 - [ ] **Phase 6: Status Dashboard** - Read-only arcade-gen dashboard showing nitpick issues, DevRev lifecycle status, PR links, and CI log links
 - [ ] **Phase 7: Visual Verification** - Before/after Playwright screenshots in CircleCI, attached to PR and DevRev issue
@@ -130,7 +130,7 @@ Plans:
 | 1. Extension Shell & Element Picker | v1.0 | 4/4 | Complete | 2026-04-25 |
 | 2. Capture, AI Analysis & Issue Creation | v1.0 | 5/5 | Complete | 2026-04-25 |
 | 3. Shortcuts & UI Fit-and-Finish | v1.0 | 2/2 | Complete | 2026-04-25 |
-| 4. Agent Core & CircleCI Pipeline | v2.0 | 3/3 | Executing | - |
+| 4. Agent Core & CircleCI Pipeline | v2.0 | 3/3 | Complete | 2026-05-03 |
 | 5. DevRev Webhook & Reply Loop | v2.0 | 0/? | Not started | - |
 | 6. Status Dashboard | v2.0 | 0/? | Not started | - |
 | 7. Visual Verification | v2.0 | 0/? | Not started | - |
