@@ -82,9 +82,9 @@ Architecture pivot: Claude Code CLI via Bedrock on CircleCI (following devrev/mo
 **Plans:** 3 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Shell runner script + DevRev query script (agent lifecycle, concurrency guard, post-run guardrails)
-- [ ] 04-02-PLAN.md — Agent prompt template (multi-phase fix flow with self-review, adapted from nitpick-fix skill)
-- [ ] 04-03-PLAN.md — CircleCI configuration (continuation config + setup routing for cron and manual dispatch)
+- [x] 04-01-PLAN.md — Shell runner script + DevRev query script (agent lifecycle, concurrency guard, post-run guardrails)
+- [x] 04-02-PLAN.md — Agent prompt template (multi-phase fix flow with self-review, adapted from nitpick-fix skill)
+- [x] 04-03-PLAN.md — CircleCI configuration (continuation config + setup routing for cron and manual dispatch)
 
 ### Phase 5: DevRev Webhook & Reply Loop
 **Goal**: Users can guide the fix by replying on the DevRev issue — the agent picks up their feedback and updates the draft PR accordingly
@@ -130,7 +130,7 @@ Plans:
 | 1. Extension Shell & Element Picker | v1.0 | 4/4 | Complete | 2026-04-25 |
 | 2. Capture, AI Analysis & Issue Creation | v1.0 | 5/5 | Complete | 2026-04-25 |
 | 3. Shortcuts & UI Fit-and-Finish | v1.0 | 2/2 | Complete | 2026-04-25 |
-| 4. Agent Core & CircleCI Pipeline | v2.0 | 0/3 | Planning complete | - |
+| 4. Agent Core & CircleCI Pipeline | v2.0 | 3/3 | Executing | - |
 | 5. DevRev Webhook & Reply Loop | v2.0 | 0/? | Not started | - |
 | 6. Status Dashboard | v2.0 | 0/? | Not started | - |
 | 7. Visual Verification | v2.0 | 0/? | Not started | - |
