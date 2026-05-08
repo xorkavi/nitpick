@@ -173,6 +173,9 @@ export function setupMessageHandler(): void {
                 description = `${imageMarkdown}\n\n${description}`;
               }
 
+              // Append "Made with Nitpick" marker (D-07)
+              description += '\n\n---\nMade with [Nitpick](https://github.com/xorkavi/nitpick)';
+
               const issueData = {
                 ...msg.issueData,
                 description,
