@@ -1,0 +1,30 @@
+{
+  "name": "nitpick-bot-snap-in",
+  "version": "0.1.0",
+  "description": "DevRev snap-in: validates nitpick issues and triggers CircleCI fix pipelines",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "scripts": {
+    "build": "rimraf ./dist && esbuild src/index.ts --bundle --outfile=dist/index.cjs --platform=node --target=node18 --format=cjs && esbuild src/functions/handle_nitpick_event/index.ts --bundle --outfile=dist/functions/handle_nitpick_event/index.js --platform=node --target=node18 --format=cjs",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "test": "node --import tsx/esm --test 'src/**/*.test.ts'",
+    "prepackage": "npm run build",
+    "package": "tar -cvzf build.tar.gz dist package.json package-lock.json",
+    "test:server": "tsx watch src/snap-in-server.ts"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.4",
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.0.0",
+    "esbuild": "^0.24.0",
+    "rimraf": "^6.0.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.7.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "express": "^5.2.1",
+    "zod": "^3.23.0"
+  }
+}

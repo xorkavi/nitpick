@@ -1,0 +1,61 @@
+version: "2"
+name: Nitpick Bot
+description: Listens for nitpick-tagged issues, validates them, and triggers fix pipelines.
+
+service_account:
+  display_name: Nitpick Bot
+
+keyrings:
+  organization:
+    - name: circleci_token
+      display_name: CircleCI API Token
+      description: API token for triggering CircleCI pipelines.
+      types:
+        - snap_in_secret
+
+inputs:
+  organization:
+    - name: circleci_project_slug
+      description: >
+        CircleCI project slug in format: gh/org-name/repo-name
+        (e.g., gh/devrev/devrev-web)
+      field_type: text
+      is_required: true
+      ui:
+        display_name: CircleCI Project Slug
+
+    - name: circleci_branch
+      description: >
+        Branch to trigger pipelines on (usually main).
+      field_type: text
+      is_required: true
+      default_value: main
+      ui:
+        display_name: CircleCI Pipeline Branch
+
+event_sources:
+  organization:
+    - name: devrev-webhook
+      display_name: DevRev Events
+      type: devrev-webhook
+      config:
+        event_types:
+          - work_created
+          - timeline_entry_created
+
+functions:
+  - name: handle_nitpick_event
+    description: Validates nitpick issues and triggers CircleCI fix pipelines.
+
+automations:
+  - name: nitpick_work_created
+    source: devrev-webhook
+    event_types:
+      - work_created
+    function: handle_nitpick_event
+
+  - name: nitpick_comment_created
+    source: devrev-webhook
+    event_types:
+      - timeline_entry_created
+    function: handle_nitpick_event
