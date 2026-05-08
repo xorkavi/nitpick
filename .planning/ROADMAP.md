@@ -96,7 +96,12 @@ Plans:
   3. Agent reads the user's reply, understands the chosen direction, and updates the draft PR with the revised fix
   4. Issue status transitions automatically: triage → in development → completed (on PR merge)
   5. PR link appears in the DevRev issue timeline when the draft PR is created
-**Plans**: TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — DevRev snap-in (event handler, validation, mode detection, CircleCI trigger)
+- [ ] 05-02-PLAN.md — Shell runner + prompt template + helper script (two-stage agent conversation flow)
+- [ ] 05-03-PLAN.md — CircleCI config update + GitHub Actions deploy workflow + Chrome extension marker
 
 ### Phase 6: Status Dashboard
 **Goal**: Users can view all nitpick issues and their fix status from a minimal web dashboard
@@ -131,7 +136,7 @@ Plans:
 | 2. Capture, AI Analysis & Issue Creation | v1.0 | 5/5 | Complete | 2026-04-25 |
 | 3. Shortcuts & UI Fit-and-Finish | v1.0 | 2/2 | Complete | 2026-04-25 |
 | 4. Agent Core & CircleCI Pipeline | v2.0 | 3/3 | Complete | 2026-05-03 |
-| 5. DevRev Webhook & Reply Loop | v2.0 | 0/? | Not started | - |
+| 5. DevRev Webhook & Reply Loop | v2.0 | 0/3 | Planning complete | - |
 | 6. Status Dashboard | v2.0 | 0/? | Not started | - |
 | 7. Visual Verification | v2.0 | 0/? | Not started | - |
 
