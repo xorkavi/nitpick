@@ -1,0 +1,18 @@
+{
+  "event_type": "work_created",
+  "payload": {
+    "work_created": {
+      "work": {
+        "id": "don:core:dvrv-us-1:devo/xxx:issue/456",
+        "display_id": "ISS-456",
+        "type": "issue",
+        "title": "Something is broken",
+        "body": "The page looks weird. Fix it please.",
+        "tags": [
+          { "tag": { "id": "TAG-001", "name": "nitpicked" } }
+        ],
+        "artifacts": []
+      }
+    }
+  }
+}

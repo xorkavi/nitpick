@@ -90,7 +90,7 @@ async function handleWorkCreated(payload: any, config: Config): Promise<void> {
   await updateWork(config.serviceAccountToken, config.devrevEndpoint, work.id, {
     stage: "in_development",
     customFields: { nitpick_stage: "Analyzing" },
-  });
+  }).catch((e) => console.warn("[nitpick] Stage update failed (non-fatal):", e.message));
 
   // D-42: Trigger analysis pipeline
   await triggerPipeline(config.circleciToken, config.projectSlug, config.branch, {
@@ -149,7 +149,7 @@ async function handleCommentCreated(payload: any, config: Config): Promise<void>
   };
   await updateWork(config.serviceAccountToken, config.devrevEndpoint, objectId, {
     customFields: { nitpick_stage: stageMap[mode] || "Analyzing" },
-  });
+  }).catch((e) => console.warn("[nitpick] Stage update failed (non-fatal):", e.message));
 
   // D-43: Trigger pipeline (same mechanism for creation and comment re-runs)
   await triggerPipeline(config.circleciToken, config.projectSlug, config.branch, {

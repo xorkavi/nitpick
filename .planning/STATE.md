@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Cloud Fix Pipeline
 status: in_progress
-last_updated: "2026-05-08T00:51:32.000Z"
+last_updated: "2026-05-08T01:00:32.000Z"
 progress:
   total_phases: 7
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 3
-  completed_plans: 2
-  percent: 66
+  completed_plans: 3
+  percent: 100
 ---
 
 # State: Nitpick
@@ -18,21 +18,21 @@ progress:
 
 **Core Value:** End-to-end UI bug lifecycle — from "this looks wrong" to merged PR — with AI doing the heavy lifting at every step.
 
-**Current Focus:** Phase 5 — DevRev Webhook & Reply Loop
+**Current Focus:** Phase 5 complete — ready for Phase 6 (Checkpoints & PR Pipeline)
 
 ## Current Position
 
 **Phase:** 5 of 7 (DevRev Webhook & Reply Loop)
-**Plan:** 3 of 3
-**Status:** In progress
-**Progress:** [██████░░░░] 66%
+**Plan:** 3 of 3 (complete)
+**Status:** Phase complete
+**Progress:** [██████████] 100%
 
 ### Phase Overview
 
 | Phase | Name | Status |
 |-------|------|--------|
 | 4 | Foundation & Agent Core | Complete (2026-05-03) |
-| 5 | DevRev Webhook & Reply Loop | In progress (Plans 01-02 complete) |
+| 5 | DevRev Webhook & Reply Loop | Complete (2026-05-08) |
 | 6 | Checkpoints & PR Pipeline | Not started |
 | 7 | Visual Verification | Not started |
 
@@ -40,15 +40,16 @@ progress:
 
 | Metric | Value |
 |--------|-------|
-| Plans completed | 2 |
+| Plans completed | 3 |
 | Plans failed | 0 |
-| Phases completed | 1 |
-| Requirements delivered | 7/20 |
+| Phases completed | 2 |
+| Requirements delivered | 9/20 |
 
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
 | 05 | 01 | 2m 41s | 2 | 14 |
 | 05 | 02 | 7m 40s | 2 | 3 |
+| 05 | 03 | 5m 27s | 2 | 4 |
 
 ## Accumulated Context
 
@@ -67,6 +68,8 @@ progress:
 | Branch prefix fix/ (not nitpick/) | 05 | Aligns with devrev-web CLAUDE.md convention per D-16 |
 | Analysis mode stays on main (no branch) | 05 | D-11: no PR during analysis; branch only needed for fix/revision |
 | Post-run stage updates are fire-and-forget | 05 | Stage API failures should not block agent completion reporting |
+| Route on nitpick_issue_id presence (not scheduled_job_name) | 05 | Direct snap-in API trigger needs parameter-based routing |
+| Job-level env vars for NITPICK_ISSUE_ID and NITPICK_MODE | 05 | Cleaner than inline per-step; available to all steps automatically |
 
 ### Todos
 
@@ -79,8 +82,8 @@ None.
 ## Session Continuity
 
 **Last Session:** 2026-05-08
-**What Happened:** Completed Phase 5 Plan 02 (Two-Stage Agent Runner & Conditional Prompt) -- 3 files in devrev-web/scripts/circleci/ (1 created, 2 overwritten). Shell runner now supports analysis/fix/revision modes with timeline injection, stage transitions, and mid-run comment posting. Prompt template defines three distinct behavior profiles. Requirements DREV-01, DREV-03, DREV-04, DREV-05 implementation complete.
-**Next Step:** Execute Phase 5 Plan 03 (CircleCI config integration)
+**What Happened:** Completed Phase 5 Plan 03 (CI Pipeline Integration) -- CircleCI config wired with nitpick_mode parameter, cron removed, GitHub Actions deploy workflow created, Chrome extension marker added. Phase 5 complete (all 3 plans delivered).
+**Next Step:** Transition to Phase 6 (Checkpoints & PR Pipeline)
 
 ---
 *State initialized: 2026-04-24*

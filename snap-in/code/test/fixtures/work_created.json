@@ -1,0 +1,18 @@
+{
+  "event_type": "work_created",
+  "payload": {
+    "work_created": {
+      "work": {
+        "id": "don:core:dvrv-us-1:devo/0:issue/296688",
+        "display_id": "ISS-296688",
+        "type": "issue",
+        "title": "[Profile Avatar] Delete button mask remains circular around square button",
+        "body": "![viewport-screenshot.png](https://api.devrev.ai/internal/artifacts.download?id=don%3Acore%3Advrv-us-1%3Adevo%2F0%3Aartifact%2F13954602)\n![detail-screenshot.png](https://api.devrev.ai/internal/artifacts.download?id=don%3Acore%3Advrv-us-1%3Adevo%2F0%3Aartifact%2F13954605)\n\nThe profile avatar delete control has a circular outer mask while its child delete button is square-rounded.\n\n---\n### Code identifiers (auto-captured from DOM)\n**Search identifiers** (grep these in order):\n1. `data-drid: profile-page--profile-picture-upload--base`\n1. `Tailwind (constraining): p-0.5, p-core-13xs`\n1. `CSS source classes: border-radius: class rounded-full`",
+        "tags": [
+          { "tag": { "id": "don:core:dvrv-us-1:devo/0:tag/103690", "name": "nitpicked" } }
+        ],
+        "artifacts": []
+      }
+    }
+  }
+}

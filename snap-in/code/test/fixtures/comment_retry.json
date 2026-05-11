@@ -1,0 +1,17 @@
+{
+  "event_type": "timeline_entry_created",
+  "payload": {
+    "timeline_entry_created": {
+      "entry": {
+        "id": "don:core:dvrv-us-1:devo/xxx:timeline_entry/790",
+        "object": "don:core:dvrv-us-1:devo/xxx:issue/123",
+        "body": "That didn't work, can you try again?",
+        "created_by": {
+          "id": "don:identity:dvrv-us-1:devo/xxx:devu/human-user",
+          "display_name": "Kavinash"
+        },
+        "created_date": "2026-05-08T11:00:00Z"
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "event_type": "timeline_entry_created",
+  "payload": {
+    "timeline_entry_created": {
+      "entry": {
+        "id": "don:core:dvrv-us-1:devo/xxx:timeline_entry/789",
+        "object": "don:core:dvrv-us-1:devo/xxx:issue/123",
+        "body": "Go with option 2, but use the DS token instead of the hardcoded color",
+        "created_by": {
+          "id": "don:identity:dvrv-us-1:devo/xxx:devu/human-user",
+          "display_name": "Kavinash"
+        },
+        "created_date": "2026-05-08T10:00:00Z"
+      }
+    }
+  }
+}
